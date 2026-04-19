@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Happy Birthday Sir</title>
+        <link rel="stylesheet" href="./CSS/index.css">
+    </head>
+    <body>
+        <!-- Input Screen -->
+
+        <div class="form_overlay" id="form_overlay">
+            <div class="popup">
+
+                <h2>Create Your Wish 🎉</h2>
+                <input type="text" id="nameInput" placeholder="Enter Name"
+                    required>
+
+                <select id="typeInput" required>
+                    <option value>Select Relation</option>
+                    <option value="mom">Mom</option>
+                    <option value="dad">Dad</option>
+                    <option value="wife">Wife</option>
+                    <option value="husband">Husband</option>
+                    <option value="sir">Teacher</option>
+                    <option value="bestfriend">Best-Friend</option>
+                    <option value="friend">Friend</option>
+                    <option value="brother">Brother</option>
+                    <option value="sister">Sister</option>
+                    <option value="boss">Boss</option>
+                    <option value="gf">Girl-Friend</option>
+                    <option value="bf">Boy-Friend</option>
+                </select>
+
+                <div class="upload_box" data-index="0"
+                    aria-required="true">Image 1</div>
+                <div class="upload_box" data-index="1"
+                    aria-required="true">Image 2</div>
+                <div class="upload_box" data-index="2"
+                    aria-required="true">Image 3</div>
+
+                <button onclick="generate()">Generate</button>
+
+            </div>
+        </div>
+
+        <!-- Loading -->
+
+        <div class="loading" id="loading">
+            <h1>Creating Magic ✨</h1>
+            <div class="loader_bar_wrap">
+                <div class="loader_bar"></div>
+            </div>
+        </div>
+
+        <!-- NavBar -->
+
+        <nav>
+            <h3 class="nav_name">Mehfooz Sir ✦</h3>
+            <div class="flex">
+                <a href="#memory">memories</a>
+                <a href="#letter">letter</a>
+                <a href="#playlist">playlist</a>
+                <a href="#wish">wishes</a>
+            </div>
+        </nav>
+
+        <!-- Hero -->
+        <div class="hero">
+
+            <!-- Fairy lights SVG -->
+            <svg class="fairy-lights" viewBox="0 0 1200 80"
+                preserveAspectRatio="xMidYMid meet">
+                <path
+                    d="M0 30 Q150 10 300 30 Q450 50 600 30 Q750 10 900 30 Q1050 50 1200 30"
+                    fill="none" stroke="#b8aed2" stroke-width="0.8"
+                    opacity="0.5" />
+                <g id="bulbs">
+
+                    <!-- bulbs -->
+                    <g id="bulbs">
+                        <ellipse cx="50" cy="38" rx="4" ry="5" fill="#f5d6d9" />
+                        <ellipse cx="150" cy="28" rx="4" ry="5"
+                            fill="#b8aed2" />
+                        <ellipse cx="250" cy="38" rx="4" ry="5"
+                            fill="#a8c5ac" />
+                        <ellipse cx="350" cy="48" rx="4" ry="5"
+                            fill="#f2c4a0" />
+                        <ellipse cx="450" cy="38" rx="4" ry="5"
+                            fill="#e8b4b8" />
+                        <ellipse cx="550" cy="28" rx="4" ry="5"
+                            fill="#c9e8c0" />
+                        <ellipse cx="650" cy="38" rx="4" ry="5"
+                            fill="#b8aed2" />
+                        <ellipse cx="750" cy="48" rx="4" ry="5"
+                            fill="#f5d6d9" />
+                        <ellipse cx="850" cy="38" rx="4" ry="5"
+                            fill="#a8c5ac" />
+                        <ellipse cx="950" cy="28" rx="4" ry="5"
+                            fill="#f2c4a0" />
+                        <ellipse cx="1050" cy="38" rx="4" ry="5"
+                            fill="#e8b4b8" />
+                        <ellipse cx="1150" cy="48" rx="4" ry="5"
+                            fill="#b8aed2" />
+                    </g>
+                </g>
+            </svg>
+
+            <div class="hero_wrapper">
+                <p class="celebration">✦ a birthday celebration </p>
+                <h1 class="birthday">
+                    Happy birthday
+                    <br>
+                    <span class="name">Mehfooz Sir</span>
+                </h1>
+                <p class="home_message">May your world be as beautiful as you
+                    make
+                    ours ✿</p>
+                <div class="scroll">
+                    <p>Scroll to explore</p>
+                    <div class="arrow_wrapper">
+                        <div class="scroll_arrow"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Decorative branch right -->
+            <svg class="branch_right" width="260" height="340"
+                viewBox="0 0 260 340">
+                <path
+                    d="M230 340 Q200 280 210 220 Q220 160 180 120 Q150 80 160 30"
+                    fill="none" stroke="#7a9e7e" stroke-width="2"
+                    opacity="0.6" />
+                <ellipse cx="180" cy="120" rx="22" ry="13" fill="#a8c5ac"
+                    opacity="0.5" transform="rotate(-30,180,120)" />
+                <ellipse cx="160" cy="160" rx="18" ry="10" fill="#c9e8c0"
+                    opacity="0.4" transform="rotate(20,160,160)" />
+                <ellipse cx="210" cy="200" rx="20" ry="11" fill="#a8c5ac"
+                    opacity="0.45" transform="rotate(-15,210,200)" />
+                <ellipse cx="195" cy="80" rx="14" ry="9" fill="#b8e0b0"
+                    opacity="0.4" transform="rotate(10,195,80)" />
+                <circle cx="180" cy="122" r="5" fill="#e8b4b8" opacity="0.7" />
+                <circle cx="160" cy="162" r="4" fill="#f5d6d9" opacity="0.6" />
+                <circle cx="210" cy="202" r="4.5" fill="#e8b4b8"
+                    opacity="0.65" />
+            </svg>
+
+            <!-- Decorative branch left -->
+            <svg class="branch_left" width="260" height="340"
+                viewBox="0 0 260 340">
+                <path
+                    d="M230 340 Q200 280 210 220 Q220 160 180 120 Q150 80 160 30"
+                    fill="none" stroke="#7a9e7e" stroke-width="2"
+                    opacity="0.6" />
+                <ellipse cx="180" cy="120" rx="22" ry="13" fill="#a8c5ac"
+                    opacity="0.5" transform="rotate(-30,180,120)" />
+                <ellipse cx="160" cy="160" rx="18" ry="10" fill="#c9e8c0"
+                    opacity="0.4" transform="rotate(20,160,160)" />
+                <ellipse cx="210" cy="200" rx="20" ry="11" fill="#a8c5ac"
+                    opacity="0.45" transform="rotate(-15,210,200)" />
+                <circle cx="180" cy="122" r="5" fill="#e8b4b8" opacity="0.7" />
+                <circle cx="160" cy="162" r="4" fill="#f5d6d9" opacity="0.6" />
+            </svg>
+
+        </div>
+
+        <!-- Memories -->
+        <div class="memory" id="memory">
+            <p class="memory_p">✦ &nbsp; Memories</p>
+            <h1 class="memory_h1">
+                Moments with
+                <br>
+                <span class="memory_name">Mehfooz Sir</span>
+            </h1>
+
+            <div class="photo">
+                <div class="photo_child1">
+                    <div class="photo1">
+                        <svg class="photo_icon" viewBox="0 0 40 40" fill="none">
+                            <rect x="4" y="10" width="32" height="24" rx="3"
+                                stroke="#9c7b6e"
+                                stroke-width="1.2" />
+                            <circle cx="20" cy="22" r="6" stroke="#9c7b6e"
+                                stroke-width="1.2" />
+                            <circle cx="20" cy="22" r="3" fill="#e8b4b8"
+                                opacity="0.6" />
+                            <path d="M14 10 L16 6 L24 6 L26 10" stroke="#9c7b6e"
+                                stroke-width="1.2" fill="none" />
+                        </svg>
+                        <p>Your favourite photo</p>
+                    </div>
+                    <button class="upload_photo">
+                        + Add Photo
+                    </button>
+                </div>
+                <div class="photo_child2">
+                    <div class="photo2">
+                        <svg class="photo_icon" viewBox="0 0 40 40" fill="none">
+                            <rect x="4" y="10" width="32" height="24" rx="3"
+                                stroke="#7a9e7e"
+                                stroke-width="1.2" />
+                            <path d="M4 26 L12 18 L20 24 L28 16 L36 22"
+                                stroke="#7a9e7e"
+                                stroke-width="1.2" fill="none" />
+                            <circle cx="12" cy="17" r="3" fill="#a8c5ac"
+                                opacity="0.6" />
+                        </svg>
+                        <p>A memory</p>
+                    </div>
+                    <button class="upload_photo">
+                        + Add Photo
+                    </button>
+                </div>
+                <div class="photo_child3">
+                    <div class="photo3">
+                        <svg class="photo_icon" viewBox="0 0 40 40" fill="none">
+                            <rect x="4" y="10" width="32" height="24" rx="3"
+                                stroke="#9c94c0"
+                                stroke-width="1.2" />
+                            <circle cx="20" cy="22" r="7" stroke="#9c94c0"
+                                stroke-width="1.2" />
+                        </svg>
+                        <p>best day together</p>
+                    </div>
+                    <button class="upload_photo">
+                        + Add Photo
+                    </button>
+                </div>
+            </div>
+            <div class="divider">
+                <div class="divider_line"></div>
+                <span>✿</span>
+                <div class="divider_line"></div>
+            </div>
+        </div>
+
+        <!-- Letter -->
+        <div class="letter" id="letter">
+            <p class="letter_p">✦ &nbsp; A letter for you</p>
+            <h2 class="letter_h2">from the heart</h2>
+            <div class="letter_div">
+                <p class="head">Dear Mehfooz Sir,</p>
+                <div class="letter_content">
+                    <p>
+                        On this special day, I just want to express my heartfelt
+                        gratitude for everything you've taught us — not just
+                        academically, but in life. Your guidance, patience, and
+                        dedication have truly made a lasting impact on all of
+                        us.
+                        <br>
+                    </p>
+
+                    <p>
+                        You have a unique way of inspiring students and bringing
+                        out
+                        the best in everyone around you. Your words, lessons,
+                        and
+                        encouragement will always stay with us.
+                        <br>
+                    </p>
+
+                    <p>
+                        Wishing you a very Happy Birthday! May your life be
+                        filled
+                        with good health, happiness, and continued success.
+                        Thank
+                        you for being such an incredible mentor.
+                        <br>
+                        <br>
+                    </p>
+
+                    <span>
+                        - With respect and best wishes <span
+                            class="pink">✿</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Playlist -->
+        <div class="playlist" id="playlist">
+            <div class="playlist_div">
+                <p class="playlist_label">✦ &nbsp; curated for you</p>
+                <h2 class="playlist_h2">Birthday Playlist</h2>
+                <p class="playlist_p">Songs that feel like you — warm, magical
+                    & free</p>
+                <div class="playlist_music">
+                    <div class="music">
+                        <div class="music_child1">
+                            <p class="track_num">01</p>
+                            <span class="music_icon">▶</span>
+                            <span>🌿</span>
+                            <div class="music_text">
+                                <p class="track_name">golden hour</p>
+                                <p class="track_artist">jVKE</p>
+                            </div>
+                        </div>
+                        <p class="track_category">warm</p>
+                        <audio src="./Utili/Golden Hour.mp3"></audio>
+                    </div>
+                    <div class="music">
+                        <div class="music_child1">
+                            <p class="track_num">02</p>
+                            <span class="music_icon">▶</span>
+                            <span>🌾</span>
+                            <div class="music_text">
+                                <p class="track_name">ilahi</p>
+                                <p class="track_artist">arjit singh</p>
+                            </div>
+                        </div>
+                        <p class="track_category">free</p>
+                        <audio src="./Utili/Ilahi.mp3"></audio>
+                    </div>
+                    <div class="music active">
+                        <div class="music_child1">
+                            <p class="track_num">03</p>
+                            <span class="music_icon">▶</span>
+                            <span>🌸</span>
+                            <div class="music_text">
+                                <p class="track_name">iktara</p>
+                                <p class="track_artist">kavita seth</p>
+                            </div>
+                        </div>
+                        <p class="track_category">calm</p>
+                        <audio src="./Utili/Iktara.mp3"></audio>
+                    </div>
+                    <div class="music">
+                        <div class="music_child1">
+                            <p class="track_num">04</p>
+                            <span class="music_icon">▶</span>
+                            <span>🪻</span>
+                            <div class="music_text">
+                                <p class="track_name">safarnama</p>
+                                <p class="track_artist">lucky ali</p>
+                            </div>
+                        </div>
+                        <p class="track_category">soulful</p>
+                        <audio src="./Utili/Safarnama.mp3"></audio>
+                    </div>
+                    <div class="music">
+                        <div class="music_child1">
+                            <p class="track_num">05</p>
+                            <span class="music_icon">▶</span>
+                            <span>🍂</span>
+                            <div class="music_text">
+                                <p class="track_name">aashayein</p>
+                                <p class="track_artist">kK</p>
+                            </div>
+                        </div>
+                        <p class="track_category">hopeful</p>
+                        <audio src="./Utili/Aashayein.mp3"></audio>
+                    </div>
+                    <div class="music">
+                        <div class="music_child1">
+                            <p class="track_num">06</p>
+                            <span class="music_icon">▶</span>
+                            <span>✨</span>
+                            <div class="music_text">
+                                <p class="track_name">love you zindagi</p>
+                                <p class="track_artist">jasleena royal</p>
+                            </div>
+                        </div>
+                        <p class="track_category">positive</p>
+                        <audio src="./Utili/Love You Zindagi.mp3"></audio>
+                    </div>
+                    <div class="music">
+                        <div class="music_child1">
+                            <p class="track_num">07</p>
+                            <span class="music_icon">▶</span>
+                            <span>🌙</span>
+                            <div class="music_text">
+                                <p class="track_name">phir se ud chala</p>
+                                <p class="track_artist">mohit chauhan</p>
+                            </div>
+                        </div>
+                        <p class="track_category">dreamy</p>
+                        <audio src="./Utili/Phir Se Ud Chala.mp3"></audio>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wish -->
+        <div class="wish" id="wish">
+            <p class="wish_p">✦ &nbsp; a garden of wishes</p>
+            <h2 class="wish_h2">growing just for you</h2>
+            <p class="wish_sub">all the beautiful things we wish for mehfooz
+                sir</p>
+            <div class="wish_list">
+                <div class="wish_button">
+                    <span>🌸</span> joy in every breath
+                </div>
+                <div class="wish_button">
+                    <span>✨</span>
+                    dreams that come true
+                </div>
+                <div class="wish_button">
+                    <span>🌿</span>
+                    peace & calm always
+                </div>
+                <div class="wish_button">
+                    <span>🦋</span>
+                    growth beyond the limits
+                </div>
+                <div class="wish_button">
+                    <span>🍰</span>
+                    all the cake you want
+                </div>
+                <div class="wish_button">
+                    <span>💫</span>
+                    magic every single day
+                </div>
+                <div class="wish_button">
+                    <span>🌙</span>
+                    restful, beautiful nights
+                </div>
+                <div class="wish_button">
+                    <span>🌻</span>
+                    happiness that lasts
+                </div>
+                <div class="wish_button">
+                    <span>🎶</span>
+                    a life full of music
+                </div>
+                <div class="wish_button">
+                    <span>🌈</span>
+                    color in every season
+                </div>
+            </div>
+            <div class="divider">
+                <div class="divider_line"></div>
+                <span>✿</span>
+                <div class="divider_line"></div>
+            </div>
+            <h5>"may every petal of this day be as lovely as you are"</h5>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <h3 class="footer_name">mehfooz sir</h3>
+            <h5>happy birthday &nbsp; . &nbsp; made with respect &nbsp; .
+                &nbsp; 2026</h5>
+        </footer>
+
+        <!-- Share Button -->
+
+        <div class="action_buttons">
+            <button onclick="copyLink()">Copy Link 🔗</button>
+            <button onclick="shareWhatsApp()">Share 📲</button>
+            <button onclick="editAgain()">Edit ✏️</button>
+        </div>
+    </body>
+    <script src="./JS/index.js"></script>
+</html>
