@@ -197,7 +197,7 @@ function setImage(selector, img) {
     if (!el) return;
 
     el.style.backgroundImage = `url(${img})`;
-    el.style.backgroundSize = "cover";
+    el.style.backgroundSize = "fill";
     el.style.backgroundPosition = "center";
     el.innerHTML = "";
   }
@@ -604,6 +604,7 @@ function editAgain() {
   localStorage.setItem("edit_type", params.get("type"));
 
   // ✅ SAVE IMAGES
+
   localStorage.setItem("edit_img1", params.get("img1"));
   localStorage.setItem("edit_img2", params.get("img2"));
   localStorage.setItem("edit_img3", params.get("img3"));
