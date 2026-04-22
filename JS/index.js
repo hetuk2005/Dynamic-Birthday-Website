@@ -197,7 +197,7 @@ function setImage(selector, img) {
     if (!el) return;
 
     el.style.backgroundImage = `url(${img})`;
-    el.style.backgroundSize = "fill";
+    el.style.backgroundSize = "cover";
     el.style.backgroundPosition = "center";
     el.innerHTML = "";
   }
