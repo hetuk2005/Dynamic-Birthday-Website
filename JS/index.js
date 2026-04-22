@@ -198,7 +198,6 @@ function setImage(selector, img) {
 
     el.style.backgroundImage = `url(${img})`;
     el.style.backgroundSize = "cover";
-    el.style.backgroundPosition = "center";
     el.innerHTML = "";
   }
 }
