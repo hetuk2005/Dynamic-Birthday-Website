@@ -5,7 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Happy Birthday</title>
         <link rel="stylesheet" href="./CSS/index.css">
-        <link rel="shortcut icon" href="./Utili/Favicon.png" type="image/x-icon">
+        <link rel="shortcut icon" href="./Utili/Favicon.png"
+            type="image/x-icon">
     </head>
     <body>
         <!-- Input Screen -->
@@ -282,7 +283,12 @@
         <div class="playlist" id="playlist">
             <div class="playlist_div">
                 <p class="playlist_label">✦ &nbsp; curated for you</p>
-                <h2 class="playlist_h2">Birthday Playlist</h2>
+                <div class="playlist_header">
+                    <h2 class="playlist_h2">Birthday Playlist</h2>
+                    <button class="playlist_edit_button" onclick="openPlay()">
+                        ✏️ Edit Button
+                    </button>
+                </div>
                 <p class="playlist_p">Songs that feel like you — warm, magical
                     & free</p>
                 <div class="playlist_music">
@@ -377,6 +383,22 @@
                         <p class="track_category">dreamy</p>
                         <audio src="./Utili/Phir Se Ud Chala.mp3"></audio>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="playlist_overlay" id="playlist_overlay">
+            <div class="playlist_popup">
+                <div class="playlist_header">
+                    <h2>Edit Playlist</h2>
+                    <button onclick="closePlay()">✖</button>
+                </div>
+
+                <div class="song_form">
+                    <input type="text" id="songTitle" placeholder="Song Name">
+                    <input type="text" id="songArtist" placeholder="Artist Name">
+                    <input type="file" id="songFile" accept=".mp3, audio/*">
+                    <button>Add Song</button>
                 </div>
             </div>
         </div>

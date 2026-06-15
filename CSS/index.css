@@ -674,6 +674,77 @@ nav > h3 {
   flex-shrink: 0;
 }
 
+.playlist_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 21px;
+}
+
+.playlist_edit_button {
+  border: 1px transparent;
+  padding: 11px 19px;
+  border-radius: 21px;
+  cursor: pointer;
+  background: var(--sage);
+  color: white;
+  font-weight: 700;
+}
+
+.playlist_overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: #00000080;
+  backdrop-filter: blur(9px);
+  z-index: 999;
+}
+
+.playlist_popup {
+  width: 500px;
+  max-width: 90%;
+  background: white;
+  border-radius: 20px;
+  padding: 25px;
+}
+
+.playlist_popup_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.playlist_popup > .playlist_header > button {
+  border: 1px transparent;
+  background: transparent;
+  font-size: 21px;
+}
+
+.song_form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 21px;
+}
+
+.song_form input {
+  padding: 13px;
+  border-radius: 11px;
+  border: 1px solid #ddd;
+}
+
+.song_form button {
+  padding: 13px;
+  border-radius: 11px;
+  cursor: pointer;
+  background: var(--sage);
+  color: white;
+  border:1px transparent;
+font-weight: 700;
+}
+
 /* Wish */
 
 .wish {
@@ -816,63 +887,68 @@ footer > h5 {
     width: 91%;
   }
 
-/* Buttons */
+  /* Buttons */
 
-.action_buttons{
-  bottom: 21px;
-  right: 0;
-  align-items: center;
-  flex-direction: column;
-}
+  .action_buttons {
+    bottom: 21px;
+    right: 0;
+    align-items: center;
+    flex-direction: column;
+  }
 
   /* Navbar */
 
-  .flex,.memory_h1>br{
+  .flex,
+  .memory_h1 > br {
     display: none;
   }
 
-.celebration,.home_message{
-  font-size: small;
-}
+  .celebration,
+  .home_message {
+    font-size: small;
+  }
 
-  .birthday,.name{
+  .birthday,
+  .name {
     font-size: 45px;
   }
 
-/* Memory Section */
+  /* Memory Section */
 
-  .memory, .letter, .wish{
+  .memory,
+  .letter,
+  .wish {
     padding: 41px 17px;
   }
 
   /* Letter Section */
 
-  .letter_content > span{
+  .letter_content > span {
     font-size: 17px;
   }
 
   /* Playlist Section */
 
-.playlist{
-  padding: 51px 21px;
-}
+  .playlist {
+    padding: 51px 21px;
+  }
 
-  .playlist_p{
+  .playlist_p {
     font-size: 15px;
     margin-bottom: 25px;
   }
 
-  .music{
+  .music {
     padding: 11px 0;
   }
 
   /* Wish Section */
 
-  .wish_list{
+  .wish_list {
     align-items: center;
   }
 
-  .wish > h5{
+  .wish > h5 {
     font-size: 15px;
   }
 }

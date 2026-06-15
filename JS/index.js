@@ -54,6 +54,11 @@ tracks.forEach((track) => {
   const audio = track.querySelector("audio");
   const icon = track.querySelector(".music_icon");
 
+  audio.addEventListener("ended", () => {
+    track.classList.remove("active");
+    icon.textContent = "▶";
+  });
+
   track.addEventListener("click", () => {
     if (track.classList.contains("active")) {
       if (!audio.paused) {
@@ -164,6 +169,18 @@ uploadBoxes.forEach((box, index) => {
 async function handleFile(file, index, box) {
   if (!file) return;
 
+  if (!file.type.startsWith("image/")) {
+    alert("Please Upload An Image File!");
+    return;
+  }
+
+  const maxSize = 5 * 1024 * 1024;
+
+  if (file.size > maxSize) {
+    alert("Image Size Must Be Under 5MB!");
+    return;
+  }
+
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", "birthday_upload");
@@ -203,20 +220,24 @@ function setImage(selector, img) {
 }
 
 function generate() {
+  const btn = document.querySelector(".popup button");
   const name = document.getElementById("nameInput").value;
   const type = document.getElementById("typeInput").value;
 
-  if (!name || !type) {
+  if (!name.trim() || !type) {
     alert("Please Fill All Details!");
     return;
   }
-
-  showLoading();
 
   if (!images[0] || !images[1] || !images[2]) {
     alert("Please Upload All 3 Images!");
     return;
   }
+
+  showLoading();
+
+  btn.disabled = true;
+  btn.innerHTML = "Generating...";
 
   setTimeout(() => {
     const url = `?name=${encodeURIComponent(name)}&type=${type}&img1=${images[0]}&img2=${images[1]}&img3=${images[2]}`;
@@ -608,5 +629,22 @@ function editAgain() {
   localStorage.setItem("edit_img2", params.get("img2"));
   localStorage.setItem("edit_img3", params.get("img3"));
 
-  window.location.href = window.location.pathname;
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+
+  setTimeout(() => {
+    window.location.href = window.location.pathname;
+  }, 300);
+}
+
+const playlistOverlay = document.getElementById("playlist_overlay");
+
+function openPlay() {
+  playlistOverlay.style.display = "flex";
+}
+
+function closePlay() {
+  playlistOverlay.style.display = "none";
 }
