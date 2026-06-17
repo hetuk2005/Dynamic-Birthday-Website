@@ -595,7 +595,6 @@ nav > h3 {
 .music {
   padding: 15px 21px;
   border-radius: 15px;
-  cursor: pointer;
   transition: all 0.3s ease-in-out;
   position: relative;
 }
@@ -720,6 +719,7 @@ nav > h3 {
   border: 1px transparent;
   background: transparent;
   font-size: 21px;
+  cursor: pointer;
 }
 
 .song_form {
@@ -756,6 +756,34 @@ font-weight: 700;
   padding: 5px 9px;
   border-radius: 9px;
   font-size: 15px;
+}
+
+.editor_song{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px 0;
+  cursor: grab;
+}
+
+.editor_song.dragging{
+  opacity: 0.5;
+}
+
+.drag_handle{
+  cursor: grab;
+}
+
+.drag_handle,.editor_song>span{
+  font-size: 21px;
+  text-transform: capitalize;
+}
+
+.editor_delete{
+  font-size: 21px;
+  border: 1px transparent;
+  border-radius: 3px;
+  cursor: pointer;
 }
 
 /* Wish */

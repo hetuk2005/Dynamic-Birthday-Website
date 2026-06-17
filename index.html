@@ -294,95 +294,103 @@
                 <div class="playlist_music">
                 </div>
             </div>
+        </div>
+
+        <div class="playlist_overlay" id="playlist_overlay">
+            <div class="playlist_popup">
+                <div class="playlist_header">
+                    <h2>Edit Playlist</h2>
+                    <button onclick="closePlay()">✖</button>
+                </div>
+
+                <div class="song_form">
+                    <input type="text" id="songTitle"
+                        placeholder="Song Name">
+                    <input type="text" id="songArtist"
+                        placeholder="Artist Name">
+                    <input type="file" id="songFile" accept=".mp3, audio/*">
+                    <button id="addSong">Add Song</button>
+                </div>
+
+                <br>
+
+                <hr>
+
+                <h3>Current Playlist</h3>
+
+                <div class="playlist_editor"></div>
             </div>
+        </div>
 
-            <div class="playlist_overlay" id="playlist_overlay">
-                <div class="playlist_popup">
-                    <div class="playlist_header">
-                        <h2>Edit Playlist</h2>
-                        <button onclick="closePlay()">✖</button>
-                    </div>
-
-                    <div class="song_form">
-                        <input type="text" id="songTitle"
-                            placeholder="Song Name">
-                        <input type="text" id="songArtist"
-                            placeholder="Artist Name">
-                        <input type="file" id="songFile" accept=".mp3, audio/*">
-                        <button id="addSong">Add Song</button>
-                    </div>
+        <!-- Wish -->
+        <div class="wish" id="wish">
+            <p class="wish_p">✦ &nbsp; a garden of wishes</p>
+            <h2 class="wish_h2">growing just for you</h2>
+            <p class="wish_sub">all the beautiful things we wish for mehfooz
+                sir</p>
+            <div class="wish_list">
+                <div class="wish_button">
+                    <span>🌸</span> joy in every breath
+                </div>
+                <div class="wish_button">
+                    <span>✨</span>
+                    dreams that come true
+                </div>
+                <div class="wish_button">
+                    <span>🌿</span>
+                    peace & calm always
+                </div>
+                <div class="wish_button">
+                    <span>🦋</span>
+                    growth beyond the limits
+                </div>
+                <div class="wish_button">
+                    <span>🍰</span>
+                    all the cake you want
+                </div>
+                <div class="wish_button">
+                    <span>💫</span>
+                    magic every single day
+                </div>
+                <div class="wish_button">
+                    <span>🌙</span>
+                    restful, beautiful nights
+                </div>
+                <div class="wish_button">
+                    <span>🌻</span>
+                    happiness that lasts
+                </div>
+                <div class="wish_button">
+                    <span>🎶</span>
+                    a life full of music
+                </div>
+                <div class="wish_button">
+                    <span>🌈</span>
+                    color in every season
                 </div>
             </div>
-
-            <!-- Wish -->
-            <div class="wish" id="wish">
-                <p class="wish_p">✦ &nbsp; a garden of wishes</p>
-                <h2 class="wish_h2">growing just for you</h2>
-                <p class="wish_sub">all the beautiful things we wish for mehfooz
-                    sir</p>
-                <div class="wish_list">
-                    <div class="wish_button">
-                        <span>🌸</span> joy in every breath
-                    </div>
-                    <div class="wish_button">
-                        <span>✨</span>
-                        dreams that come true
-                    </div>
-                    <div class="wish_button">
-                        <span>🌿</span>
-                        peace & calm always
-                    </div>
-                    <div class="wish_button">
-                        <span>🦋</span>
-                        growth beyond the limits
-                    </div>
-                    <div class="wish_button">
-                        <span>🍰</span>
-                        all the cake you want
-                    </div>
-                    <div class="wish_button">
-                        <span>💫</span>
-                        magic every single day
-                    </div>
-                    <div class="wish_button">
-                        <span>🌙</span>
-                        restful, beautiful nights
-                    </div>
-                    <div class="wish_button">
-                        <span>🌻</span>
-                        happiness that lasts
-                    </div>
-                    <div class="wish_button">
-                        <span>🎶</span>
-                        a life full of music
-                    </div>
-                    <div class="wish_button">
-                        <span>🌈</span>
-                        color in every season
-                    </div>
-                </div>
-                <div class="divider">
-                    <div class="divider_line"></div>
-                    <span>✿</span>
-                    <div class="divider_line"></div>
-                </div>
-                <h5>"may every petal of this day be as lovely as you are"</h5>
+            <div class="divider">
+                <div class="divider_line"></div>
+                <span>✿</span>
+                <div class="divider_line"></div>
             </div>
+            <h5>"may every petal of this day be as lovely as you are"</h5>
+        </div>
 
-            <!-- Footer -->
-            <footer>
-                <h3 class="footer_name">mehfooz sir</h3>
-                <h5>happy birthday &nbsp; . &nbsp; made with respect &nbsp; .
-                    &nbsp; 2026</h5>
-            </footer>
+        <!-- Footer -->
+        <footer>
+            <h3 class="footer_name">mehfooz sir</h3>
+            <h5>happy birthday &nbsp; . &nbsp; made with respect &nbsp; .
+                &nbsp; 2026</h5>
+        </footer>
 
-            <!-- Share Button -->
+        <!-- Share Button -->
 
-            <div class="action_buttons">
-                <button onclick="copyLink()">Copy Link 🔗</button>
-                <button onclick="shareWhatsApp()">Share 📲</button>
-                <button onclick="editAgain()">Edit ✏️</button>
-            </div>
-        </body>
-        <script src="./JS/index.js"></script>
-    </html>
+        <div class="action_buttons">
+            <button onclick="copyLink()">Copy Link 🔗</button>
+            <button onclick="shareWhatsApp()">Share 📲</button>
+            <button onclick="editAgain()">Edit ✏️</button>
+        </div>
+    </body>
+    <script src="./JS/index.js"></script>
+</html>

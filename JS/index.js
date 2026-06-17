@@ -723,10 +723,21 @@ function editAgain() {
   }, 300);
 }
 
+let draggedSong = null;
+
+let editMode = false;
+
+function togglePlayList() {
+  editMode = !editMode;
+
+  renderSongs();
+}
+
 const playlistOverlay = document.getElementById("playlist_overlay");
 
 function openPlay() {
   playlistOverlay.style.display = "flex";
+  renderPlaylistEditor();
 }
 
 function closePlay() {
@@ -777,6 +788,7 @@ if (addSong) {
       // playlist.append(createSongElement(song, customSongs.length - 1));
 
       renderSongs();
+      renderPlaylistEditor();
 
       // console.log(customSongs);
 
@@ -815,74 +827,8 @@ function createSongElement(song, index) {
             </div>
         </div>
 
-        <p class="track_category">${song.default ? "default" : "custom"}</p>
-
-        <div class="track_actions">
-          <button class="move_up">⬆️</button>
-          <button class="move_down">⬇️</button>
-          <button class="delete_song">🗑️</button>
-        </div>
-
         <audio src="${song.audioURL}"></audio>
     `;
-
-  // Delete
-
-  const deleteBtn = div.querySelector(".delete_song");
-
-  deleteBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-
-    allSongs = allSongs.filter((s) => s.id !== song.id);
-
-    customSongs = allSongs.filter((s) => !s.default);
-
-    localStorage.setItem("allSongs", JSON.stringify(allSongs));
-
-    refreshCustom();
-  });
-
-  // Move Up
-
-  const upBtn = div.querySelector(".move_up");
-
-  upBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-
-    const index = allSongs.findIndex((s) => s.id === song.id);
-
-    if (index > 0) {
-      [allSongs[index - 1], allSongs[index]] = [
-        allSongs[index],
-        allSongs[index - 1],
-      ];
-
-      localStorage.setItem("allSongs", JSON.stringify(allSongs));
-
-      refreshCustom();
-    }
-  });
-
-  // Move Down
-
-  const downBtn = div.querySelector(".move_down");
-
-  downBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-
-    const index = allSongs.findIndex((s) => s.id === song.id);
-
-    if (index < allSongs.length - 1) {
-      [allSongs[index + 1], allSongs[index]] = [
-        allSongs[index],
-        allSongs[index + 1],
-      ];
-
-      localStorage.setItem("allSongs", JSON.stringify(allSongs));
-
-      refreshCustom();
-    }
-  });
 
   setUpTrack(div);
   // playlist.append(div);
@@ -908,3 +854,83 @@ function renderSongs() {
 }
 
 renderSongs();
+
+function renderPlaylistEditor() {
+  const editor = document.querySelector(".playlist_editor");
+
+  editor.innerHTML = "";
+
+  allSongs.forEach((song, index) => {
+    const row = document.createElement("div");
+
+    row.draggable = true;
+
+    row.dataset.id = song.id;
+
+    row.addEventListener("dragstart", () => {
+      draggedSong = song.id;
+
+      row.classList.add("dragging");
+    });
+
+    row.addEventListener("dragend", () => {
+      row.classList.remove("dragging");
+    });
+
+    row.addEventListener("dragover", (e) => {
+      e.preventDefault();
+    });
+
+    row.addEventListener("drop", (e) => {
+      e.preventDefault();
+
+      if (draggedSong === song.id) return;
+
+      const fromIndex = allSongs.findIndex((s) => s.id === draggedSong);
+
+      const toIndex = allSongs.findIndex((s) => s.id === song.id);
+
+      // [allSongs[fromIndex], allSongs[toIndex]] = [
+      //   allSongs[toIndex],
+      //   allSongs[fromIndex],
+      // ];
+
+      const [movedSong] = allSongs.splice(fromIndex, 1);
+
+      allSongs.splice(toIndex, 0, movedSong);
+
+      localStorage.setItem("allSongs", JSON.stringify(allSongs));
+
+      renderSongs();
+      renderPlaylistEditor();
+    });
+
+    row.className = "editor_song";
+
+    row.innerHTML = `
+      <span class="drag_handle">☰</span>
+      <span>${song.title}</span>
+      <button
+        class="editor_delete"
+        data-id="${song.id}"
+      >
+        🗑️
+      </button>
+    `;
+
+    editor.append(row);
+  });
+}
+
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("editor_delete")) {
+    const id = Number(e.target.dataset.id);
+
+    allSongs = allSongs.filter((song) => song.id !== id);
+
+    localStorage.setItem("allSongs", JSON.stringify(allSongs));
+
+    renderSongs();
+    renderPlaylistEditor();
+  }
+});
