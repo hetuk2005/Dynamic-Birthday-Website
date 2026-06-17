@@ -44,13 +44,7 @@ for (let i = 0; i < 25; i++) {
   }
 }
 
-// Music Active
-
-const tracks = document.querySelectorAll(".music");
-
-let currentAudio = null;
-
-tracks.forEach((track) => {
+function setUpTrack(track) {
   const audio = track.querySelector("audio");
   const icon = track.querySelector(".music_icon");
 
@@ -60,6 +54,8 @@ tracks.forEach((track) => {
   });
 
   track.addEventListener("click", () => {
+    const allTrack = document.querySelectorAll(".music");
+
     if (track.classList.contains("active")) {
       if (!audio.paused) {
         audio.pause();
@@ -69,24 +65,34 @@ tracks.forEach((track) => {
         icon.textContent = "⏸";
       }
     } else {
-      // Remove Active From All
-      tracks.forEach((t) => {
+      allTrack.forEach((t) => {
         t.classList.remove("active");
+
         const a = t.querySelector("audio");
         const i = t.querySelector(".music_icon");
+
         a.pause();
         i.textContent = "▶";
       });
 
-      // Add Active To Clicked One
       track.classList.add("active");
+
       audio.currentTime = 0;
       audio.play();
-      icon.textContent = "⏸";
 
-      currentAudio = audio;
+      icon.textContent = "⏸";
     }
   });
+}
+
+// Music Active
+
+const tracks = document.querySelectorAll(".music");
+
+let currentAudio = null;
+
+tracks.forEach((track) => {
+  setUpTrack(track);
 });
 
 // Active Navbar Highlight
@@ -131,6 +137,8 @@ const uploadBoxes = document.querySelectorAll(".upload_box");
 
 let images = ["", "", ""];
 
+let customSongs = JSON.parse(localStorage.getItem("customSongs")) || [];
+
 uploadBoxes.forEach((box, index) => {
   // Drag Over
 
@@ -165,6 +173,26 @@ uploadBoxes.forEach((box, index) => {
     input.click();
   });
 });
+
+async function uploadSong(file) {
+  const formData = new FormData();
+
+  formData.append("file", file);
+  formData.append("upload_preset", "playlist_audio");
+
+  const res = await fetch(
+    "https://api.cloudinary.com/v1_1/demvl3niy/video/upload",
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
+
+  const data = await res.json();
+  console.log("✈️  data: ", data);
+
+  return data.secure_url;
+}
 
 async function handleFile(file, index, box) {
   if (!file) return;
@@ -647,4 +675,103 @@ function openPlay() {
 
 function closePlay() {
   playlistOverlay.style.display = "none";
+
+  document.getElementById("songTitle").value = "";
+  document.getElementById("songArtist").value = "";
+  document.getElementById("songFile").value = "";
 }
+
+const addSong = document.getElementById("addSong");
+
+if (addSong) {
+  addSong.addEventListener("click", async () => {
+    const title = document.getElementById("songTitle");
+    const artist = document.getElementById("songArtist");
+    const fileInput = document.getElementById("songFile");
+
+    const titleValue = title.value.trim();
+    const artistValue = artist.value.trim();
+    const file = fileInput.files[0];
+
+    if (!titleValue || !artistValue || !file) {
+      alert("Please Fill All The Details");
+      return;
+    }
+
+    addSong.disabled = true;
+    addSong.innerHTML = "Uploading...";
+
+    try {
+      const audioURL = await uploadSong(file);
+
+      const song = {
+        id: Date.now(),
+        title: titleValue,
+        artist: artistValue,
+        audioURL,
+      };
+
+      customSongs.push(song);
+
+      localStorage.setItem("customSongs", JSON.stringify(customSongs));
+
+      const playlist = document.querySelector(".playlist_music");
+
+      playlist.append(createSongElement(song, customSongs.length - 1));
+
+      // console.log(customSongs);
+
+      alert("Song Captured Successfully 🎵");
+
+      title.value = "";
+      artist.value = "";
+      fileInput.value = "";
+    } catch (err) {
+      console.error(err);
+      alert("Upload Failed ❌");
+    }
+
+    addSong.disabled = false;
+    addSong.innerHTML = "Add Song";
+  });
+}
+
+function createSongElement(song, index) {
+  const div = document.createElement("div");
+
+  div.className = "music";
+
+  const tracknum = customSongs.indexOf(song) + 8;
+
+  div.innerHTML = `
+        <div class="music_child1">
+            <p class="track_num">${String(tracknum).padStart(2, "0")}</p>
+            <span class="music_icon">▶</span>
+            <span>🎵</span>
+            <div class="music_text">
+                <p class="track_name">${song.title}</p>
+                <p class="track_artist">${song.artist}</p>
+            </div>
+        </div>
+
+        <p class="track_category">custom</p>
+
+        <audio src="${song.audioURL}"></audio>
+    `;
+
+  setUpTrack(div);
+  // playlist.append(div);
+  return div;
+}
+
+function renderSongs() {
+  const playlist = document.querySelector(".playlist_music");
+
+  if (!playlist) return;
+
+  customSongs.forEach((song, index) => {
+    playlist.append(createSongElement(song, index));
+  });
+}
+
+renderSongs();
