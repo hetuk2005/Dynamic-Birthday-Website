@@ -292,186 +292,97 @@
                 <p class="playlist_p">Songs that feel like you — warm, magical
                     & free</p>
                 <div class="playlist_music">
-                    <div class="music">
-                        <div class="music_child1">
-                            <p class="track_num">01</p>
-                            <span class="music_icon">▶</span>
-                            <span>🌿</span>
-                            <div class="music_text">
-                                <p class="track_name">golden hour</p>
-                                <p class="track_artist">jVKE</p>
-                            </div>
-                        </div>
-                        <p class="track_category">warm</p>
-                        <audio src="./Utili/Golden Hour.mp3"></audio>
+                </div>
+            </div>
+            </div>
+
+            <div class="playlist_overlay" id="playlist_overlay">
+                <div class="playlist_popup">
+                    <div class="playlist_header">
+                        <h2>Edit Playlist</h2>
+                        <button onclick="closePlay()">✖</button>
                     </div>
-                    <div class="music">
-                        <div class="music_child1">
-                            <p class="track_num">02</p>
-                            <span class="music_icon">▶</span>
-                            <span>🌾</span>
-                            <div class="music_text">
-                                <p class="track_name">ilahi</p>
-                                <p class="track_artist">arjit singh</p>
-                            </div>
-                        </div>
-                        <p class="track_category">free</p>
-                        <audio src="./Utili/Ilahi.mp3"></audio>
-                    </div>
-                    <div class="music active">
-                        <div class="music_child1">
-                            <p class="track_num">03</p>
-                            <span class="music_icon">▶</span>
-                            <span>🌸</span>
-                            <div class="music_text">
-                                <p class="track_name">iktara</p>
-                                <p class="track_artist">kavita seth</p>
-                            </div>
-                        </div>
-                        <p class="track_category">calm</p>
-                        <audio src="./Utili/Iktara.mp3"></audio>
-                    </div>
-                    <div class="music">
-                        <div class="music_child1">
-                            <p class="track_num">04</p>
-                            <span class="music_icon">▶</span>
-                            <span>🪻</span>
-                            <div class="music_text">
-                                <p class="track_name">safarnama</p>
-                                <p class="track_artist">lucky ali</p>
-                            </div>
-                        </div>
-                        <p class="track_category">soulful</p>
-                        <audio src="./Utili/Safarnama.mp3"></audio>
-                    </div>
-                    <div class="music">
-                        <div class="music_child1">
-                            <p class="track_num">05</p>
-                            <span class="music_icon">▶</span>
-                            <span>🍂</span>
-                            <div class="music_text">
-                                <p class="track_name">aashayein</p>
-                                <p class="track_artist">kK</p>
-                            </div>
-                        </div>
-                        <p class="track_category">hopeful</p>
-                        <audio src="./Utili/Aashayein.mp3"></audio>
-                    </div>
-                    <div class="music">
-                        <div class="music_child1">
-                            <p class="track_num">06</p>
-                            <span class="music_icon">▶</span>
-                            <span>✨</span>
-                            <div class="music_text">
-                                <p class="track_name">love you zindagi</p>
-                                <p class="track_artist">jasleena royal</p>
-                            </div>
-                        </div>
-                        <p class="track_category">positive</p>
-                        <audio src="./Utili/Love You Zindagi.mp3"></audio>
-                    </div>
-                    <div class="music">
-                        <div class="music_child1">
-                            <p class="track_num">07</p>
-                            <span class="music_icon">▶</span>
-                            <span>🌙</span>
-                            <div class="music_text">
-                                <p class="track_name">phir se ud chala</p>
-                                <p class="track_artist">mohit chauhan</p>
-                            </div>
-                        </div>
-                        <p class="track_category">dreamy</p>
-                        <audio src="./Utili/Phir Se Ud Chala.mp3"></audio>
+
+                    <div class="song_form">
+                        <input type="text" id="songTitle"
+                            placeholder="Song Name">
+                        <input type="text" id="songArtist"
+                            placeholder="Artist Name">
+                        <input type="file" id="songFile" accept=".mp3, audio/*">
+                        <button id="addSong">Add Song</button>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="playlist_overlay" id="playlist_overlay">
-            <div class="playlist_popup">
-                <div class="playlist_header">
-                    <h2>Edit Playlist</h2>
-                    <button onclick="closePlay()">✖</button>
+            <!-- Wish -->
+            <div class="wish" id="wish">
+                <p class="wish_p">✦ &nbsp; a garden of wishes</p>
+                <h2 class="wish_h2">growing just for you</h2>
+                <p class="wish_sub">all the beautiful things we wish for mehfooz
+                    sir</p>
+                <div class="wish_list">
+                    <div class="wish_button">
+                        <span>🌸</span> joy in every breath
+                    </div>
+                    <div class="wish_button">
+                        <span>✨</span>
+                        dreams that come true
+                    </div>
+                    <div class="wish_button">
+                        <span>🌿</span>
+                        peace & calm always
+                    </div>
+                    <div class="wish_button">
+                        <span>🦋</span>
+                        growth beyond the limits
+                    </div>
+                    <div class="wish_button">
+                        <span>🍰</span>
+                        all the cake you want
+                    </div>
+                    <div class="wish_button">
+                        <span>💫</span>
+                        magic every single day
+                    </div>
+                    <div class="wish_button">
+                        <span>🌙</span>
+                        restful, beautiful nights
+                    </div>
+                    <div class="wish_button">
+                        <span>🌻</span>
+                        happiness that lasts
+                    </div>
+                    <div class="wish_button">
+                        <span>🎶</span>
+                        a life full of music
+                    </div>
+                    <div class="wish_button">
+                        <span>🌈</span>
+                        color in every season
+                    </div>
                 </div>
-
-                <div class="song_form">
-                    <input type="text" id="songTitle" placeholder="Song Name">
-                    <input type="text" id="songArtist" placeholder="Artist Name">
-                    <input type="file" id="songFile" accept=".mp3, audio/*">
-                    <button id="addSong">Add Song</button>
+                <div class="divider">
+                    <div class="divider_line"></div>
+                    <span>✿</span>
+                    <div class="divider_line"></div>
                 </div>
+                <h5>"may every petal of this day be as lovely as you are"</h5>
             </div>
-        </div>
 
-        <!-- Wish -->
-        <div class="wish" id="wish">
-            <p class="wish_p">✦ &nbsp; a garden of wishes</p>
-            <h2 class="wish_h2">growing just for you</h2>
-            <p class="wish_sub">all the beautiful things we wish for mehfooz
-                sir</p>
-            <div class="wish_list">
-                <div class="wish_button">
-                    <span>🌸</span> joy in every breath
-                </div>
-                <div class="wish_button">
-                    <span>✨</span>
-                    dreams that come true
-                </div>
-                <div class="wish_button">
-                    <span>🌿</span>
-                    peace & calm always
-                </div>
-                <div class="wish_button">
-                    <span>🦋</span>
-                    growth beyond the limits
-                </div>
-                <div class="wish_button">
-                    <span>🍰</span>
-                    all the cake you want
-                </div>
-                <div class="wish_button">
-                    <span>💫</span>
-                    magic every single day
-                </div>
-                <div class="wish_button">
-                    <span>🌙</span>
-                    restful, beautiful nights
-                </div>
-                <div class="wish_button">
-                    <span>🌻</span>
-                    happiness that lasts
-                </div>
-                <div class="wish_button">
-                    <span>🎶</span>
-                    a life full of music
-                </div>
-                <div class="wish_button">
-                    <span>🌈</span>
-                    color in every season
-                </div>
+            <!-- Footer -->
+            <footer>
+                <h3 class="footer_name">mehfooz sir</h3>
+                <h5>happy birthday &nbsp; . &nbsp; made with respect &nbsp; .
+                    &nbsp; 2026</h5>
+            </footer>
+
+            <!-- Share Button -->
+
+            <div class="action_buttons">
+                <button onclick="copyLink()">Copy Link 🔗</button>
+                <button onclick="shareWhatsApp()">Share 📲</button>
+                <button onclick="editAgain()">Edit ✏️</button>
             </div>
-            <div class="divider">
-                <div class="divider_line"></div>
-                <span>✿</span>
-                <div class="divider_line"></div>
-            </div>
-            <h5>"may every petal of this day be as lovely as you are"</h5>
-        </div>
-
-        <!-- Footer -->
-        <footer>
-            <h3 class="footer_name">mehfooz sir</h3>
-            <h5>happy birthday &nbsp; . &nbsp; made with respect &nbsp; .
-                &nbsp; 2026</h5>
-        </footer>
-
-        <!-- Share Button -->
-
-        <div class="action_buttons">
-            <button onclick="copyLink()">Copy Link 🔗</button>
-            <button onclick="shareWhatsApp()">Share 📲</button>
-            <button onclick="editAgain()">Edit ✏️</button>
-        </div>
-    </body>
-    <script src="./JS/index.js"></script>
-</html>
+        </body>
+        <script src="./JS/index.js"></script>
+    </html>

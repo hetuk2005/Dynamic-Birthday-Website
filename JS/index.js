@@ -85,6 +85,58 @@ function setUpTrack(track) {
   });
 }
 
+const defaultSongs = [
+  {
+    id: 1,
+    title: "golden hour",
+    artist: "jVKE",
+    audioURL: "../Utili/Golden Hour.mp3",
+    default: true,
+  },
+  {
+    id: 2,
+    title: "ilahi",
+    artist: "arjit sing",
+    audioURL: "../Utili/Ilahi.mp3",
+    default: true,
+  },
+  {
+    id: 3,
+    title: "iktara",
+    artist: "kavita seth",
+    audioURL: "../Utili/Iktara.mp3",
+    default: true,
+  },
+  {
+    id: 4,
+    title: "safarnama",
+    artist: "lucky ali",
+    audioURL: "../Utili/Safarnama.mp3",
+    default: true,
+  },
+  {
+    id: 5,
+    title: "aashayein",
+    artist: "kk",
+    audioURL: "../Utili/Aashayein.mp3",
+    default: true,
+  },
+  {
+    id: 6,
+    title: "love you zindagi",
+    artist: "jasleena royal",
+    audioURL: "../Utili/Love You Zindagi.mp3",
+    default: true,
+  },
+  {
+    id: 7,
+    title: "phir se ud chala",
+    artist: "mohit chauhan",
+    audioURL: "../Utili/Phir Se Ud Chala.mp3",
+    default: true,
+  },
+];
+
 // Music Active
 
 const tracks = document.querySelectorAll(".music");
@@ -138,6 +190,10 @@ const uploadBoxes = document.querySelectorAll(".upload_box");
 let images = ["", "", ""];
 
 let customSongs = JSON.parse(localStorage.getItem("customSongs")) || [];
+
+let allSongs = JSON.parse(localStorage.getItem("allSongs")) || [
+  ...defaultSongs,
+];
 
 uploadBoxes.forEach((box, index) => {
   // Drag Over
@@ -711,13 +767,16 @@ if (addSong) {
         audioURL,
       };
 
+      allSongs.push(song);
       customSongs.push(song);
 
       localStorage.setItem("customSongs", JSON.stringify(customSongs));
 
       const playlist = document.querySelector(".playlist_music");
 
-      playlist.append(createSongElement(song, customSongs.length - 1));
+      // playlist.append(createSongElement(song, customSongs.length - 1));
+
+      renderSongs();
 
       // console.log(customSongs);
 
@@ -739,9 +798,11 @@ if (addSong) {
 function createSongElement(song, index) {
   const div = document.createElement("div");
 
-  div.className = "music";
+  div.dataset.id = song.id;
 
-  const tracknum = customSongs.indexOf(song) + 8;
+  div.className = song.default ? "music default_song" : "music custom_song";
+
+  const tracknum = index + 1;
 
   div.innerHTML = `
         <div class="music_child1">
@@ -754,14 +815,84 @@ function createSongElement(song, index) {
             </div>
         </div>
 
-        <p class="track_category">custom</p>
+        <p class="track_category">${song.default ? "default" : "custom"}</p>
+
+        <div class="track_actions">
+          <button class="move_up">⬆️</button>
+          <button class="move_down">⬇️</button>
+          <button class="delete_song">🗑️</button>
+        </div>
 
         <audio src="${song.audioURL}"></audio>
     `;
 
+  // Delete
+
+  const deleteBtn = div.querySelector(".delete_song");
+
+  deleteBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    allSongs = allSongs.filter((s) => s.id !== song.id);
+
+    customSongs = allSongs.filter((s) => !s.default);
+
+    localStorage.setItem("allSongs", JSON.stringify(allSongs));
+
+    refreshCustom();
+  });
+
+  // Move Up
+
+  const upBtn = div.querySelector(".move_up");
+
+  upBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    const index = allSongs.findIndex((s) => s.id === song.id);
+
+    if (index > 0) {
+      [allSongs[index - 1], allSongs[index]] = [
+        allSongs[index],
+        allSongs[index - 1],
+      ];
+
+      localStorage.setItem("allSongs", JSON.stringify(allSongs));
+
+      refreshCustom();
+    }
+  });
+
+  // Move Down
+
+  const downBtn = div.querySelector(".move_down");
+
+  downBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    const index = allSongs.findIndex((s) => s.id === song.id);
+
+    if (index < allSongs.length - 1) {
+      [allSongs[index + 1], allSongs[index]] = [
+        allSongs[index],
+        allSongs[index + 1],
+      ];
+
+      localStorage.setItem("allSongs", JSON.stringify(allSongs));
+
+      refreshCustom();
+    }
+  });
+
   setUpTrack(div);
   // playlist.append(div);
   return div;
+}
+
+function refreshCustom() {
+  document.querySelectorAll(".custom_song").forEach((el) => el.remove());
+
+  renderSongs();
 }
 
 function renderSongs() {
@@ -769,7 +900,9 @@ function renderSongs() {
 
   if (!playlist) return;
 
-  customSongs.forEach((song, index) => {
+  playlist.innerHTML = "";
+
+  allSongs.forEach((song, index) => {
     playlist.append(createSongElement(song, index));
   });
 }

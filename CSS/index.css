@@ -745,6 +745,19 @@ nav > h3 {
 font-weight: 700;
 }
 
+.track_actions{
+  display: flex;
+  gap: 9px;
+}
+
+.track_actions button{
+  border: 1px transparent;
+  cursor: pointer;
+  padding: 5px 9px;
+  border-radius: 9px;
+  font-size: 15px;
+}
+
 /* Wish */
 
 .wish {
