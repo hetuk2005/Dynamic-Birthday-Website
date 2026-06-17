@@ -702,6 +702,7 @@ nav > h3 {
 }
 
 .playlist_popup {
+  margin: 21px 0;
   width: 500px;
   max-width: 90%;
   background: white;
