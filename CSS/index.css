@@ -94,6 +94,25 @@ body {
   background: var(--sage);
 }
 
+.message_options>p,.message_options>label,.message_options>textarea::placeholder{
+  text-transform: capitalize;
+}
+
+.message_options>label,.message_options>label>input{
+  cursor: pointer;
+}
+
+.message_options>textarea{
+  display: none;
+  border-radius: 11px;
+  width: 100%;
+  padding: 25px;
+}
+
+.message_options>textarea::placeholder{
+  font-size: 15px;
+}
+
 .upload_box {
   cursor: pointer;
 }

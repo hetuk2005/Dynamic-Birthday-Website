@@ -230,6 +230,20 @@ uploadBoxes.forEach((box, index) => {
   });
 });
 
+const messageRadios = document.querySelectorAll('input[name="messageType"]');
+
+const customMessage = document.getElementById("customMessage");
+
+messageRadios.forEach((radio) => {
+  radio.addEventListener("change", () => {
+    if (radio.value === "custom" && radio.checked) {
+      customMessage.style.display = "block";
+    } else {
+      customMessage.style.display = "none";
+    }
+  });
+});
+
 async function uploadSong(file) {
   const formData = new FormData();
 
@@ -323,8 +337,23 @@ function generate() {
   btn.disabled = true;
   btn.innerHTML = "Generating...";
 
+  let message = "";
+
+  const selectedType = document.querySelector(
+    `input[name="messageType"]:checked`,
+  ).value;
+
+  if (selectedType === "custom") {
+    message = document.getElementById("customMessage").value.trim();
+
+    if (!message) {
+      alert("Please Write Your Message!");
+      return;
+    }
+  }
+
   setTimeout(() => {
-    const url = `?name=${encodeURIComponent(name)}&type=${type}&img1=${images[0]}&img2=${images[1]}&img3=${images[2]}`;
+    const url = `?name=${encodeURIComponent(name)}&type=${type}&message=${encodeURIComponent(message)}&img1=${images[0]}&img2=${images[1]}&img3=${images[2]}`;
     window.location.href = url;
   }, 3000);
 }
@@ -335,6 +364,7 @@ const params = new URLSearchParams(window.location.search);
 
 const name = params.get("name");
 const type = params.get("type");
+const customMessageParam = params.get("message");
 const img1 = params.get("img1");
 const img2 = params.get("img2");
 const img3 = params.get("img3");
@@ -675,8 +705,18 @@ const letters = {
 
 const letterBox = document.querySelector(".letter_content");
 
-if (type && letters[type] && letterBox) {
-  document.querySelector(".letter_content").innerHTML = letters[type];
+// if (type && letters[type] && letterBox) {
+//   document.querySelector(".letter_content").innerHTML = letters[type];
+// }
+
+if (customMessageParam && letterBox) {
+  letterBox.innerHTML = `
+    <p>
+      ${customMessageParam}
+    </p>
+  `;
+} else if (type && letters[type] && letterBox) {
+  letterBox.innerHTML = letters[type];
 }
 
 // Share & Copy Link Button

@@ -41,6 +41,24 @@
                 <div class="upload_box" data-index="2"
                     aria-required="true">Image 3</div>
 
+                <div class="message_options">
+                    <p>do you want to write your own message ?</p>
+
+                    <label>
+                        <input type="radio" checked value="default"
+                            name="messageType">
+                        use default message
+                    </label>
+
+                    <label>
+                        <input type="radio" value="custom" name="messageType">
+                        write my own
+                    </label>
+                    <br><br>
+                    <textarea id="customMessage"
+                        placeholder="write your special message here..."></textarea>
+                </div>
+
                 <button onclick="generate()">Generate</button>
 
             </div>
