@@ -14,12 +14,55 @@ body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  cursor:
+  /* cursor: 
     url(../Utili/Cursor.svg) 11 11,
-    auto;
+    auto; */
   scroll-behavior: smooth;
   scrollbar-width: thin;
   scrollbar-color: var(--sage) var(--cream);
+}
+
+/* Cursor */
+
+#cursor_dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  position: fixed;
+  background: var(--forest);
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 999999;
+  transform: translate(-50%, -50%);
+  transition: all 0.09s ease-in-out;
+}
+
+#cursor_ring {
+  pointer-events: none;
+  width: 35px;
+  height: 35px;
+  border: 2px solid;
+  border-radius: 50%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition:
+    all 0.13s,
+    transform 0.13s ease-out;
+}
+
+#cursor_dot.hovered {
+  display: none;
+}
+
+#cursor_ring.hovered {
+  width: 50px;
+  height: 50px;
+  background: var(--forest);
+  border-color: var(--sage);
 }
 
 /* Scrollbar Color  & Width */
@@ -58,6 +101,7 @@ body {
 }
 
 .popup {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -74,6 +118,18 @@ body {
   color: #fff;
 }
 
+.popup_close{
+  position: absolute;
+  top:15px;
+  right: 15px;
+  border: 1px transparent;
+  font-size: 25px;
+  cursor: pointer;
+  color: #fff;
+  font-weight: 700;
+  background: transparent;
+}
+
 #typeInput,
 #nameInput {
   width: 51%;
@@ -82,6 +138,10 @@ body {
   border-radius: 11px;
   border: transparent;
   outline: none;
+  cursor: pointer;
+}
+
+#typeInput>option{
   cursor: pointer;
 }
 
@@ -94,22 +154,25 @@ body {
   background: var(--sage);
 }
 
-.message_options>p,.message_options>label,.message_options>textarea::placeholder{
+.message_options > p,
+.message_options > label,
+.message_options > textarea::placeholder {
   text-transform: capitalize;
 }
 
-.message_options>label,.message_options>label>input{
+.message_options > label,
+.message_options > label > input {
   cursor: pointer;
 }
 
-.message_options>textarea{
+.message_options > textarea {
   display: none;
   border-radius: 11px;
   width: 100%;
   padding: 25px;
 }
 
-.message_options>textarea::placeholder{
+.message_options > textarea::placeholder {
   font-size: 15px;
 }
 
@@ -761,16 +824,16 @@ nav > h3 {
   cursor: pointer;
   background: var(--sage);
   color: white;
-  border:1px transparent;
-font-weight: 700;
+  border: 1px transparent;
+  font-weight: 700;
 }
 
-.track_actions{
+.track_actions {
   display: flex;
   gap: 9px;
 }
 
-.track_actions button{
+.track_actions button {
   border: 1px transparent;
   cursor: pointer;
   padding: 5px 9px;
@@ -778,7 +841,7 @@ font-weight: 700;
   font-size: 15px;
 }
 
-.editor_song{
+.editor_song {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -786,20 +849,21 @@ font-weight: 700;
   cursor: grab;
 }
 
-.editor_song.dragging{
+.editor_song.dragging {
   opacity: 0.5;
 }
 
-.drag_handle{
+.drag_handle {
   cursor: grab;
 }
 
-.drag_handle,.editor_song>span{
+.drag_handle,
+.editor_song > span {
   font-size: 21px;
   text-transform: capitalize;
 }
 
-.editor_delete{
+.editor_delete {
   font-size: 21px;
   border: 1px transparent;
   border-radius: 3px;

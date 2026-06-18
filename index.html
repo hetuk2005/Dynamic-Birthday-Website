@@ -9,10 +9,18 @@
             type="image/x-icon">
     </head>
     <body>
+        <!-- Cursor -->
+
+        <div id="cursor_dot"></div>
+        <div id="cursor_ring"></div>
+
         <!-- Input Screen -->
 
         <div class="form_overlay" id="form_overlay">
             <div class="popup">
+
+                <button class="popup_close"
+                    onclick="closeEditPopup()">❌</button>
 
                 <h2>Create Your Wish 🎉</h2>
                 <input type="text" id="nameInput" placeholder="Enter Name"

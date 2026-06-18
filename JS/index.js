@@ -374,6 +374,10 @@ setImage(".photo_child2", img2);
 setImage(".photo_child3", img3);
 
 if (!name) {
+  const closeBtn = document.querySelector(".popup_close");
+  if (closeBtn) {
+    closeBtn.style.display = "none";
+  }
   if (overlay) overlay.style.display = "flex";
   document.body.style.overflow = "hidden";
   document.querySelector(".action_buttons").style.display = "none";
@@ -384,6 +388,7 @@ if (!name) {
 
 const editName = localStorage.getItem("edit_name");
 const editType = localStorage.getItem("edit_type");
+const editing_mode = localStorage.getItem("editing_mode");
 
 if (editName || editType) {
   if (overlay) overlay.style.display = "flex";
@@ -393,9 +398,16 @@ if (editName || editType) {
 
   document.body.style.overflow = "hidden";
 
+  const closeBtn = document.querySelector(".popup_close");
+
+  if (closeBtn) {
+    closeBtn.style.display = editing_mode ? "block" : "none";
+  }
+
   // Clear After Use (Optional)
   localStorage.removeItem("edit_name");
   localStorage.removeItem("edit_type");
+  localStorage.removeItem("editing_mode");
 }
 
 const editImg1 = localStorage.getItem("edit_img1");
@@ -753,6 +765,8 @@ function editAgain() {
   localStorage.setItem("edit_img2", params.get("img2"));
   localStorage.setItem("edit_img3", params.get("img3"));
 
+  localStorage.setItem("editing_mode", "true");
+
   window.scrollTo({
     top: 0,
     behavior: "smooth",
@@ -974,3 +988,75 @@ document.addEventListener("click", (e) => {
     renderPlaylistEditor();
   }
 });
+
+const dot = document.getElementById("cursor_dot");
+const ring = document.getElementById("cursor_ring");
+
+let ringX = 0,
+  ringY = 0;
+
+let mouseX = 0,
+  mouseY = 0;
+
+document.addEventListener("mousemove", function (e) {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+
+  dot.style.left = mouseX + "px";
+  dot.style.top = mouseY + "px";
+
+  ring.style.left = mouseX + "px";
+  ring.style.top = mouseY + "px";
+});
+
+function animateRing() {
+  ringX += (mouseX - ringX) * 1.0;
+  ringY += (mouseY - ringY) * 1.0;
+
+  ring.style.left = ringX + "px";
+  ring.style.top = ringY + "px";
+
+  requestAnimationFrame(animateRing);
+}
+
+animateRing();
+
+document.addEventListener("mouseover", (e) => {
+  if (
+    e.target.matches(
+      "a, button, input, textarea, select, label,.upload_box,.photo_child1,.photo_child2,.photo_child3",
+    )
+  ) {
+    dot.classList.add("hovered");
+    ring.classList.add("hovered");
+  }
+});
+
+document.addEventListener("mouseout", (e) => {
+  if (
+    e.target.closest(
+      "a, button, input, textarea, select, label,.upload_box,.photo_child1,.photo_child2,.photo_child3",
+    )
+  ) {
+    dot.classList.remove("hovered");
+    ring.classList.remove("hovered");
+  }
+});
+
+document.addEventListener("mouseleave", function () {
+  dot.style.opacity = "0";
+  ring.style.opacity = "0";
+});
+
+document.addEventListener("mouseenter", function () {
+  dot.style.opacity = "1";
+  ring.style.opacity = "0.4";
+});
+
+function closeEditPopup() {
+  const overlay = document.getElementById("form_overlay");
+
+  overlay.style.display = "none";
+
+  document.body.style.overflow = "auto";
+}
