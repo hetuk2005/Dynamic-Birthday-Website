@@ -753,28 +753,59 @@ function shareWhatsApp() {
 
 // Edit Button
 
+// function editAgain() {
+//   const params = new URLSearchParams(window.location.search);
+
+//   localStorage.setItem("edit_name", params.get("name"));
+//   localStorage.setItem("edit_type", params.get("type"));
+
+//   // ✅ SAVE IMAGES
+
+//   localStorage.setItem("edit_img1", params.get("img1"));
+//   localStorage.setItem("edit_img2", params.get("img2"));
+//   localStorage.setItem("edit_img3", params.get("img3"));
+
+//   localStorage.setItem("editing_mode", "true");
+
+//   window.scrollTo({
+//     top: 0,
+//     behavior: "smooth",
+//   });
+
+//   setTimeout(() => {
+//     window.location.href = window.location.pathname;
+//   }, 300);
+// }
+
 function editAgain() {
+  const overlay = document.getElementById("form_overlay");
+
+  overlay.style.display = "flex";
+  document.body.style.overflow = "hidden";
+
   const params = new URLSearchParams(window.location.search);
 
-  localStorage.setItem("edit_name", params.get("name"));
-  localStorage.setItem("edit_type", params.get("type"));
+  document.getElementById("nameInput").value = params.get("name") || "";
 
-  // ✅ SAVE IMAGES
+  document.getElementById("typeInput").value = params.get("type") || "";
 
-  localStorage.setItem("edit_img1", params.get("img1"));
-  localStorage.setItem("edit_img2", params.get("img2"));
-  localStorage.setItem("edit_img3", params.get("img3"));
+  if (params.get("message")) {
+    document.querySelector('input[value="custom"]').checked = true;
 
-  localStorage.setItem("editing_mode", "true");
+    customMessage.style.display = "block";
 
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
+    customMessage.value = decodeURIComponent(params.get("message"));
+  }
+
+  images[0] = params.get("img1") || "";
+  images[1] = params.get("img2") || "";
+  images[2] = params.get("img3") || "";
+
+  uploadBoxes.forEach((box, i) => {
+    if (images[i]) {
+      box.innerHTML = "Image Uploaded ✅";
+    }
   });
-
-  setTimeout(() => {
-    window.location.href = window.location.pathname;
-  }, 300);
 }
 
 let draggedSong = null;
@@ -1060,3 +1091,52 @@ function closeEditPopup() {
 
   document.body.style.overflow = "auto";
 }
+
+function openEditPopup() {
+  const overlay = document.getElementById("form_overlay");
+
+  overlay.style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+$(window).on("scroll", function () {
+  let scrollTop = $(window).scrollTop();
+
+  let docHeight = $(document).height() - $(window).height();
+
+  let progress = (scrollTop / docHeight) * 100;
+
+  $("#progress_bar").css("width", progress + "%");
+});
+
+// JQuery
+
+$(function () {
+  $("#mainActionBtn").click(function () {
+    $(this).hide();
+    $(".action_items").slideDown(300);
+  });
+
+  $("#closeActionBtn").click(function () {
+    $(".action_items").slideUp(300, function () {
+      $("#mainActionBtn").show();
+    });
+  });
+
+  $(window).scroll(function () {
+    if ($(this).scrollTop() > 300) {
+      $("#scrollTopBtn").fadeIn();
+    } else {
+      $("#scrollTopBtn").fadeOut();
+    }
+  });
+
+  $("#scrollTopBtn").click(function () {
+    $("html,body").animate(
+      {
+        scrollTop: 0,
+      },
+      700,
+    );
+  });
+});
