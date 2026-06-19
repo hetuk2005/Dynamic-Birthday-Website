@@ -54,6 +54,37 @@
                     <option value="bf">Boy-Friend</option>
                 </select>
 
+                <div class="gallery_options">
+                    <p>Choose Gallery Type</p>
+
+                    <label>
+                        <input type="radio" name="galleryType" value="simple"
+                            checked>
+                        Simple Gallery (3 Images)
+                    </label>
+
+                    <label>
+                        <input type="radio" name="galleryType" value="animated">
+                        Animated Gallery (10-15 Images)
+                    </label>
+                </div>
+
+                <div id="animatedUploadContainer">
+
+                    <div id="animatedUploadBox">
+                        📸 Click To Upload 10-15 Images
+                    </div>
+
+                    <input
+                        type="file"
+                        id="animatedImages"
+                        multiple
+                        accept="image/*">
+
+                    <p id="imageCount"></p>
+
+                </div>
+
                 <div class="upload_box" data-index="0"
                     aria-required="true">Image 1</div>
                 <div class="upload_box" data-index="1"
@@ -212,6 +243,7 @@
                 <br>
                 <span class="memory_name">Mehfooz Sir</span>
             </h1>
+        </div>
 
             <div class="photo">
                 <div class="photo_child1">
@@ -267,12 +299,16 @@
                     </button>
                 </div>
             </div>
+
+            <div class="animated_gallery">
+                <div class="animated_gallery_track"></div>
+            </div>
+
             <div class="divider">
                 <div class="divider_line"></div>
                 <span>✿</span>
                 <div class="divider_line"></div>
             </div>
-        </div>
 
         <!-- Letter -->
         <div class="letter" id="letter">

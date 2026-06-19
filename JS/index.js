@@ -234,6 +234,30 @@ const messageRadios = document.querySelectorAll('input[name="messageType"]');
 
 const customMessage = document.getElementById("customMessage");
 
+const galleryRadios = document.querySelectorAll('input[name="galleryType"]');
+
+const animatedContainer = document.getElementById("animatedUploadContainer");
+
+const uploadBoxesContainer = document.querySelectorAll(".upload_box");
+
+galleryRadios.forEach((radio) => {
+  radio.addEventListener("change", () => {
+    if (radio.checked && radio.value === "animated") {
+      animatedContainer.style.display = "flex";
+
+      uploadBoxesContainer.forEach((box) => {
+        box.style.display = "none";
+      });
+    } else if (radio.checked && radio.value === "simple") {
+      animatedContainer.style.display = "none";
+
+      uploadBoxesContainer.forEach((box) => {
+        box.style.display = "flex";
+      });
+    }
+  });
+});
+
 messageRadios.forEach((radio) => {
   radio.addEventListener("change", () => {
     if (radio.value === "custom" && radio.checked) {
@@ -316,8 +340,89 @@ function setImage(selector, img) {
     el.innerHTML = "";
   }
 }
+// Animated Gallery
+
+let animatedImages = [];
+let uploadedCount = 0;
+
+const animatedInput = document.getElementById("animatedImages");
+
+const animatedUploadBox = document.getElementById("animatedUploadBox");
+
+const imageCount = document.getElementById("imageCount");
+
+animatedUploadBox.addEventListener("click", () => {
+  animatedInput.click();
+});
+
+animatedInput.addEventListener("change", async () => {
+  const files = [...animatedInput.files];
+
+  if (uploadedCount + files.length > 15) {
+    alert(
+      `Maximum 15 Images Allowed.
+You Can Upload ${15 - uploadedCount} More Images`,
+    );
+
+    animatedInput.value = "";
+    return;
+  }
+
+  imageCount.innerHTML = "⏳ Uploading...";
+
+  try {
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) {
+        continue;
+      }
+
+      const formData = new FormData();
+
+      formData.append("file", file);
+      formData.append("upload_preset", "birthday_upload");
+
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/demvl3niy/image/upload",
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
+      const data = await res.json();
+
+      animatedImages.push(data.secure_url);
+
+      uploadedCount++;
+    }
+
+    const remaining = Math.max(0, 10 - uploadedCount);
+
+    imageCount.innerHTML = `
+      📸 Uploaded : ${uploadedCount}/15
+      <br><br>
+      ${
+        uploadedCount < 10
+          ? `⚠️ ${remaining} More Required`
+          : uploadedCount < 15
+            ? "✅ Minimum Requirement Complete"
+            : "🎉 Maximum Reached"
+      }
+    `;
+
+    animatedInput.value = "";
+  } catch (err) {
+    console.error(err);
+
+    imageCount.innerHTML = "❌ Upload Failed";
+  }
+});
 
 function generate() {
+  const galleryType = document.querySelector(
+    'input[name="galleryType"]:checked',
+  ).value;
+
   const btn = document.querySelector(".popup button");
   const name = document.getElementById("nameInput").value;
   const type = document.getElementById("typeInput").value;
@@ -327,8 +432,16 @@ function generate() {
     return;
   }
 
-  if (!images[0] || !images[1] || !images[2]) {
-    alert("Please Upload All 3 Images!");
+  if (galleryType === "simple") {
+    if (!images[0] || !images[1] || !images[2]) {
+      alert("Please Upload All 3 Images!");
+      return;
+    }
+  }
+
+  if (galleryType === "animated" && animatedImages.length < 10) {
+    alert(`Please Upload ${10 - animatedImages.length} More Images!`);
+
     return;
   }
 
@@ -343,6 +456,8 @@ function generate() {
     `input[name="messageType"]:checked`,
   ).value;
 
+  localStorage.setItem("galleryType", galleryType);
+
   if (selectedType === "custom") {
     message = document.getElementById("customMessage").value.trim();
 
@@ -351,6 +466,8 @@ function generate() {
       return;
     }
   }
+
+  localStorage.setItem("animatedGallery", JSON.stringify(animatedImages));
 
   setTimeout(() => {
     const url = `?name=${encodeURIComponent(name)}&type=${type}&message=${encodeURIComponent(message)}&img1=${images[0]}&img2=${images[1]}&img3=${images[2]}`;
@@ -361,6 +478,47 @@ function generate() {
 const overlay = document.getElementById("form_overlay");
 
 const params = new URLSearchParams(window.location.search);
+
+const galleryType = localStorage.getItem("galleryType");
+
+const animatedGallery =
+  JSON.parse(localStorage.getItem("animatedGallery")) || [];
+
+if (galleryType === "animated" && animatedGallery.length > 0) {
+  const photo = document.querySelector(".photo");
+
+  const gallery = document.querySelector(".animated_gallery");
+
+  const track = document.querySelector(".animated_gallery_track");
+
+  photo.style.display = "none";
+
+  gallery.style.display = "block";
+
+  // First Copy
+
+  animatedGallery.forEach((imgUrl, index) => {
+    const img = document.createElement("img");
+
+    img.src = imgUrl;
+
+    img.className = index % 2 === 0 ? "large_img" : "small_img";
+
+    track.appendChild(img);
+  });
+
+  // Duplicate Copy
+
+  animatedGallery.forEach((imgUrl, index) => {
+    const img = document.createElement("img");
+
+    img.src = imgUrl;
+
+    img.className = index % 2 === 0 ? "large_img" : "small_img";
+
+    track.appendChild(img);
+  });
+}
 
 const name = params.get("name");
 const type = params.get("type");
@@ -380,8 +538,16 @@ if (!name) {
   }
   if (overlay) overlay.style.display = "flex";
   document.body.style.overflow = "hidden";
-  document.querySelector(".action_buttons").style.display = "none";
+  const actionMenu = document.querySelector(".action_menu");
+  if (actionMenu) {
+    actionMenu.style.display = "none";
+  }
 } else {
+  const actionMenu = document.querySelector(".action_menu");
+  if (actionMenu) {
+    actionMenu.style.display = "block";
+  }
+
   if (overlay) overlay.style.display = "none";
   document.body.style.overflow = "auto";
 }
