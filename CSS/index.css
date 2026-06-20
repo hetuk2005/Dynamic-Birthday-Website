@@ -226,6 +226,10 @@ body {
   display: none;
 }
 
+.animated_divider{
+  display: none;
+}
+
 #animatedImages {
   display: none;
 }
@@ -450,9 +454,26 @@ nav > h3 {
 }
 
 .name {
+  display: inline-block;
   font-size: 115px;
   color: var(--forest);
   font-style: italic;
+  transition: all .3s ease-in-out;
+  margin-top: 25px;
+}
+
+.name::after{
+  content: "|";
+  animation: blink .9s infinite;
+}
+
+@keyframes blink{
+  0%,50%{
+    opacity: 1;
+  }
+  51%,100%{
+    opacity: 0;
+  }
 }
 
 .home_message {

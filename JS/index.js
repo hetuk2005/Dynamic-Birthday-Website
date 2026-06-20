@@ -484,44 +484,96 @@ const galleryType = localStorage.getItem("galleryType");
 const animatedGallery =
   JSON.parse(localStorage.getItem("animatedGallery")) || [];
 
-if (galleryType === "animated" && animatedGallery.length > 0) {
-  const photo = document.querySelector(".photo");
+const photo = document.querySelector(".photo");
 
-  const gallery = document.querySelector(".animated_gallery");
+const divider = document.querySelector(".divider");
+
+const gallery = document.querySelector(".animated_gallery");
+
+if (galleryType === "animated" && animatedGallery.length > 0) {
+  if (photo) photo.style.display = "none";
+
+  if (divider) divider.style.display = "none";
+
+  if (gallery) gallery.style.display = "block";
 
   const track = document.querySelector(".animated_gallery_track");
 
-  photo.style.display = "none";
+  if (track) {
+    track.innerHTML = "";
 
-  gallery.style.display = "block";
+    animatedGallery.forEach((imgUrl, index) => {
+      const img = document.createElement("img");
 
-  // First Copy
+      img.src = imgUrl;
 
-  animatedGallery.forEach((imgUrl, index) => {
-    const img = document.createElement("img");
+      img.className = index % 2 === 0 ? "large_img" : "small_img";
 
-    img.src = imgUrl;
+      track.appendChild(img);
+    });
 
-    img.className = index % 2 === 0 ? "large_img" : "small_img";
+    animatedGallery.forEach((imgUrl, index) => {
+      const img = document.createElement("img");
 
-    track.appendChild(img);
-  });
+      img.src = imgUrl;
 
-  // Duplicate Copy
+      img.className = index % 2 === 0 ? "large_img" : "small_img";
 
-  animatedGallery.forEach((imgUrl, index) => {
-    const img = document.createElement("img");
-
-    img.src = imgUrl;
-
-    img.className = index % 2 === 0 ? "large_img" : "small_img";
-
-    track.appendChild(img);
-  });
+      track.appendChild(img);
+    });
+  }
+} else {
+  if (photo) photo.style.display = "grid";
+  if (divider) divider.style.display = "flex";
+  if (gallery) gallery.style.display = "none";
 }
 
 const name = params.get("name");
 const type = params.get("type");
+const languages = [
+  "hi",
+  "mr",
+  "gu",
+  "bn",
+  "ta",
+  "te",
+  "kn",
+  "ml",
+  "pa",
+  "ur",
+  "ru",
+  "ja",
+  "ko",
+  "ar",
+  "zh-CN",
+];
+
+async function translateText(text, target) {
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${target}&dt=t&q=${encodeURIComponent(text)}`;
+
+  const res = await fetch(url);
+
+  const data = await res.json();
+
+  return data[0][0][0];
+}
+
+async function getTranslations(name) {
+  const words = [name];
+
+  for (const lang of languages) {
+    try {
+      const translated = await translateText(name, lang);
+
+      words.push(translated);
+    } catch (err) {
+      console.error("Translation Error", err);
+    }
+  }
+
+  return words;
+}
+
 const customMessageParam = params.get("message");
 const img1 = params.get("img1");
 const img2 = params.get("img2");
@@ -620,7 +672,57 @@ if (name) {
 
   const head = document.querySelector(".head");
   if (head) head.textContent = `Dear ${name},`;
+
+  const typedTarget = document.querySelector(".name");
 }
+
+async function startNameAnimation() {
+  if (!name) return;
+
+  const words = await getTranslations(name);
+
+  const target = document.querySelector(".name");
+
+  if (!target) return;
+
+  let wordIndex = 0;
+  let charIndex = 0;
+  let deleting = false;
+
+  function type() {
+    const currentWord = words[wordIndex];
+
+    if (!deleting) {
+      target.textContent = currentWord.substring(0, charIndex + 1);
+
+      charIndex++;
+
+      if (charIndex === currentWord.length) {
+        deleting = true;
+
+        setTimeout(type, 1500);
+
+        return;
+      }
+    } else {
+      target.textContent = currentWord.substring(0, charIndex - 1);
+
+      charIndex--;
+
+      if (charIndex === 0) {
+        deleting = false;
+
+        wordIndex = (wordIndex + 1) % words.length;
+      }
+    }
+
+    setTimeout(type, deleting ? 50 : 120);
+  }
+
+  type();
+}
+
+startNameAnimation();
 
 const letters = {
   sir: `
