@@ -44,6 +44,26 @@ for (let i = 0; i < 25; i++) {
   }
 }
 
+// Royal Gold Theme
+
+const currentTheme = localStorage.getItem("theme");
+
+if (currentTheme === "royal") {
+  const sparkleContainer = document.querySelector(".royal_sparkles");
+
+  if (sparkleContainer) {
+    for (let i = 0; i < 25; i++) {
+      const sparkle = document.createElement("div");
+      sparkle.classList.add("sparkle");
+      sparkle.style.left = Math.random() * 100 + "%";
+      sparkle.style.top = Math.random() * 100 + "%";
+      sparkle.style.animationDuration = 3 + Math.random() * 4 + "s";
+      sparkle.style.animationDelay = Math.random() * 5 + "s";
+      sparkleContainer.appendChild(sparkle);
+    }
+  }
+}
+
 function setUpTrack(track) {
   const audio = track.querySelector("audio");
   const icon = track.querySelector(".music_icon");
@@ -418,9 +438,35 @@ You Can Upload ${15 - uploadedCount} More Images`,
   }
 });
 
+const typeInput = document.getElementById("typeInput");
+
+const romanticThemeOption = document.getElementById("romanticThemeOption");
+
+typeInput.addEventListener("change", () => {
+  const value = typeInput.value.toLowerCase();
+
+  const romanticTypes = ["gf", "bf", "wife", "husband"];
+
+  if (romanticTypes.includes(value)) {
+    romanticThemeOption.style.display = "block";
+  } else {
+    romanticThemeOption.style.display = "none";
+
+    const romanticRadio = romanticThemeOption.querySelector("input");
+
+    romanticRadio.checked = false;
+
+    document.querySelector('input[value="classic"]').checked = true;
+  }
+});
+
 function generate() {
   const galleryType = document.querySelector(
     'input[name="galleryType"]:checked',
+  ).value;
+
+  const selectedTheme = document.querySelector(
+    'input[name="themeType"]:checked',
   ).value;
 
   const btn = document.querySelector(".popup button");
@@ -469,6 +515,8 @@ function generate() {
 
   localStorage.setItem("animatedGallery", JSON.stringify(animatedImages));
 
+  localStorage.setItem("theme", selectedTheme);
+
   setTimeout(() => {
     const url = `?name=${encodeURIComponent(name)}&type=${type}&message=${encodeURIComponent(message)}&img1=${images[0]}&img2=${images[1]}&img3=${images[2]}`;
     window.location.href = url;
@@ -478,6 +526,12 @@ function generate() {
 const overlay = document.getElementById("form_overlay");
 
 const params = new URLSearchParams(window.location.search);
+
+const theme = localStorage.getItem("theme");
+
+if (theme) {
+  document.body.classList.add(theme);
+}
 
 const galleryType = localStorage.getItem("galleryType");
 
@@ -531,21 +585,21 @@ if (galleryType === "animated" && animatedGallery.length > 0) {
 const name = params.get("name");
 const type = params.get("type");
 const languages = [
-  "hi",
-  "mr",
-  "gu",
-  "bn",
-  "ta",
-  "te",
-  "kn",
-  "ml",
-  "pa",
-  "ur",
-  "ru",
-  "ja",
-  "ko",
-  "ar",
-  "zh-CN",
+  "hi", //Hindi
+  "mr", //Marathi
+  "gu", //Gujarati
+  "bn", // Bengali
+  "ta", // Tamil
+  "te", // Telegu
+  "kn", //Kannad
+  "ml", //Malayalam
+  "pa", //Punjabi
+  "ur", // Urdu
+  "ru", //Russian
+  "ja", //Japanese
+  "ko", //Korean
+  "ar", //Arabic
+  "zh-CN", //Chinese(Simplified)
 ];
 
 async function translateText(text, target) {
