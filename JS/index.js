@@ -20,46 +20,69 @@ bulbs.forEach((bulb, i) => {
 
 // Petal Animation
 
+const theme = localStorage.getItem("theme");
+
 const hero = document.querySelector(".hero");
 
 const colors = ["#e8b4b8", "#b8aed2", "#a8c5ac", "#f5d6d9", "#c9e8c0"];
 
-for (let i = 0; i < 25; i++) {
-  const petal = document.createElement("div");
-  petal.classList.add("petal");
+if (theme !== "royal" && theme !== "galaxy") {
+  for (let i = 0; i < 25; i++) {
+    const petal = document.createElement("div");
+    petal.classList.add("petal");
 
-  petal.style.left = Math.random() * 100 + "%";
-  petal.style.background = colors[Math.floor(Math.random() * colors.length)];
+    petal.style.left = Math.random() * 100 + "%";
+    petal.style.background = colors[Math.floor(Math.random() * colors.length)];
 
-  petal.style.width = 9 + Math.random() * 11 + "px";
-  petal.style.height = 13 + Math.random() * 15 + "px";
+    petal.style.width = 9 + Math.random() * 11 + "px";
+    petal.style.height = 13 + Math.random() * 15 + "px";
 
-  petal.style.animationDuration = 7 + Math.random() * 8 + "s";
-  petal.style.animationDelay = -Math.random() * 11 + "s";
+    petal.style.animationDuration = 7 + Math.random() * 8 + "s";
+    petal.style.animationDelay = -Math.random() * 11 + "s";
 
-  petal.style.transform = `rotate(${Math.random() * 360}deg)`;
+    petal.style.transform = `rotate(${Math.random() * 360}deg)`;
 
-  if (hero) {
-    hero.append(petal);
+    if (hero) {
+      hero.append(petal);
+    }
   }
 }
 
 // Royal Gold Theme
 
-const currentTheme = localStorage.getItem("theme");
-
-if (currentTheme === "royal") {
+if (theme === "royal") {
   const sparkleContainer = document.querySelector(".royal_sparkles");
 
   if (sparkleContainer) {
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 41; i++) {
       const sparkle = document.createElement("div");
+      const sparkleIcon = ["✨", "⭐", "✦", "✧"];
+      sparkle.innerHTML =
+        sparkleIcon[Math.floor(Math.random() * sparkleIcon.length)];
       sparkle.classList.add("sparkle");
       sparkle.style.left = Math.random() * 100 + "%";
       sparkle.style.top = Math.random() * 100 + "%";
       sparkle.style.animationDuration = 3 + Math.random() * 4 + "s";
       sparkle.style.animationDelay = Math.random() * 5 + "s";
       sparkleContainer.appendChild(sparkle);
+    }
+  }
+}
+
+// MidNight Galaxy Theme
+
+if (theme === "galaxy") {
+  const stars = document.querySelector(".galaxy_stars");
+
+  if (stars) {
+    for (let i = 0; i < 81; i++) {
+      const star = document.createElement("div");
+      star.classList.add("star");
+      star.innerHTML = Math.random() > 0.5 ? "✦" : "✧";
+      star.style.left = Math.random() * 100 + "%";
+      star.style.top = Math.random() * 100 + "%";
+      star.style.animationDelay = Math.random() * 3 + "s";
+      stars.appendChild(star);
     }
   }
 }
@@ -527,8 +550,6 @@ const overlay = document.getElementById("form_overlay");
 
 const params = new URLSearchParams(window.location.search);
 
-const theme = localStorage.getItem("theme");
-
 if (theme) {
   document.body.classList.add(theme);
 }
@@ -618,8 +639,9 @@ async function getTranslations(name) {
   for (const lang of languages) {
     try {
       const translated = await translateText(name, lang);
-
-      words.push(translated);
+      if (translated && !words.includes(translated)) {
+        words.push(translated);
+      }
     } catch (err) {
       console.error("Translation Error", err);
     }
@@ -739,7 +761,7 @@ async function startNameAnimation() {
 
   if (!target) return;
 
-  let wordIndex = 0;
+  let wordIndex = 1;
   let charIndex = 0;
   let deleting = false;
 
