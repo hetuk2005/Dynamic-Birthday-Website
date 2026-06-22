@@ -26,7 +26,12 @@ const hero = document.querySelector(".hero");
 
 const colors = ["#e8b4b8", "#b8aed2", "#a8c5ac", "#f5d6d9", "#c9e8c0"];
 
-if (theme !== "royal" && theme !== "galaxy") {
+if (
+  theme !== "royal" &&
+  theme !== "galaxy" &&
+  theme !== "romantic" &&
+  theme !== "floral"
+) {
   for (let i = 0; i < 25; i++) {
     const petal = document.createElement("div");
     petal.classList.add("petal");
@@ -126,6 +131,45 @@ function setUpTrack(track) {
       icon.textContent = "⏸";
     }
   });
+}
+
+// Rose Quartz Romantic Theme
+
+if (theme === "romantic") {
+  const container = document.querySelector(".romantic_petals");
+
+  if (container) {
+    for (let i = 0; i < 41; i++) {
+      const petal = document.createElement("div");
+      const roseIcon = ["🌹", "✦", "♥"];
+      petal.innerHTML = roseIcon[Math.floor(Math.random() * roseIcon.length)];
+      petal.classList.add("petal");
+      petal.style.left = Math.random() * 100 + "%";
+      petal.style.top = Math.random() * 100 + "%";
+      petal.style.animationDuration = 3 + Math.random() * 4 + "s";
+      petal.style.animationDelay = Math.random() * 5 + "s";
+      container.appendChild(petal);
+    }
+  }
+}
+
+// Floral Garden Theme
+
+if (theme === "floral") {
+  const container = document.querySelector(".floral_petals");
+
+  if (container) {
+    for (let i = 0; i < 41; i++) {
+      const leaf = document.createElement("div");
+      leaf.classList.add("floral_leaf");
+      const icons = ["🌸", "🌿", "🍃"];
+      leaf.innerHTML = icons[Math.floor(Math.random() * icons.length)];
+      leaf.style.left = Math.random() * 100 + "%";
+      leaf.style.animationDuration = 8 + Math.random() * 7 + "s";
+      leaf.style.animationDelay = Math.random() * 8 + "s";
+      container.appendChild(leaf);
+    }
+  }
 }
 
 const defaultSongs = [
@@ -1572,4 +1616,14 @@ $(function () {
       700,
     );
   });
+});
+
+// Dark/ Light Mode Button
+
+const themeToggleBtn = document.getElementById("themeToggleBtn");
+themeToggleBtn.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  const isDark = document.body.classList.contains("dark");
+  localStorage.setItem("darkMode", isDark);
+  themeToggleBtn.textContent = isDark ? "☀️" : "🌙";
 });

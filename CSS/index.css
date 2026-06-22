@@ -4,12 +4,6 @@
   --forest: #4a7c59;
   --sage: #7a9e7e;
   --cream: #fdf6ee;
-
-  /* Scroll */
-
-  --scroll-track: #f5f5f5;
-  --scroll-thumb: #e8b4b8;
-  --scroll-thumb-hover: #d89ca2;
 }
 
 body.royal {
@@ -20,12 +14,6 @@ body.royal {
   --cream: #fff8e1;
 
   background: linear-gradient(135deg, #fff8e1, #ffefb0);
-
-  /* Scroll */
-
-  --scroll-track: #fff8dc;
-  --scroll-thumb: #d4af37;
-  --scroll-thumb-hover: #b8860b;
 }
 
 body.galaxy {
@@ -38,12 +26,26 @@ body.galaxy {
   background: linear-gradient(135deg, #020617, #0f172a, #1e1b4b);
 
   color: #fff;
+}
 
-  /* Scroll */
+body.romantic {
+  --rose: #e11d48;
+  --brown: #9f1239;
+  --forest: #fb7185;
+  --sage: #f43f5e;
+  --cream: #fff1f2;
 
-  --scroll-track: #020617;
-  --scroll-thumb: #8b5cf6;
-  --scroll-thumb-hover: #c084fc;
+  background: linear-gradient(135deg, #fff1f2, #ffe4e6, #fff1f2);
+}
+
+body.floral {
+  --rose: #6aa84f;
+  --brown: #4a7c59;
+  --forest: #7fb77e;
+  --sage: #a8d5ba;
+  --cream: #f6fff8;
+
+  background: linear-gradient(135deg, #f6fff8, #edf7ed, #f6fff8);
 }
 
 @import url("https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Dancing+Script:wght@400..700&family=Edu+NSW+ACT+Cursive:wght@400..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Libertinus+Serif:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Pacifico&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Playwrite+HU:wght@100..400&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
@@ -75,6 +77,22 @@ body {
   transition: all 0.3s ease-in-out;
 }
 
+/* Dark/Light Button */
+
+#themeToggleBtn {
+  position: fixed;
+  right: 21px;
+  bottom: 90px;
+  width: 50px;
+  height: 50px;
+  border: 1px transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 9999;
+  font-size: 21px;
+  box-shadow: 0 5px 15px #00000027;
+}
+
 /* Scroll To Top */
 
 #scrollTopBtn {
@@ -93,7 +111,8 @@ body {
 }
 
 #scrollTopBtn:hover,
-#mainActionBtn:hover {
+#mainActionBtn:hover,
+#themeToggleBtn:hover {
   background: var(--sage);
   color: var(--cream);
   border: 1px solid #000;
@@ -1252,6 +1271,41 @@ footer > h5 {
   background: var(--forest);
 }
 
+.romantic_petals {
+  display: none;
+  position: absolute;
+  top: -50px;
+  z-index: 5;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.floral_petals {
+  display: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Dark Mode */
+
+body.dark{
+  background: #111;
+  color: #f5f5f5;
+}
+
+body.dark nav{
+background: rgba(21, 21, 21, 0.9);
+}
+
+body.dark .letter_div,
+body.dark .wish_card{
+    background:#1c1c1c;
+    color:white;
+}
+
 /* Royal Gold Theme */
 
 html:has(body.royal)::-webkit-scrollbar-track {
@@ -1355,7 +1409,7 @@ body.royal .royal_crown {
   display: block;
 }
 
-/* MidNight Galaxy */
+/* MidNight Galaxy Theme */
 
 html:has(body.galaxy)::-webkit-scrollbar-track {
   background: #020617;
@@ -1420,21 +1474,68 @@ body.galaxy .galaxy_stars {
   }
 }
 
-/* Romantic */
+/* Rose Quartz Romantic Theme*/
 
 html:has(body.romantic)::-webkit-scrollbar-track {
   background: #fff1f2;
 }
 
 html:has(body.romantic)::-webkit-scrollbar-thumb {
-  background: #ff4d6d;
+  background: #f43f5e;
 }
 
 html:has(body.romantic)::-webkit-scrollbar-thumb:hover {
-  background: #ff758f;
+  background: #e11d48;
 }
 
-/* Floral */
+body.romantic .royal_crown {
+  display: none;
+}
+
+body.romantic .galaxy_stars {
+  display: none;
+}
+
+body.romantic .royal_sparkles {
+  display: none;
+}
+
+body.romantic .name {
+  color: #e11d48;
+  text-shadow:
+    0 0 11px #ff4d6d,
+    0 0 21px #ff758f,
+    0 0 41px #ff8fa3;
+}
+
+body.romantic .hero {
+  background: radial-gradient(circle at top, #ffe4e6, #fff1f2 61%, #ffff);
+}
+
+body.romantic .romantic_petals {
+  display: block;
+  color: red;
+  font-size: 23px;
+  opacity: 0.7;
+  animation: romantic linear infinite;
+  /* border: 2px solid red; */
+}
+
+@keyframes romantic {
+  0% {
+    transform: translateY(-50px) rotate(0deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Floral Garden Theme */
 
 html:has(body.floral)::-webkit-scrollbar-track {
   background: #f8fff4;
@@ -1446,6 +1547,41 @@ html:has(body.floral)::-webkit-scrollbar-thumb {
 
 html:has(body.floral)::-webkit-scrollbar-thumb:hover {
   background: #5f9c5d;
+}
+
+body.floral .hero {
+  background: linear-gradient(160deg, #f6fff8, #edf7ed, #ffffff);
+}
+
+body.floral .name {
+  color: #4a7c59;
+  text-shadow:
+    0 0 11px #a8d5ba,
+    0 0 21px #7fb77e;
+}
+
+body.floral .floral_petals {
+  display: block;
+}
+
+.floral_leaf {
+  position: absolute;
+  font-size: 21px;
+  animation: floralFall linear infinite;
+}
+
+@keyframes floralFall {
+  0% {
+    transform: translateY(-50px) rotate(0deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) translateX(50px) rotate(360deg);
+    opacity: 0;
+  }
 }
 
 @media (max-width: 430px) {
