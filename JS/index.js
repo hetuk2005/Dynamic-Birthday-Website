@@ -87,6 +87,23 @@ if (theme === "galaxy") {
   }
 }
 
+if (theme === "galaxy") {
+  const shootingContainer = document.querySelector(".shooting_stars");
+
+  if (shootingContainer) {
+    setInterval(() => {
+      const star = document.createElement("div");
+      star.classList.add("shooting_star");
+      star.style.top = Math.random() * 41 + "%";
+      star.style.left = 61 + Math.random() * 30 + "%";
+      shootingContainer.appendChild(star);
+      setTimeout(() => {
+        star.remove();
+      }, 5000);
+    }, 7000);
+  }
+}
+
 function setUpTrack(track) {
   const audio = track.querySelector("audio");
   const icon = track.querySelector(".music_icon");
