@@ -87,23 +87,6 @@ if (theme === "galaxy") {
   }
 }
 
-if (theme === "galaxy") {
-  const shootingContainer = document.querySelector(".shooting_stars");
-
-  if (shootingContainer) {
-    setInterval(() => {
-      const star = document.createElement("div");
-      star.classList.add("shooting_star");
-      star.style.top = Math.random() * 41 + "%";
-      star.style.left = 61 + Math.random() * 30 + "%";
-      shootingContainer.appendChild(star);
-      setTimeout(() => {
-        star.remove();
-      }, 5000);
-    }, 7000);
-  }
-}
-
 function setUpTrack(track) {
   const audio = track.querySelector("audio");
   const icon = track.querySelector(".music_icon");
@@ -411,6 +394,21 @@ const animatedUploadBox = document.getElementById("animatedUploadBox");
 
 const imageCount = document.getElementById("imageCount");
 
+animatedImages = [];
+uploadedCount = 0;
+
+const savedAnimatedGallery =
+  JSON.parse(localStorage.getItem("animatedGallery")) || [];
+
+if (savedAnimatedGallery.length) {
+  animatedImages = savedAnimatedGallery;
+  uploadedCount = savedAnimatedGallery.length;
+  imageCount.innerHTML = `
+    📸 Uploaded :
+    ${uploadedCount}/15
+  `;
+}
+
 animatedUploadBox.addEventListener("click", () => {
   animatedInput.click();
 });
@@ -568,6 +566,7 @@ const overlay = document.getElementById("form_overlay");
 const params = new URLSearchParams(window.location.search);
 
 if (theme) {
+  document.body.classList.remove("royal", "galaxy", "romantic", "floral");
   document.body.classList.add(theme);
 }
 
@@ -702,6 +701,31 @@ const editType = localStorage.getItem("edit_type");
 const editing_mode = localStorage.getItem("editing_mode");
 
 if (editName || editType) {
+  const savedTheme = localStorage.getItem("theme");
+
+  if (savedTheme) {
+    const themeRadio = document.querySelector(
+      `input[name="themeType"][value="${savedTheme}"]`,
+    );
+
+    if (themeRadio) {
+      themeRadio.checked = true;
+    }
+  }
+
+  const savedGalleryType = localStorage.getItem("galleryType");
+
+  if (savedGalleryType) {
+    const galleryRadio = document.querySelector(
+      `input[name="galleryType"][value="${savedGalleryType}"]`,
+    );
+
+    if (galleryRadio) {
+      galleryRadio.checked = true;
+      galleryRadio.dispatchEvent(new Event("change"));
+    }
+  }
+
   if (overlay) overlay.style.display = "flex";
 
   document.getElementById("nameInput").value = editName || "";
@@ -1139,6 +1163,52 @@ function shareWhatsApp() {
 // }
 
 function editAgain() {
+  const savedTheme = localStorage.getItem("theme");
+
+  if (savedTheme) {
+    const themeRadio = document.querySelector(
+      `input[name="themeType"][value="${savedTheme}"]`,
+    );
+
+    if (themeRadio) {
+      themeRadio.checked = true;
+    }
+  }
+
+  const savedGalleryType = localStorage.getItem("galleryType");
+
+  if (savedGalleryType) {
+    const galleryRadio = document.querySelector(
+      `input[name="galleryType"][value="${savedGalleryType}"]`,
+    );
+
+    if (galleryRadio) {
+      galleryRadio.checked = true;
+      galleryRadio.dispatchEvent(new Event("change"));
+    }
+  }
+
+  const savedAnimatedGallery =
+    JSON.parse(localStorage.getItem("animatedGallery")) || [];
+
+  if (savedAnimatedGallery.length) {
+    animatedImages = savedAnimatedGallery;
+
+    uploadedCount = savedAnimatedGallery.length;
+
+    imageCount.innerHTML = `
+    📸 Uploaded : ${uploadedCount}/15
+    <br><br>
+    ${
+      uploadedCount < 10
+        ? `⚠️ ${10 - uploadedCount} More Required`
+        : uploadedCount < 15
+          ? "✅ Minimum Requirement Complete"
+          : "🎉 Maximum Reached"
+    }
+  `;
+  }
+
   const overlay = document.getElementById("form_overlay");
 
   overlay.style.display = "flex";
@@ -1149,6 +1219,8 @@ function editAgain() {
   document.getElementById("nameInput").value = params.get("name") || "";
 
   document.getElementById("typeInput").value = params.get("type") || "";
+
+  typeInput.dispatchEvent(new Event("change"));
 
   if (params.get("message")) {
     document.querySelector('input[value="custom"]').checked = true;
