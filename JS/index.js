@@ -614,6 +614,18 @@ if (theme) {
   document.body.classList.add(theme);
 }
 
+/* ---------- Restore Dark Mode ---------- */
+
+const themeToggleBtn = document.getElementById("themeToggleBtn");
+const savedDarkMode = localStorage.getItem("darkMode");
+
+if (savedDarkMode === "true") {
+  document.body.classList.add("dark");
+  themeToggleBtn.textContent = "☀️";
+} else {
+  themeToggleBtn.textContent = "🌙";
+}
+
 const galleryType = localStorage.getItem("galleryType");
 
 const animatedGallery =
@@ -684,13 +696,15 @@ const languages = [
 ];
 
 async function translateText(text, target) {
-  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${target}&dt=t&q=${encodeURIComponent(text)}`;
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${target}&dt=t&q=${encodeURIComponent(text)}`;
 
   const res = await fetch(url);
 
   const data = await res.json();
 
-  return data[0][0][0];
+  const translated = data[0][0][0];
+  const romanized = data[0] && data[0][0] && data[0][0][2];
+  return romanized || translated;
 }
 
 async function getTranslations(name) {
@@ -1620,7 +1634,6 @@ $(function () {
 
 // Dark/ Light Mode Button
 
-const themeToggleBtn = document.getElementById("themeToggleBtn");
 themeToggleBtn.addEventListener("click", () => {
   document.body.classList.toggle("dark");
   const isDark = document.body.classList.contains("dark");
