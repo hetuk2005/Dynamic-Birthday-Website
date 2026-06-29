@@ -860,9 +860,9 @@ async function startNameAnimation() {
 
   if (!target) return;
 
-  let wordIndex = 1;
-  let charIndex = 0;
-  let deleting = false;
+  let wordIndex = 0;
+  let charIndex = words[0].length;
+  let deleting = true;
 
   function type() {
     const currentWord = words[wordIndex];
@@ -880,21 +880,23 @@ async function startNameAnimation() {
         return;
       }
     } else {
-      target.textContent = currentWord.substring(0, charIndex - 1);
-
       charIndex--;
 
-      if (charIndex === 0) {
+      target.textContent = currentWord.substring(0, charIndex);
+
+      if (charIndex <= 0) {
         deleting = false;
 
         wordIndex = (wordIndex + 1) % words.length;
+
+        charIndex = 0;
       }
     }
 
     setTimeout(type, deleting ? 50 : 120);
   }
 
-  type();
+  setTimeout(type, 1500);
 }
 
 startNameAnimation();
@@ -1617,8 +1619,10 @@ $(function () {
   $(window).scroll(function () {
     if ($(this).scrollTop() > 300) {
       $("#scrollTopBtn").fadeIn();
+      $("#themeToggleBtn").addClass("moveUp");
     } else {
       $("#scrollTopBtn").fadeOut();
+      $("#themeToggleBtn").removeClass("moveUp");
     }
   });
 
