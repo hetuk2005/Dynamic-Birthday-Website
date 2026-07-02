@@ -92,10 +92,10 @@ body {
   font-size: 21px;
   box-shadow: 0 5px 15px #00000027;
   border: 1px solid;
-  transition: all .3s ease-in-out;
+  transition: all 0.3s ease-in-out;
 }
 
-#themeToggleBtn.moveUp{
+#themeToggleBtn.moveUp {
   bottom: 141px;
 }
 
@@ -1275,6 +1275,215 @@ footer > h5 {
 
 .action_items button:hover {
   background: var(--forest);
+}
+
+/* Theme Preview */
+
+/* ── Preview Button ── */
+.previewBtn {
+  margin-left: auto;
+  padding: 3px 11px;
+  font-size: 0.75rem;
+  border: 1px solid #aaa;
+  border-radius: 21px;
+  background: transparent;
+  cursor: pointer;
+  transition: 0.3s;
+  float: right;
+  margin: 0 15px;
+}
+
+.previewBtn:hover {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+/* ── Preview Overlay ── */
+.theme_preview_overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme_preview_overlay.active {
+  display: flex;
+}
+
+/* ── Modal Box ── */
+.theme_preview_modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px;
+  width: 380px;
+  max-width: 90vw;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: popIn 0.25s ease;
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.theme_preview_close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #666;
+}
+
+.theme_preview_close:hover {
+  color: #000;
+}
+
+.preview_title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+/* ── Preview Card (mini birthday card) ── */
+.preview_card {
+  border-radius: 12px;
+  padding: 30px 20px;
+  margin-bottom: 12px;
+  transition: background 0.3s;
+}
+
+/* Each theme's preview card background */
+.preview_card.classic {
+  background: linear-gradient(135deg, #fdf6ee, #fdebd0);
+}
+
+.preview_card.floral {
+  background: linear-gradient(135deg, #f6fff8, #edf7ed);
+}
+
+.preview_card.royal {
+  background: linear-gradient(135deg, #fff8e1, #ffefb0);
+}
+
+.preview_card.galaxy {
+  background: linear-gradient(135deg, #020617, #1e1b4b);
+}
+
+.preview_card.romantic {
+  background: linear-gradient(135deg, #fff1f2, #ffe4e6);
+}
+
+.preview_hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.preview_emoji {
+  font-size: 3rem;
+}
+
+.preview_name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-family: "Dancing Script", cursive;
+}
+
+/* Text color per theme */
+
+.preview_card.classic .preview_name,
+.preview_card.classic .preview_sub {
+  color: #6b4e3d;
+}
+
+.preview_card.floral .preview_name,
+.preview_card.floral .preview_sub {
+  color: #4a7c59;
+}
+
+.preview_card.royal .preview_name,
+.preview_card.royal .preview_sub {
+  color: #8b6f00;
+}
+
+.preview_card.galaxy .preview_name,
+.preview_card.galaxy .preview_sub {
+  color: #c084fc;
+}
+
+.preview_card.romantic .preview_name,
+.preview_card.romantic .preview_sub {
+  color: #e11d48;
+}
+
+.preview_sub {
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.preview_hint {
+  font-size: 0.78rem;
+  color: #999;
+  margin-top: 4px;
+}
+
+/* ── Dark mode: Preview Button ── */
+body.dark .previewBtn {
+  border-color: #555;
+  color: #ccc;
+}
+
+body.dark .previewBtn:hover {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+}
+
+/* ── Dark mode: Modal ── */
+body.dark .theme_preview_modal {
+  background: #1c1c1c;
+  color: #f5f5f5;
+}
+
+body.dark .preview_card.classic,
+body.dark .preview_card.floral,
+body.dark .preview_card.royal,
+body.dark .preview_card.romantic {
+  background: #1c1c1c;
+  border: 1px solid #fff;
+}
+
+body.dark .preview_title {
+  color: #f5f5f5;
+}
+
+body.dark .theme_preview_close {
+  color: #aaa;
+}
+
+body.dark .theme_preview_close:hover {
+  color: #fff;
+}
+
+body.dark .preview_hint {
+  color: #666;
 }
 
 .romantic_petals {

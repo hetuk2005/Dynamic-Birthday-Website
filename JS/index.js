@@ -1171,6 +1171,13 @@ if (customMessageParam && letterBox) {
     <p>
       ${customMessageParam}
     </p>
+
+    <br>
+    
+    <span>
+       - With respect and best wishes <span
+            class="pink">✿</span>
+    </span>
   `;
 } else if (type && letters[type] && letterBox) {
   letterBox.innerHTML = letters[type];
@@ -1640,7 +1647,56 @@ $(function () {
 
 themeToggleBtn.addEventListener("click", () => {
   document.body.classList.toggle("dark");
+
+  document.querySelectorAll(".theme_card_preview").forEach((card) => {
+    card.classList.toggle("dark");
+  });
+
   const isDark = document.body.classList.contains("dark");
   localStorage.setItem("darkMode", isDark);
   themeToggleBtn.textContent = isDark ? "☀️" : "🌙";
+});
+
+// Theme Preview
+
+// ── Theme Preview ──
+document.addEventListener("DOMContentLoaded", () => {
+  const overlay = document.getElementById("themePreviewOverlay");
+  const closeBtn = document.getElementById("themePreviewClose");
+  const previewCard = document.getElementById("previewCard");
+  const previewTitle = document.getElementById("previewTitle");
+  const previewEmoji = document.getElementById("previewEmoji");
+
+  const themeInfo = {
+    classic: { label: "🎂 Classic Birthday", emoji: "🎂" },
+    floral: { label: "🌸 Floral Garden", emoji: "🌸" },
+    royal: { label: "👑 Royal Gold", emoji: "👑" },
+    galaxy: { label: "🌌 Midnight Galaxy", emoji: "🌌" },
+    romantic: { label: "💖 Rose Quartz", emoji: "💖" },
+  };
+
+  document.querySelectorAll(".previewBtn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation(); // stop radio button from toggling
+      const theme = btn.dataset.theme;
+
+      // Update modal content
+      previewCard.className = `preview_card ${theme}`;
+      previewTitle.textContent = themeInfo[theme].label + " Preview";
+      previewEmoji.textContent = themeInfo[theme].emoji;
+
+      // Show modal
+      overlay.classList.add("active");
+    });
+  });
+
+  // Close on X button
+  closeBtn.addEventListener("click", () => {
+    overlay.classList.remove("active");
+  });
+
+  // Close on clicking outside modal
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) overlay.classList.remove("active");
+  });
 });

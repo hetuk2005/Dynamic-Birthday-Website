@@ -104,30 +104,45 @@
                             <input type="radio" checked name="themeType"
                                 value="classic">
                             🎂 Classic Birthday (Default)
+
+                            <button class="previewBtn"
+                                data-theme="classic">Preview</button>
                         </label>
 
                         <label>
                             <input type="radio" name="themeType"
                                 value="floral">
                             🌸 Floral Garden
+
+                            <button class="previewBtn"
+                                data-theme="floral">Preview</button>
                         </label>
 
                         <label>
                             <input type="radio" name="themeType"
                                 value="royal">
                             👑 Royal Gold
+
+                            <button class="previewBtn"
+                                data-theme="royal">Preview</button>
                         </label>
 
                         <label>
                             <input type="radio" name="themeType"
                                 value="galaxy">
                             🌌 Midnight Galaxy
+
+                            <button class="previewBtn"
+                                data-theme="galaxy">Preview</button>
                         </label>
 
                         <label id="romanticThemeOption">
                             <input type="radio" name="themeType"
                                 value="romantic">
                             💖 Rose Quartz Romantic
+
+                            <button class="previewBtn"
+                                data-theme="romantic">Preview</button>
                         </label>
                     </div>
                 </div>
@@ -515,6 +530,25 @@
                 <button onclick="shareWhatsApp()">Share 📲</button>
                 <button onclick="editAgain()">Edit ✏️</button>
                 <button id="closeActionBtn">✖</button>
+            </div>
+        </div>
+
+        <!-- Theme Preview -->
+
+        <div class="theme_preview_overlay" id="themePreviewOverlay">
+            <div class="theme_preview_modal">
+                <button class="theme_preview_close"
+                    id="themePreviewClose">✕</button>
+                <h3 class="preview_title" id="previewTitle">Theme Preview</h3>
+                <div class="preview_card" id="previewCard">
+                    <div class="preview_hero">
+                        <div class="preview_emoji" id="previewEmoji">🎂</div>
+                        <div class="preview_name">Happy Birthday</div>
+                        <div class="preview_sub">Wishing you a wonderful
+                            day!</div>
+                    </div>
+                </div>
+                <p class="preview_hint">This is how your card will look</p>
             </div>
         </div>
     </body>
