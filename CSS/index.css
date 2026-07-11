@@ -312,10 +312,11 @@ html::-webkit-scrollbar-thumb:hover {
 
 #animatedUploadContainer {
   width: 100%;
-  min-height: 121px;
+  min-height: 181px;
   border: 2px dotted var(--sage);
   border-radius: 21px;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   cursor: pointer;
@@ -409,6 +410,149 @@ html::-webkit-scrollbar-thumb:hover {
 
 .upload_box {
   cursor: pointer;
+}
+
+.upload_row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin: 13px 0;
+}
+
+.upload_actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Image Preview Modal */
+
+.image_preview_overlay {
+  position: fixed;
+  inset: 0;
+  background: #000000aa;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  backdrop-filter: blur(9px);
+}
+
+.image_preview_modal {
+  background: white;
+  padding: 25px;
+  border-radius: 21px;
+  width: 651px;
+  max-width: 90%;
+  text-align: center;
+  position: relative;
+  border: 1px solid #fff;
+}
+
+#previewImage {
+  width: 100%;
+  max-height: 451px;
+  object-fit: contain;
+  border-radius: 15px;
+}
+
+.closeImagePreview,
+.closeGalleryPreview {
+  position: absolute;
+  right: 27px;
+  top: 25px;
+  border: 1px transparent;
+  background: transparent;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+body.dark .closeImagePreview,
+body.dark .closeGalleryPreview {
+  color: #fff;
+}
+
+/* Animated Gallery Preview */
+
+#previewAnimatedGallery {
+  padding: 11px 23px !important;
+  border: 1px solid #fff;
+  border-radius: 13px;
+  background: var(--sage);
+  color: #fff;
+  cursor: pointer;
+  min-width: 181px;
+}
+
+#previewAnimatedGallery:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Animated Gallery Preview Modal */
+
+.gallery_preview_overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: #000000aa;
+  z-index: 99999;
+  backdrop-filter: blur(9px);
+}
+
+.gallery_preview_modal {
+  background: #fff;
+  width: 851px;
+  max-width: 93%;
+  padding: 25px;
+  border-radius: 21px;
+  position: relative;
+}
+
+#galleryPreviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(141px, 1fr));
+  gap: 15px;
+  margin-top: 21px;
+}
+
+.galleryCard {
+  position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.galleryPreviewImage {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  cursor: pointer;
+  display: block;
+}
+
+.galleryActions {
+  position: absolute;
+  bottom: 9px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 9px;
+}
+
+.galleryActions button {
+  border: none;
+  border-radius: 9px;
+  cursor: pointer;
+  padding: 7px 10px;
+  background: rgba(255, 255, 255, 0.9);
+  transition: 0.3s;
+}
+
+.galleryActions button:hover {
+  transform: scale(1.07);
 }
 
 /* Loading */
@@ -1277,10 +1421,52 @@ footer > h5 {
   background: var(--forest);
 }
 
+#animatedGalleryManager {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+  margin-top: 21px;
+  width: 100%;
+}
+
+.galleryThumb {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.galleryThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbActions {
+  position: absolute;
+  bottom: 9px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 7px;
+}
+
+.thumbActions button {
+  border: none;
+  border-radius: 9px;
+  cursor: pointer;
+  padding: 5px 9px;
+  background: #ffffffdd;
+}
+
 /* Theme Preview */
 
 /* ── Preview Button ── */
-.previewBtn {
+.previewBtn,
+.imagePreviewBtn,
+.replaceImageBtn,
+.deleteImageBtn,
+#previewAnimatedGallery {
   margin-left: auto;
   padding: 3px 11px;
   font-size: 0.75rem;
@@ -1288,15 +1474,77 @@ footer > h5 {
   border-radius: 21px;
   background: transparent;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.3s ease-in-out;
   float: right;
   margin: 0 15px;
+  color: #fff;
 }
 
-.previewBtn:hover {
+.replaceImageBtn {
+  background: #d4af37;
+}
+
+.deleteImageBtn {
+  background: #d9534f;
+}
+
+.imagePreviewBtn:disabled,
+.replaceImageBtn:disabled,
+.deleteImageBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.replaceImageBtn:hover:not(:disabled) {
+  background: #b89323;
+}
+
+.deleteImageBtn:hover:not(:disabled) {
+  background: #b52b27;
+}
+
+.imagePreviewFooter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 31px;
+}
+
+#imageCounter {
+  color: #000;
+  font-size: large;
+  font-weight: 700;
+}
+
+body.dark #imageCounter {
+  color: #fff;
+}
+
+#nextImage,
+#prevImage {
+  color: #000;
+  font-size: medium;
+  border-radius: 21px;
+  border: 1px solid #aaa;
+  cursor: pointer;
+  margin: 25px 0;
+  padding: 5px 15px;
+  transition: all 0.3s ease-in-out;
+}
+
+.previewBtn:hover,
+.imagePreviewBtn:hover,
+.replaceImageBtn:hover,
+.deleteImageBtn:hover,
+#previewAnimatedGallery:hover {
+  background: #000;
+  border-color: #fff;
+}
+
+#nextImage:hover,
+#prevImage:hover {
   background: #000;
   color: #fff;
-  border-color: #000;
 }
 
 /* ── Preview Overlay ── */
@@ -1445,21 +1693,34 @@ footer > h5 {
 }
 
 /* ── Dark mode: Preview Button ── */
-body.dark .previewBtn {
+body.dark .previewBtn,
+body.dark .imagePreviewBtn,
+body.dark .replaceImageBtn,
+body.dark .deleteImageBtn,
+body.dark #previewAnimatedGallery {
   border-color: #555;
   color: #ccc;
 }
 
-body.dark .previewBtn:hover {
+body.dark .previewBtn:hover,
+body.dark .imagePreviewBtn:hover,
+body.dark .replaceImageBtn:hover,
+body.dark .deleteImageBtn:hover,
+body.dark #previewAnimatedGallery:hover {
   background: #fff;
   color: #000;
   border-color: #fff;
 }
 
 /* ── Dark mode: Modal ── */
-body.dark .theme_preview_modal {
+body.dark .theme_preview_modal,
+body.dark .image_preview_modal {
   background: #1c1c1c;
   color: #f5f5f5;
+}
+
+body.dark .image_preview_modal {
+  border-color: #fff;
 }
 
 body.dark .preview_card.classic,

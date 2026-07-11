@@ -325,7 +325,7 @@ const galleryRadios = document.querySelectorAll('input[name="galleryType"]');
 
 const animatedContainer = document.getElementById("animatedUploadContainer");
 
-const uploadBoxesContainer = document.querySelectorAll(".upload_box");
+const uploadBoxesContainer = document.querySelectorAll(".upload_row");
 
 galleryRadios.forEach((radio) => {
   radio.addEventListener("change", () => {
@@ -375,7 +375,7 @@ async function uploadSong(file) {
   return data.secure_url;
 }
 
-async function handleFile(file, index, box) {
+async function handleFile(file, index, box, isReplace = false) {
   if (!file) return;
 
   if (!file.type.startsWith("image/")) {
@@ -409,10 +409,50 @@ async function handleFile(file, index, box) {
 
     images[index] = encodeURIComponent(data.secure_url);
 
-    box.innerHTML = "Image Uploaded ✅";
+    box.innerHTML = isReplace ? "Image Replaced ✅" : "Image Uploaded ✅";
+
+    document.querySelector(`.imagePreviewBtn[data-index="${index}"]`).disabled =
+      false;
+
+    document.querySelector(`.replaceImageBtn[data-index="${index}"]`).disabled =
+      false;
+
+    document.querySelector(`.deleteImageBtn[data-index="${index}"]`).disabled =
+      false;
   } catch (err) {
+    // console.log("✈️  err: ", err);
     box.innerHTML = "Upload Failed ❌";
   }
+}
+
+function deleteImage(index) {
+  if (!confirm("Delete This Image?")) return;
+
+  // Remove from images array
+  images[index] = "";
+
+  // Save updated array
+  localStorage.setItem("images", JSON.stringify(images));
+
+  // Restore upload box
+  const uploadBox = document.querySelector(
+    `.upload_box[data-index="${index}"]`,
+  );
+
+  uploadBox.innerHTML = `Image ${index + 1}`;
+
+  // Enable clicking again
+  uploadBox.style.pointerEvents = "auto";
+
+  // Disable buttons
+  document.querySelector(`.imagePreviewBtn[data-index="${index}"]`).disabled =
+    true;
+
+  document.querySelector(`.replaceImageBtn[data-index="${index}"]`).disabled =
+    true;
+
+  document.querySelector(`.deleteImageBtn[data-index="${index}"]`).disabled =
+    true;
 }
 
 // Set Images
@@ -430,6 +470,7 @@ function setImage(selector, img) {
 // Animated Gallery
 
 let animatedImages = [];
+
 let uploadedCount = 0;
 
 const animatedInput = document.getElementById("animatedImages");
@@ -451,6 +492,12 @@ if (savedAnimatedGallery.length) {
     📸 Uploaded :
     ${uploadedCount}/15
   `;
+
+  const previewBtn = document.getElementById("previewAnimatedGallery");
+
+  previewBtn.disabled = uploadedCount === 0;
+
+  previewBtn.innerHTML = `👁 Preview Gallery (${uploadedCount})`;
 }
 
 animatedUploadBox.addEventListener("click", () => {
@@ -496,6 +543,9 @@ You Can Upload ${15 - uploadedCount} More Images`,
       animatedImages.push(data.secure_url);
 
       uploadedCount++;
+
+      document.getElementById("previewAnimatedGallery").disabled =
+        uploadedCount === 0;
     }
 
     const remaining = Math.max(0, 10 - uploadedCount);
@@ -511,6 +561,12 @@ You Can Upload ${15 - uploadedCount} More Images`,
             : "🎉 Maximum Reached"
       }
     `;
+
+    const previewBtn = document.getElementById("previewAnimatedGallery");
+
+    previewBtn.disabled = uploadedCount === 0;
+
+    previewBtn.innerHTML = `👁 Preview Gallery (${uploadedCount})`;
 
     animatedInput.value = "";
   } catch (err) {
@@ -1198,36 +1254,10 @@ function copyLink() {
 function shareWhatsApp() {
   const link = window.location.href;
 
-  const message = `🎉 I made something special for you!\n${link}`;
+  const message = `🎉  I made something special for you!\n${link}`;
 
   window.open(`https://wa.me/?text=${encodeURIComponent(message)}`);
 }
-
-// Edit Button
-
-// function editAgain() {
-//   const params = new URLSearchParams(window.location.search);
-
-//   localStorage.setItem("edit_name", params.get("name"));
-//   localStorage.setItem("edit_type", params.get("type"));
-
-//   // ✅ SAVE IMAGES
-
-//   localStorage.setItem("edit_img1", params.get("img1"));
-//   localStorage.setItem("edit_img2", params.get("img2"));
-//   localStorage.setItem("edit_img3", params.get("img3"));
-
-//   localStorage.setItem("editing_mode", "true");
-
-//   window.scrollTo({
-//     top: 0,
-//     behavior: "smooth",
-//   });
-
-//   setTimeout(() => {
-//     window.location.href = window.location.pathname;
-//   }, 300);
-// }
 
 function editAgain() {
   const savedTheme = localStorage.getItem("theme");
@@ -1700,3 +1730,226 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.target === overlay) overlay.classList.remove("active");
   });
 });
+
+// Image Preview
+
+const imagePreviewButtons = document.querySelectorAll(".imagePreviewBtn");
+
+const replaceInput = document.getElementById("replaceImageInput");
+
+let replaceIndex = -1;
+
+const replaceImageButtons = document.querySelectorAll(".replaceImageBtn");
+
+replaceImageButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    replaceIndex = Number(button.dataset.index);
+    replaceInput.click();
+  });
+});
+
+replaceInput.addEventListener("change", () => {
+  if (!replaceInput.files.length) return;
+
+  const uploadBox = document.querySelector(
+    `.upload_box[data-index="${replaceIndex}"]`,
+  );
+  handleFile(replaceInput.files[0], replaceIndex, uploadBox, true);
+  replaceInput.value = "";
+});
+
+const deleteImageButtons = document.querySelectorAll(".deleteImageBtn");
+
+deleteImageButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const index = Number(button.dataset.index);
+    deleteImage(index);
+  });
+});
+
+const imagePreviewOverlay = document.querySelector(".image_preview_overlay");
+
+const previewImage = document.getElementById("previewImage");
+
+const closeImagePreview = document.querySelector(".closeImagePreview");
+
+const prevImageBtn = document.getElementById("prevImage");
+
+const nextImageBtn = document.getElementById("nextImage");
+
+const imageCounter = document.getElementById("imageCounter");
+
+let currentPreviewIndex = 0;
+
+let previewIndexes = [];
+
+function showPreviewImage(index) {
+  previewIndexes = [];
+
+  images.forEach((img, i) => {
+    if (img) {
+      previewIndexes.push(i);
+    }
+  });
+
+  previewMode = "simple";
+
+  currentPreviewIndex = previewIndexes.indexOf(index);
+
+  previewImage.src = decodeURIComponent(
+    images[previewIndexes[currentPreviewIndex]],
+  );
+  const uploadedImagesCount = images.filter((img) => img !== "").length;
+
+  imageCounter.textContent = `${currentPreviewIndex + 1} / ${previewIndexes.length}`;
+  imagePreviewOverlay.style.display = "flex";
+}
+
+// Open Preview
+
+imagePreviewButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const index = Number(button.dataset.index);
+    showPreviewImage(index);
+  });
+});
+
+// Close Button
+
+closeImagePreview.addEventListener("click", () => {
+  imagePreviewOverlay.style.display = "none";
+});
+
+// Click Outside Close
+
+imagePreviewOverlay.addEventListener("click", (e) => {
+  if (e.target === imagePreviewOverlay) {
+    imagePreviewOverlay.style.display = "none";
+  }
+});
+
+// Previous Button
+
+prevImageBtn.addEventListener("click", () => {
+  if (previewMode === "simple") {
+    currentPreviewIndex--;
+
+    if (currentPreviewIndex < 0) {
+      currentPreviewIndex = previewIndexes.length - 1;
+    }
+
+    const actualIndex = previewIndexes[currentPreviewIndex];
+
+    previewImage.src = decodeURIComponent(images[actualIndex]);
+    imageCounter.textContent = `${currentPreviewIndex + 1} / ${previewIndexes.length}`;
+  }
+});
+
+// Next Button
+
+nextImageBtn.addEventListener("click", () => {
+  if (previewMode === "simple") {
+    currentPreviewIndex++;
+
+    if (currentPreviewIndex >= previewIndexes.length) {
+      currentPreviewIndex = 0;
+    }
+
+    const actualIndex = previewIndexes[currentPreviewIndex];
+
+    previewImage.src = decodeURIComponent(images[actualIndex]);
+    imageCounter.textContent = `${currentPreviewIndex + 1} / ${previewIndexes.length}`;
+  }
+});
+
+// Animated Gallery Preview
+
+const previewGalleryBtn = document.getElementById("previewAnimatedGallery");
+
+const galleryOverlay = document.querySelector(".gallery_preview_overlay");
+
+const galleryGrid = document.getElementById("galleryPreviewGrid");
+
+const closeGalleryBtn = document.querySelector(".closeGalleryPreview");
+
+// Gallery Opening
+
+previewGalleryBtn.addEventListener("click", () => {
+  if (animatedImages.length === 0) {
+    alert("Please upload at least one image.");
+    return;
+  }
+
+  galleryGrid.innerHTML = "";
+
+  animatedImages.forEach((img, index) => {
+    const card = document.createElement("div");
+
+    card.className = "galleryCard";
+
+    card.innerHTML = `
+
+        <img
+            src="${img}"
+            data-index="${index}"
+            class="galleryPreviewImage"
+        >
+
+        <div class="galleryActions">
+
+            <button
+                class="animatedReplaceBtn"
+                data-index="${index}"
+            >
+                🔄
+            </button>
+
+            <button
+                class="animatedDeleteBtn"
+                data-index="${index}"
+            >
+                🗑
+            </button>
+
+        </div>
+
+    `;
+
+    galleryGrid.appendChild(card);
+  });
+
+  galleryOverlay.style.display = "flex";
+});
+
+// Close Gallery
+
+closeGalleryBtn.addEventListener("click", () => {
+  galleryOverlay.style.display = "none";
+});
+
+// Gallery Close Outside
+
+galleryOverlay.addEventListener("click", (e) => {
+  if (e.target === galleryOverlay) {
+    galleryOverlay.style.display = "none";
+  }
+});
+
+// Thumbnail Open
+
+galleryGrid.addEventListener("click", (e) => {
+  if (!e.target.classList.contains("galleryPreviewImage")) return;
+
+  currentPreviewIndex = Number(e.target.dataset.index);
+
+  previewMode = "animated";
+
+  previewImage.src = animatedImages[currentPreviewIndex];
+
+  imageCounter.textContent = `${currentPreviewIndex + 1} / ${animatedImages.length}`;
+
+  galleryOverlay.style.display = "none";
+  imagePreviewOverlay.style.display = "flex";
+});
+
+let previewMode = "simple";
