@@ -1,1 +1,5 @@
-./Utili/KY/
+# Ignore VS Code settings
+.vscode/
+
+# Ignore KY folder
+Utili/KY/
