@@ -533,6 +533,17 @@ body.dark .closeGalleryPreview {
   display: block;
 }
 
+#confirmGalleryChanges {
+  display: none;
+  border: 1px solid;
+  border-radius: 5px;
+  margin-top: 25px;
+  cursor: pointer;
+  padding: 5px 11px;
+  font-weight: 700;
+  transition: all 0.3s ease-in-out;
+}
+
 .galleryActions {
   position: absolute;
   bottom: 9px;
@@ -543,11 +554,8 @@ body.dark .closeGalleryPreview {
 }
 
 .galleryActions button {
-  border: none;
   border-radius: 9px;
   cursor: pointer;
-  padding: 7px 10px;
-  background: rgba(255, 255, 255, 0.9);
   transition: 0.3s;
 }
 
@@ -1480,14 +1488,6 @@ footer > h5 {
   color: #fff;
 }
 
-.replaceImageBtn {
-  background: #d4af37;
-}
-
-.deleteImageBtn {
-  background: #d9534f;
-}
-
 .imagePreviewBtn:disabled,
 .replaceImageBtn:disabled,
 .deleteImageBtn:disabled {
@@ -1534,11 +1534,26 @@ body.dark #imageCounter {
 
 .previewBtn:hover,
 .imagePreviewBtn:hover,
-.replaceImageBtn:hover,
-.deleteImageBtn:hover,
-#previewAnimatedGallery:hover {
+#previewAnimatedGallery:hover,
+#confirmGalleryChanges:hover {
   background: #000;
   border-color: #fff;
+}
+
+.replaceImageBtn:hover,
+.animatedReplaceBtn:hover {
+  background-color: #d4af37;
+  border-color: #fff;
+}
+
+.deleteImageBtn:hover,
+.animatedDeleteBtn:hover {
+  background-color: #d9534f;
+  border-color: #fff;
+}
+
+#confirmGalleryChanges:hover {
+  color: #fff;
 }
 
 #nextImage:hover,
@@ -1697,6 +1712,7 @@ body.dark .previewBtn,
 body.dark .imagePreviewBtn,
 body.dark .replaceImageBtn,
 body.dark .deleteImageBtn,
+body.dark #confirmGalleryChanges,
 body.dark #previewAnimatedGallery {
   border-color: #555;
   color: #ccc;
@@ -1705,6 +1721,7 @@ body.dark #previewAnimatedGallery {
 body.dark .previewBtn:hover,
 body.dark .imagePreviewBtn:hover,
 body.dark .replaceImageBtn:hover,
+body.dark #confirmGalleryChanges:hover,
 body.dark .deleteImageBtn:hover,
 body.dark #previewAnimatedGallery:hover {
   background: #fff;
@@ -2059,6 +2076,17 @@ body.dark .letter_div,
 body.dark .wish_card {
   background: #1c1c1c;
   color: white;
+}
+
+.animatedReplaceBtn,
+.animatedDeleteBtn {
+  padding: 7px 11px;
+}
+
+.animatedDeleteBtn {
+  font-weight: 700;
+  font-size: 15px;
+  padding: 7px 15px;
 }
 
 @media (max-width: 430px) {

@@ -455,6 +455,16 @@ function deleteImage(index) {
     true;
 }
 
+function markGalleryChanged() {
+  galleryChanged = true;
+  confirmGalleryChangesBtn.style.display = "inline-flex";
+}
+
+function resetGalleryChanged() {
+  galleryChanged = false;
+  confirmGalleryChangesBtn.style.display = "none";
+}
+
 // Set Images
 
 function setImage(selector, img) {
@@ -471,13 +481,63 @@ function setImage(selector, img) {
 
 let animatedImages = [];
 
+let tempAnimatedImages = [];
+
 let uploadedCount = 0;
+
+let galleryChanged = false;
+
+const confirmGalleryChangesBtn = document.getElementById(
+  "confirmGalleryChanges",
+);
+
+const previewGalleryBtn = document.getElementById("previewAnimatedGallery");
+
+const imageCount = document.getElementById("imageCount");
+
+function updateAnimatedGalleryCounter() {
+  uploadedCount = animatedImages.length;
+
+  const remaining = Math.max(0, 10 - uploadedCount);
+
+  imageCount.innerHTML = `
+        📸 Uploaded : ${uploadedCount}/15
+        <br><br>
+        ${
+          uploadedCount < 10
+            ? `⚠️ ${remaining} More Required`
+            : uploadedCount < 15
+              ? "✅ Minimum Requirement Complete"
+              : "🎉 Maximum Reached"
+        }
+    `;
+
+  previewGalleryBtn.disabled = uploadedCount === 0;
+
+  previewGalleryBtn.innerHTML = `👁 Preview Gallery (${uploadedCount})`;
+}
+
+confirmGalleryChangesBtn.addEventListener("click", () => {
+  animatedImages = [...tempAnimatedImages];
+
+  localStorage.setItem("animatedGallery", JSON.stringify(animatedImages));
+
+  const remaining = Math.max(0, 10 - uploadedCount);
+
+  updateAnimatedGalleryCounter();
+
+  previewGalleryBtn.disabled = uploadedCount === 0;
+
+  previewGalleryBtn.innerHTML = `👁 Preview Gallery (${uploadedCount})`;
+
+  galleryOverlay.style.display = "none";
+
+  resetGalleryChanged();
+});
 
 const animatedInput = document.getElementById("animatedImages");
 
 const animatedUploadBox = document.getElementById("animatedUploadBox");
-
-const imageCount = document.getElementById("imageCount");
 
 animatedImages = [];
 uploadedCount = 0;
@@ -488,10 +548,7 @@ const savedAnimatedGallery =
 if (savedAnimatedGallery.length) {
   animatedImages = savedAnimatedGallery;
   uploadedCount = savedAnimatedGallery.length;
-  imageCount.innerHTML = `
-    📸 Uploaded :
-    ${uploadedCount}/15
-  `;
+  updateAnimatedGalleryCounter();
 
   const previewBtn = document.getElementById("previewAnimatedGallery");
 
@@ -550,17 +607,7 @@ You Can Upload ${15 - uploadedCount} More Images`,
 
     const remaining = Math.max(0, 10 - uploadedCount);
 
-    imageCount.innerHTML = `
-      📸 Uploaded : ${uploadedCount}/15
-      <br><br>
-      ${
-        uploadedCount < 10
-          ? `⚠️ ${remaining} More Required`
-          : uploadedCount < 15
-            ? "✅ Minimum Requirement Complete"
-            : "🎉 Maximum Reached"
-      }
-    `;
+    updateAnimatedGalleryCounter();
 
     const previewBtn = document.getElementById("previewAnimatedGallery");
 
@@ -657,6 +704,7 @@ function generate() {
 
   setTimeout(() => {
     const url = `?name=${encodeURIComponent(name)}&type=${type}&message=${encodeURIComponent(message)}&img1=${images[0]}&img2=${images[1]}&img3=${images[2]}`;
+    themeToggleBtn.style.display = "flex";
     window.location.href = url;
   }, 3000);
 }
@@ -673,6 +721,11 @@ if (theme) {
 /* ---------- Restore Dark Mode ---------- */
 
 const themeToggleBtn = document.getElementById("themeToggleBtn");
+
+if (!params.has("name")) {
+  themeToggleBtn.style.display = "none";
+}
+
 const savedDarkMode = localStorage.getItem("darkMode");
 
 if (savedDarkMode === "true") {
@@ -1293,25 +1346,16 @@ function editAgain() {
 
     uploadedCount = savedAnimatedGallery.length;
 
-    imageCount.innerHTML = `
-    📸 Uploaded : ${uploadedCount}/15
-    <br><br>
-    ${
-      uploadedCount < 10
-        ? `⚠️ ${10 - uploadedCount} More Required`
-        : uploadedCount < 15
-          ? "✅ Minimum Requirement Complete"
-          : "🎉 Maximum Reached"
-    }
-  `;
+    updateAnimatedGalleryCounter();
   }
 
   const overlay = document.getElementById("form_overlay");
 
   overlay.style.display = "flex";
-  document.body.style.overflow = "hidden";
 
-  const params = new URLSearchParams(window.location.search);
+  themeToggleBtn.style.display = "none";
+
+  document.body.style.overflow = "hidden";
 
   document.getElementById("nameInput").value = params.get("name") || "";
 
@@ -1619,6 +1663,10 @@ function closeEditPopup() {
 
   overlay.style.display = "none";
 
+  if (params.has("name")) {
+    themeToggleBtn.style.display = "flex";
+  }
+
   document.body.style.overflow = "auto";
 }
 
@@ -1739,6 +1787,10 @@ const replaceInput = document.getElementById("replaceImageInput");
 
 let replaceIndex = -1;
 
+let animatedReplaceIndex = -1;
+
+let draggedImageIndex = -1;
+
 const replaceImageButtons = document.querySelectorAll(".replaceImageBtn");
 
 replaceImageButtons.forEach((button) => {
@@ -1748,13 +1800,50 @@ replaceImageButtons.forEach((button) => {
   });
 });
 
-replaceInput.addEventListener("change", () => {
+replaceInput.addEventListener("change", async () => {
   if (!replaceInput.files.length) return;
 
-  const uploadBox = document.querySelector(
-    `.upload_box[data-index="${replaceIndex}"]`,
-  );
-  handleFile(replaceInput.files[0], replaceIndex, uploadBox, true);
+  const file = replaceInput.files[0];
+
+  // Animated Gallery
+  if (animatedReplaceIndex !== -1) {
+    const formData = new FormData();
+
+    formData.append("file", file);
+    formData.append("upload_preset", "birthday_upload");
+
+    try {
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/demvl3niy/image/upload",
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
+      const data = await res.json();
+
+      tempAnimatedImages[animatedReplaceIndex] = data.secure_url;
+
+      markGalleryChanged();
+
+      renderGalleryPreview();
+    } catch (err) {
+      alert("Image Replace Failed!");
+    }
+
+    animatedReplaceIndex = -1;
+  }
+
+  // Simple Gallery
+  else {
+    const uploadBox = document.querySelector(
+      `.upload_box[data-index="${replaceIndex}"]`,
+    );
+
+    handleFile(file, replaceIndex, uploadBox, true);
+  }
+
   replaceInput.value = "";
 });
 
@@ -1864,8 +1953,6 @@ nextImageBtn.addEventListener("click", () => {
 
 // Animated Gallery Preview
 
-const previewGalleryBtn = document.getElementById("previewAnimatedGallery");
-
 const galleryOverlay = document.querySelector(".gallery_preview_overlay");
 
 const galleryGrid = document.getElementById("galleryPreviewGrid");
@@ -1874,49 +1961,80 @@ const closeGalleryBtn = document.querySelector(".closeGalleryPreview");
 
 // Gallery Opening
 
+function renderGalleryPreview() {
+  galleryGrid.innerHTML = "";
+
+  tempAnimatedImages.forEach((img, index) => {
+    const card = document.createElement("div");
+
+    card.className = "galleryCard";
+
+    card.draggable = true;
+
+    card.addEventListener("dragstart", () => {
+      draggedImageIndex = index;
+      card.classList.add("dragging");
+    });
+
+    card.addEventListener("dragend", () => {
+      card.classList.remove("dragging");
+    });
+
+    card.addEventListener("dragover", (e) => {
+      e.preventDefault();
+    });
+
+    card.addEventListener("drop", (e) => {
+      e.preventDefault();
+
+      if (draggedImageIndex === index) return;
+      const movedImage = tempAnimatedImages.splice(draggedImageIndex, 1)[0];
+      tempAnimatedImages.splice(index, 0, movedImage);
+      markGalleryChanged();
+      renderGalleryPreview();
+    });
+
+    card.innerHTML = `
+            <img
+                src="${img}"
+                data-index="${index}"
+                class="galleryPreviewImage"
+            >
+
+            <div class="galleryActions">
+
+                <button
+                    class="animatedReplaceBtn"
+                    data-index="${index}"
+                >
+                    🔄
+                </button>
+
+                <button
+                    class="animatedDeleteBtn"
+                    data-index="${index}"
+                >
+                    🗑
+                </button>
+
+            </div>
+        `;
+
+    galleryGrid.appendChild(card);
+  });
+}
+
 previewGalleryBtn.addEventListener("click", () => {
   if (animatedImages.length === 0) {
     alert("Please upload at least one image.");
     return;
   }
 
-  galleryGrid.innerHTML = "";
+  tempAnimatedImages = [...animatedImages];
 
-  animatedImages.forEach((img, index) => {
-    const card = document.createElement("div");
+  resetGalleryChanged();
 
-    card.className = "galleryCard";
-
-    card.innerHTML = `
-
-        <img
-            src="${img}"
-            data-index="${index}"
-            class="galleryPreviewImage"
-        >
-
-        <div class="galleryActions">
-
-            <button
-                class="animatedReplaceBtn"
-                data-index="${index}"
-            >
-                🔄
-            </button>
-
-            <button
-                class="animatedDeleteBtn"
-                data-index="${index}"
-            >
-                🗑
-            </button>
-
-        </div>
-
-    `;
-
-    galleryGrid.appendChild(card);
-  });
+  renderGalleryPreview();
 
   galleryOverlay.style.display = "flex";
 });
@@ -1938,13 +2056,31 @@ galleryOverlay.addEventListener("click", (e) => {
 // Thumbnail Open
 
 galleryGrid.addEventListener("click", (e) => {
+  if (e.target.classList.contains("animatedReplaceBtn")) {
+    animatedReplaceIndex = Number(e.target.dataset.index);
+    replaceInput.click();
+    return;
+  }
+
+  if (e.target.classList.contains("animatedDeleteBtn")) {
+    const index = Number(e.target.dataset.index);
+
+    tempAnimatedImages.splice(index, 1);
+
+    markGalleryChanged();
+
+    renderGalleryPreview();
+
+    return;
+  }
+
   if (!e.target.classList.contains("galleryPreviewImage")) return;
 
   currentPreviewIndex = Number(e.target.dataset.index);
 
   previewMode = "animated";
 
-  previewImage.src = animatedImages[currentPreviewIndex];
+  previewImage.src = tempAnimatedImages[currentPreviewIndex];
 
   imageCounter.textContent = `${currentPreviewIndex + 1} / ${animatedImages.length}`;
 
