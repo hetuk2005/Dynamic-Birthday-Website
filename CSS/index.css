@@ -208,7 +208,7 @@ html::-webkit-scrollbar-thumb:hover {
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   gap: 21px;
   background: #ffffff33;
@@ -220,9 +220,10 @@ html::-webkit-scrollbar-thumb:hover {
   margin: auto;
   text-align: center;
   color: #fff;
-  max-height: 90vh;
+  max-height: 91vh;
   overflow-y: auto;
   scrollbar-width: none;
+  scroll-padding-top: 31px;
 }
 
 .popup::-webkit-scrollbar {
@@ -2089,7 +2090,9 @@ body.dark .wish_card {
   padding: 7px 15px;
 }
 
-@media (max-width: 430px) {
+/* Media Query */
+
+@media (min-width: 321px) and (max-width: 430px) {
   .popup {
     width: 81%;
   }
@@ -2122,6 +2125,11 @@ body.dark .wish_card {
   .birthday,
   .name {
     font-size: 45px;
+  }
+
+  /* Upload rows can overflow the popup at this width (box + 3 buttons) */
+  .upload_row {
+    flex-wrap: wrap;
   }
 
   /* Memory Section */
@@ -2161,5 +2169,67 @@ body.dark .wish_card {
 
   .wish > h5 {
     font-size: 15px;
+  }
+}
+
+@media (max-width: 320px) {
+  .popup {
+    width: 95%;
+    padding: 15px;
+  }
+  #typeInput,
+  #nameInput {
+    width: 95%;
+  }
+  .birthday {
+    font-size: 33px;
+  }
+  .name {
+    font-size: 37px;
+  }
+  .memory,
+  .letter,
+  .wish {
+    padding: 31px 13px;
+  }
+}
+
+@media (min-width: 431px) and (max-width: 840px) {
+  .popup {
+    width: 70%;
+  }
+  .birthday {
+    font-size: 61px;
+  }
+  .name {
+    font-size: 71px;
+  }
+  .upload_row {
+    flex-wrap: wrap;
+  }
+  .photo {
+    grid-template-columns: 1fr; /* Stack photos */
+  }
+  .hero_wrapper {
+    margin-top: 61px;
+  }
+}
+
+@media (min-width: 841px) and (max-width: 1340px) {
+  .popup {
+    width: 50%;
+  }
+  .hero_wrapper {
+    margin-top: 81px;
+  }
+}
+
+@media (min-width: 2560px) {
+  body {
+    max-width: 2500px;
+    margin: 0 auto;
+  }
+  .hero_wrapper {
+    transform: scale(1.3);
   }
 }
