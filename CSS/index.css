@@ -64,6 +64,11 @@ body {
   /* scrollbar-color: #e8b4b8 #d89ca2; */
 }
 
+.gallery_options > br,
+.message_options > br {
+  display: none;
+}
+
 /* Progress Bar */
 
 #progress_bar {
@@ -2092,6 +2097,170 @@ body.dark .wish_card {
 
 /* Media Query */
 
+@media (max-width: 320px) {
+  /* Hide unnecessary navigation on tiny screens */
+  nav {
+    display: none;
+  }
+
+  .gallery_options > br,
+  .message_options > br {
+    display: inline-block;
+  }
+
+  /* Fix Popup Size */
+  .popup {
+    width: 90%;
+    padding: 11px;
+    gap: 11px;
+  }
+
+  .popup h2 {
+    font-size: 19px;
+  }
+
+  /* Form Inputs */
+  #nameInput,
+  #typeInput {
+    width: 95%;
+    padding: 9px;
+  }
+
+  /* Upload Boxes & Buttons */
+  .upload_row {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .upload_box {
+    width: 95%;
+    font-size: 13px;
+  }
+
+  .imagePreviewBtn,
+  .replaceImageBtn,
+  .deleteImageBtn {
+    width: 95%;
+    margin: 3px 0;
+    font-size: 11px;
+  }
+
+  .theme_selection_child {
+    justify-content: left;
+  }
+
+  .theme_selection_child label {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Hero Section Font Scaling */
+  .birthday {
+    font-size: 26px;
+  }
+  .name {
+    font-size: 29px;
+  }
+  .home_message {
+    font-size: 15px;
+    text-align: center;
+    padding: 0 10px;
+  }
+  .hero_wrapper {
+    margin-top: 0;
+  }
+
+  /* Section Containers (Memory / Letter / Wish) */
+  .memory,
+  .letter,
+  .wish {
+    padding: 45px 16px;
+  }
+  .memory_h1,
+  .letter_h2 {
+    font-size: 24px;
+  }
+  .memory_p,
+  .letter_p {
+    font-size: 11px;
+  }
+
+  /* Photo Grid: stack into a single column */
+  .photo {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    gap: 12px;
+  }
+  .photo_child1 {
+    grid-row: auto;
+  }
+  .photo_child1,
+  .photo_child2,
+  .photo_child3 {
+    min-height: 180px;
+  }
+
+  /* Letter */
+  .letter_div {
+    padding: 20px 14px;
+  }
+  .letter_content > p {
+    font-size: 13px;
+  }
+
+  /* Playlist */
+  .playlist {
+    padding: 45px 16px;
+  }
+
+  .playlist_h2 {
+    font-size: 28px;
+  }
+
+  .playlist_p {
+    font-size: 13px;
+    margin-bottom: 28px;
+  }
+
+  .music {
+    padding: 10px 12px;
+  }
+
+  /* Wish Buttons */
+  .wish_button {
+    width: 90%;
+    font-size: 13px;
+  }
+
+  .wish_sub {
+    font-size: 13px;
+  }
+
+  /* Image / Gallery Preview Modals */
+  .image_preview_modal,
+  .gallery_preview_modal,
+  .theme_preview_modal {
+    width: 92%;
+    padding: 14px;
+  }
+
+  /* Action Menu */
+  .action_menu,
+  #scrollTopBtn,
+  #themeToggleBtn {
+    right: 17px;
+  }
+
+  /* Footer */
+  footer h3 {
+    font-size: 21px;
+  }
+
+  footer h5 {
+    font-size: 11px;
+  }
+}
+
 @media (min-width: 321px) and (max-width: 430px) {
   .popup {
     width: 81%;
@@ -2116,12 +2285,10 @@ body.dark .wish_card {
   .memory_h1 > br {
     display: none;
   }
-
   .celebration,
   .home_message {
     font-size: small;
   }
-
   .birthday,
   .name {
     font-size: 45px;
@@ -2151,12 +2318,10 @@ body.dark .wish_card {
   .playlist {
     padding: 51px 21px;
   }
-
   .playlist_p {
     font-size: 15px;
     margin-bottom: 25px;
   }
-
   .music {
     padding: 11px 0;
   }
@@ -2166,31 +2331,8 @@ body.dark .wish_card {
   .wish_list {
     align-items: center;
   }
-
   .wish > h5 {
     font-size: 15px;
-  }
-}
-
-@media (max-width: 320px) {
-  .popup {
-    width: 95%;
-    padding: 15px;
-  }
-  #typeInput,
-  #nameInput {
-    width: 95%;
-  }
-  .birthday {
-    font-size: 33px;
-  }
-  .name {
-    font-size: 37px;
-  }
-  .memory,
-  .letter,
-  .wish {
-    padding: 31px 13px;
   }
 }
 
