@@ -1185,19 +1185,31 @@ nav > h3 {
   inset: 0;
   display: none;
   justify-content: center;
-  align-items: center;
-  background: #00000080;
-  backdrop-filter: blur(9px);
-  z-index: 999;
+  background: #00000066;
+  backdrop-filter: blur(11px);
+  z-index: 99999;
 }
 
 .playlist_popup {
-  margin: 21px 0;
-  width: 500px;
-  max-width: 90%;
-  background: white;
-  border-radius: 20px;
-  padding: 25px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  width: 57%;
+  max-width: 850px;
+  max-height: 90vh;
+  margin: auto;
+  padding: 30px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  border-radius: 23px;
+  background: #ffffff33;
+  backdrop-filter: blur(21px);
+  color: #fff;
+}
+
+.playlist_popup::-webkit-scrollbar {
+  width: 0;
 }
 
 .playlist_popup_header {
@@ -1206,10 +1218,16 @@ nav > h3 {
   align-items: center;
 }
 
+.playlist_header > h2 {
+  margin: 0;
+  font-size: 30px;
+}
+
 .playlist_popup > .playlist_header > button {
   border: 1px transparent;
   background: transparent;
   font-size: 21px;
+  color: #fff;
   cursor: pointer;
 }
 
@@ -1217,16 +1235,20 @@ nav > h3 {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  margin-top: 21px;
+  /* margin-top: 21px; */
 }
 
 .song_form input {
+  width: 95%;
   padding: 13px;
   border-radius: 11px;
   border: 1px solid #ddd;
+  text-transform: capitalize;
+  letter-spacing: 0.5px;
 }
 
 .song_form button {
+  width: 98%;
   padding: 13px;
   border-radius: 11px;
   cursor: pointer;
@@ -1276,6 +1298,12 @@ nav > h3 {
   border: 1px transparent;
   border-radius: 3px;
   cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.editor_delete:hover {
+  background: #d9534f;
+  border: 1px solid;
 }
 
 /* Wish */

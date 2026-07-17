@@ -1668,6 +1668,7 @@ function closeEditPopup() {
   }
 
   document.body.style.overflow = "auto";
+  playlistOverlay.style.display = "none";
 }
 
 function openEditPopup() {
