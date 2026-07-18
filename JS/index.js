@@ -1777,6 +1777,18 @@ $(function () {
       700,
     );
   });
+  $(".flex a").on("click", function (e) {
+    e.preventDefault();
+
+    const target = $(this).attr("href");
+
+    $("html, body").animate(
+      {
+        scrollTop: $(target).offset().top - 70,
+      },
+      900,
+    );
+  });
 });
 
 // Dark/ Light Mode Button
@@ -2261,3 +2273,74 @@ function handleKeyboardShortcuts(e) {
     }
   }
 }
+
+// Live Network Capsule
+
+const networkStatus = document.getElementById("networkStatus");
+
+let compactTimer = null;
+
+function scheduleCompact() {
+  clearTimeout(compactTimer);
+  compactTimer = setTimeout(() => {
+    networkStatus.classList.add("compact");
+  }, 5000);
+}
+
+function updateNetworkStatus() {
+  // Always expand back to full capsule so the change is visible
+  networkStatus.classList.remove("compact", "online", "offline");
+
+  if (navigator.onLine) {
+    networkStatus.classList.add("online");
+    networkStatus.querySelector(".status-text").textContent = "Online";
+    // Shrink to dot after 5s when online
+    scheduleCompact();
+  } else {
+    networkStatus.classList.add("offline");
+    networkStatus.querySelector(".status-text").textContent = "Offline";
+    // Keep offline capsule fully visible — don't auto-compact so user notices
+    clearTimeout(compactTimer);
+  }
+}
+
+window.addEventListener("online", updateNetworkStatus);
+window.addEventListener("offline", updateNetworkStatus);
+
+updateNetworkStatus();
+
+// Live Battery Status
+
+const batteryStatus = document.getElementById("batteryStatus");
+
+async function initBatteryStatus() {
+  if (!("getBattery" in navigator)) {
+    batteryStatus.style.display = "none";
+    return;
+  }
+
+  const battery = await navigator.getBattery();
+
+  function updateBattery() {
+    const percent = Math.round(battery.level * 100);
+
+    if (battery.charging) {
+      batteryStatus.innerHTML = `<span class="battery-text">⚡ ${percent}%</span>`;
+    } else {
+      batteryStatus.innerHTML = `<span class="battery-text">🔋 ${percent}%</span>`;
+    }
+
+    if (percent <= 20) {
+      batteryStatus.style.background = "#e74c3c";
+    } else if (battery.charging) {
+      batteryStatus.style.background = "#2ecc71";
+    }
+  }
+
+  updateBattery();
+
+  battery.addEventListener("chargingchange", updateBattery);
+  battery.addEventListener("levelchange", updateBattery);
+}
+
+initBatteryStatus();

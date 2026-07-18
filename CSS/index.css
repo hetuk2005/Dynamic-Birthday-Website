@@ -2123,6 +2123,145 @@ body.dark .wish_card {
   padding: 7px 15px;
 }
 
+/*  Network Status */
+
+#networkStatus {
+  position: fixed;
+  left: 21px;
+  bottom: 21px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 14px 8px 10px;
+  border-radius: 21px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 9999;
+  transition:
+    padding 0.5s ease,
+    border-radius 0.5s ease,
+    width 0.5s ease,
+    height 0.5s ease,
+    gap 0.5s ease;
+  user-select: none;
+  pointer-events: none;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+#networkStatus.online {
+  background: rgba(46, 204, 113, 0.95);
+}
+
+#networkStatus.offline {
+  background: rgba(231, 76, 60, 0.95);
+}
+
+/* Dot inside the capsule */
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  flex-shrink: 0;
+  animation: pulse_dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse_dot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.6;
+  }
+}
+
+/* Status text transition */
+
+.status-text {
+  transition:
+    opacity 0.4s ease,
+    max-width 0.5s ease;
+  max-width: 120px;
+  opacity: 1;
+}
+
+/* After 5 seconds — shrink to a small dot */
+
+#networkStatus.compact {
+  padding: 0;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  gap: 0;
+  justify-content: center;
+  animation: blink 2s ease-in-out infinite;
+}
+
+#networkStatus.compact .status-text {
+  opacity: 0;
+  max-width: 0;
+  overflow: hidden;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Battery Status */
+
+#batteryStatus {
+  position: fixed;
+  left: 21px;
+  bottom: 61px; /* Above Network Status */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 25px;
+  border-radius: 50px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  z-index: 9999;
+  border: 1px solid #000;
+  transition: all 0.5s ease;
+  user-select: none;
+  pointer-events: none;
+}
+
+body.galaxy #batteryStatus,
+body.dark #batteryStatus {
+  border: 1px solid #fff;
+}
+
+#batteryStatus {
+  width: 50px;
+  height: 19px;
+  padding: 0;
+  border-radius: 50px;
+}
+
+#batteryStatus .battery-text {
+  font-size: 13px;
+  color: #000;
+}
+
+body.galaxy #batteryStatus .battery-text,
+body.dark #batteryStatus .battery-text {
+  color: #fff;
+}
+
 /* Media Query */
 
 @media (max-width: 320px) {
