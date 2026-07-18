@@ -92,6 +92,8 @@ if (theme === "galaxy") {
   }
 }
 
+let currentTrackIndex = -1;
+
 function setUpTrack(track) {
   const audio = track.querySelector("audio");
   const icon = track.querySelector(".music_icon");
@@ -125,12 +127,52 @@ function setUpTrack(track) {
 
       track.classList.add("active");
 
+      const allTracks = [...document.querySelectorAll(".music")];
+      currentTrackIndex = allTracks.indexOf(track);
+
       audio.currentTime = 0;
       audio.play();
 
       icon.textContent = "⏸";
     }
   });
+}
+
+function playTrack(index) {
+  const tracks = [...document.querySelectorAll(".music")];
+
+  if (!tracks.length) return;
+
+  if (index < 0) {
+    index = tracks.length - 1;
+  }
+
+  if (index >= tracks.length) {
+    index = 0;
+  }
+
+  currentTrackIndex = index;
+
+  tracks[index].click();
+}
+
+function nextTrack() {
+  playTrack(currentTrackIndex + 1);
+}
+
+function previousTrack() {
+  playTrack(currentTrackIndex - 1);
+}
+
+function toggleCurrentTrack() {
+  const tracks = [...document.querySelectorAll(".music")];
+
+  if (currentTrackIndex === -1) {
+    playTrack(0);
+    return;
+  }
+
+  tracks[currentTrackIndex].click();
 }
 
 // Rose Quartz Romantic Theme
@@ -848,6 +890,9 @@ if (!name) {
     closeBtn.style.display = "none";
   }
   if (overlay) overlay.style.display = "flex";
+  setTimeout(() => {
+    document.getElementById("nameInput").focus();
+  }, 100);
   document.body.style.overflow = "hidden";
   const actionMenu = document.querySelector(".action_menu");
   if (actionMenu) {
@@ -1353,6 +1398,8 @@ function editAgain() {
 
   overlay.style.display = "flex";
 
+  isEditingPopup = true;
+
   themeToggleBtn.style.display = "none";
 
   document.body.style.overflow = "hidden";
@@ -1380,6 +1427,10 @@ function editAgain() {
       box.innerHTML = "Image Uploaded ✅";
     }
   });
+
+  setTimeout(() => {
+    document.getElementById("nameInput").focus();
+  }, 100);
 }
 
 let draggedSong = null;
@@ -1659,6 +1710,8 @@ document.addEventListener("mouseenter", function () {
 });
 
 function closeEditPopup() {
+  isEditingPopup = false;
+
   const overlay = document.getElementById("form_overlay");
 
   overlay.style.display = "none";
@@ -1676,6 +1729,10 @@ function openEditPopup() {
 
   overlay.style.display = "flex";
   document.body.style.overflow = "hidden";
+
+  setTimeout(() => {
+    document.getElementById("nameInput").focus();
+  }, 100);
 }
 
 $(window).on("scroll", function () {
@@ -1782,6 +1839,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Image Preview
 
+let touchStartX = 0;
+let touchEndX = 0;
+
+const minSwipeDistance = 50;
+
 const imagePreviewButtons = document.querySelectorAll(".imagePreviewBtn");
 
 const replaceInput = document.getElementById("replaceImageInput");
@@ -1861,6 +1923,24 @@ const imagePreviewOverlay = document.querySelector(".image_preview_overlay");
 
 const previewImage = document.getElementById("previewImage");
 
+previewImage.addEventListener("touchstart", (e) => {
+  touchStartX = e.changedTouches[0].clientX;
+});
+
+previewImage.addEventListener("touchend", (e) => {
+  touchEndX = e.changedTouches[0].clientX;
+
+  const distance = touchStartX - touchEndX;
+
+  if (Math.abs(distance) < minSwipeDistance) return;
+
+  if (distance > 0) {
+    nextImageBtn.click();
+  } else {
+    prevImageBtn.click();
+  }
+});
+
 const closeImagePreview = document.querySelector(".closeImagePreview");
 
 const prevImageBtn = document.getElementById("prevImage");
@@ -1906,15 +1986,13 @@ imagePreviewButtons.forEach((button) => {
 
 // Close Button
 
-closeImagePreview.addEventListener("click", () => {
-  imagePreviewOverlay.style.display = "none";
-});
+closeImagePreview.addEventListener("click", closeImagePreviewModal);
 
 // Click Outside Close
 
 imagePreviewOverlay.addEventListener("click", (e) => {
   if (e.target === imagePreviewOverlay) {
-    imagePreviewOverlay.style.display = "none";
+    closeImagePreviewModal();
   }
 });
 
@@ -1931,7 +2009,18 @@ prevImageBtn.addEventListener("click", () => {
     const actualIndex = previewIndexes[currentPreviewIndex];
 
     previewImage.src = decodeURIComponent(images[actualIndex]);
+
     imageCounter.textContent = `${currentPreviewIndex + 1} / ${previewIndexes.length}`;
+  } else if (previewMode === "animated") {
+    currentPreviewIndex--;
+
+    if (currentPreviewIndex < 0) {
+      currentPreviewIndex = tempAnimatedImages.length - 1;
+    }
+
+    previewImage.src = tempAnimatedImages[currentPreviewIndex];
+
+    imageCounter.textContent = `${currentPreviewIndex + 1} / ${tempAnimatedImages.length}`;
   }
 });
 
@@ -1948,7 +2037,18 @@ nextImageBtn.addEventListener("click", () => {
     const actualIndex = previewIndexes[currentPreviewIndex];
 
     previewImage.src = decodeURIComponent(images[actualIndex]);
+
     imageCounter.textContent = `${currentPreviewIndex + 1} / ${previewIndexes.length}`;
+  } else if (previewMode === "animated") {
+    currentPreviewIndex++;
+
+    if (currentPreviewIndex >= tempAnimatedImages.length) {
+      currentPreviewIndex = 0;
+    }
+
+    previewImage.src = tempAnimatedImages[currentPreviewIndex];
+
+    imageCounter.textContent = `${currentPreviewIndex + 1} / ${tempAnimatedImages.length}`;
   }
 });
 
@@ -2042,15 +2142,13 @@ previewGalleryBtn.addEventListener("click", () => {
 
 // Close Gallery
 
-closeGalleryBtn.addEventListener("click", () => {
-  galleryOverlay.style.display = "none";
-});
+closeGalleryBtn.addEventListener("click", closeGalleryPreviewModal);
 
 // Gallery Close Outside
 
 galleryOverlay.addEventListener("click", (e) => {
   if (e.target === galleryOverlay) {
-    galleryOverlay.style.display = "none";
+    closeGalleryPreviewModal();
   }
 });
 
@@ -2090,3 +2188,76 @@ galleryGrid.addEventListener("click", (e) => {
 });
 
 let previewMode = "simple";
+
+let isEditingPopup = false;
+
+document.addEventListener("keydown", handleKeyboardShortcuts);
+
+function closeImagePreviewModal() {
+  imagePreviewOverlay.style.display = "none";
+}
+
+function closeGalleryPreviewModal() {
+  galleryOverlay.style.display = "none";
+}
+
+function handleKeyboardShortcuts(e) {
+  if (e.key === "Escape") {
+    if (isEditingPopup && $("#form_overlay").is(":visible")) {
+      closeEditPopup();
+    }
+
+    if ($("#playlist_overlay").is(":visible")) {
+      closePlay();
+    }
+
+    if ($(".image_preview_overlay").is(":visible")) {
+      closeImagePreviewModal();
+    }
+
+    if ($(".gallery_preview_overlay").is(":visible")) {
+      closeGalleryPreviewModal();
+    }
+  }
+
+  // Image Preview Navigation
+
+  if ($(".image_preview_overlay").is(":visible")) {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      prevImageBtn.click();
+    }
+
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      nextImageBtn.click();
+    }
+  }
+
+  // Playlist Shortcuts
+
+  if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+    return;
+  }
+
+  if (e.code === "Space") {
+    e.preventDefault();
+    toggleCurrentTrack();
+  }
+
+  if (e.key.toLowerCase() === "n") {
+    nextTrack();
+  }
+
+  if (e.key.toLowerCase() === "p") {
+    previousTrack();
+  }
+
+  if (e.key.toLowerCase() === "m") {
+    if ($("#playlist_overlay").is(":visible")) {
+      closePlay();
+    } else {
+      openPlay();
+    }
+  }
+}
