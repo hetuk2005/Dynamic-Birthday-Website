@@ -324,6 +324,26 @@ let allSongs = JSON.parse(localStorage.getItem("allSongs")) || [
   ...defaultSongs,
 ];
 
+// Temporary Playlist (Apply Changes Feature)
+
+let tempSongs = [...allSongs];
+
+let playlistChanged = false;
+
+const applyMusicChangesBtn = document.getElementById("applyMusicChanges");
+
+function markPlaylistChanged() {
+  playlistChanged = true;
+
+  applyMusicChangesBtn.style.display = "inline-flex";
+}
+
+function resetPlaylistChanged() {
+  playlistChanged = false;
+
+  applyMusicChangesBtn.style.display = "none";
+}
+
 uploadBoxes.forEach((box, index) => {
   // Drag Over
 
@@ -412,7 +432,7 @@ async function uploadSong(file) {
   );
 
   const data = await res.json();
-  console.log("✈️  data: ", data);
+  // console.log("✈️  data: ", data);
 
   return data.secure_url;
 }
@@ -1447,16 +1467,41 @@ const playlistOverlay = document.getElementById("playlist_overlay");
 
 function openPlay() {
   playlistOverlay.style.display = "flex";
+
+  tempSongs = [...allSongs];
+
+  resetPlaylistChanged();
+
   renderPlaylistEditor();
 }
 
 function closePlay() {
+  tempSongs = [...allSongs];
+
+  resetPlaylistChanged();
+
   playlistOverlay.style.display = "none";
 
   document.getElementById("songTitle").value = "";
   document.getElementById("songArtist").value = "";
   document.getElementById("songFile").value = "";
 }
+
+applyMusicChangesBtn.addEventListener("click", () => {
+  allSongs = [...tempSongs];
+
+  customSongs = allSongs.filter((song) => !song.default);
+
+  localStorage.setItem("allSongs", JSON.stringify(allSongs));
+  localStorage.setItem("customSongs", JSON.stringify(customSongs));
+
+  renderSongs();
+  renderPlaylistEditor();
+
+  resetPlaylistChanged();
+
+  closePlay();
+});
 
 const addSong = document.getElementById("addSong");
 
@@ -1488,16 +1533,10 @@ if (addSong) {
         audioURL,
       };
 
-      allSongs.push(song);
-      customSongs.push(song);
+      tempSongs.push(song);
 
-      localStorage.setItem("customSongs", JSON.stringify(customSongs));
+      markPlaylistChanged();
 
-      const playlist = document.querySelector(".playlist_music");
-
-      // playlist.append(createSongElement(song, customSongs.length - 1));
-
-      renderSongs();
       renderPlaylistEditor();
 
       // console.log(customSongs);
@@ -1570,7 +1609,7 @@ function renderPlaylistEditor() {
 
   editor.innerHTML = "";
 
-  allSongs.forEach((song, index) => {
+  tempSongs.forEach((song, index) => {
     const row = document.createElement("div");
 
     row.draggable = true;
@@ -1596,20 +1635,16 @@ function renderPlaylistEditor() {
 
       if (draggedSong === song.id) return;
 
-      const fromIndex = allSongs.findIndex((s) => s.id === draggedSong);
+      const fromIndex = tempSongs.findIndex((s) => s.id === draggedSong);
 
-      const toIndex = allSongs.findIndex((s) => s.id === song.id);
+      const toIndex = tempSongs.findIndex((s) => s.id === song.id);
 
-      // [allSongs[fromIndex], allSongs[toIndex]] = [
-      //   allSongs[toIndex],
-      //   allSongs[fromIndex],
-      // ];
+      const [movedSong] = tempSongs.splice(fromIndex, 1);
 
-      const [movedSong] = allSongs.splice(fromIndex, 1);
+      tempSongs.splice(toIndex, 0, movedSong);
 
-      allSongs.splice(toIndex, 0, movedSong);
-
-      localStorage.setItem("allSongs", JSON.stringify(allSongs));
+      markPlaylistChanged();
+      renderPlaylistEditor();
 
       renderSongs();
       renderPlaylistEditor();
@@ -1636,11 +1671,10 @@ document.addEventListener("click", (e) => {
   if (e.target.classList.contains("editor_delete")) {
     const id = Number(e.target.dataset.id);
 
-    allSongs = allSongs.filter((song) => song.id !== id);
+    tempSongs = tempSongs.filter((song) => song.id !== id);
 
-    localStorage.setItem("allSongs", JSON.stringify(allSongs));
+    markPlaylistChanged();
 
-    renderSongs();
     renderPlaylistEditor();
   }
 });
@@ -2327,7 +2361,7 @@ async function initBatteryStatus() {
     if (battery.charging) {
       batteryStatus.innerHTML = `<span class="battery-text">⚡ ${percent}%</span>`;
     } else {
-      batteryStatus.innerHTML = `<span class="battery-text">🔋 ${percent}%</span>`;
+      batteryStatus.innerHTML = `<span class="battery-text">🔋git add -A${percent}%</span>`;
     }
 
     if (percent <= 20) {

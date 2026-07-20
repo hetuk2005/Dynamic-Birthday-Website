@@ -2248,7 +2248,7 @@ body.dark #batteryStatus {
 #batteryStatus {
   width: 50px;
   height: 19px;
-  padding: 0;
+  padding: 0 3px;
   border-radius: 50px;
 }
 
@@ -2260,6 +2260,24 @@ body.dark #batteryStatus {
 body.galaxy #batteryStatus .battery-text,
 body.dark #batteryStatus .battery-text {
   color: #fff;
+}
+
+#applyMusicChanges {
+  display: none;
+  padding: 10px 21px;
+  border: none;
+  border-radius: 11px;
+  cursor: pointer;
+  margin-top: 21px;
+  background: var(--sage);
+  color: white;
+  font-weight: 600;
+  transition: 0.3s;
+  justify-content: center;
+}
+
+#applyMusicChanges:hover {
+  transform: scale(1.03);
 }
 
 /* Media Query */
