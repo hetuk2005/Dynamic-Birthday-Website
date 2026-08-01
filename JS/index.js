@@ -379,6 +379,13 @@ uploadBoxes.forEach((box, index) => {
   });
 });
 
+const message = document.getElementById("customMessage").value;
+
+if (!message.trim()) {
+  alert("Please Write Your Message!");
+  return;
+}
+
 const messageRadios = document.querySelectorAll('input[name="messageType"]');
 
 const customMessage = document.getElementById("customMessage");
@@ -1341,18 +1348,21 @@ const letterBox = document.querySelector(".letter_content");
 // }
 
 if (customMessageParam && letterBox) {
+  const decodedMessage = decodeURIComponent(customMessageParam);
+
   letterBox.innerHTML = `
-    <p>
-      ${customMessageParam}
-    </p>
+    <p class="custom_letter_message"></p>
 
     <br>
-    
+
     <span>
-       - With respect and best wishes <span
-            class="pink">✿</span>
+      - With respect and best wishes
+      <span class="pink">✿</span>
     </span>
   `;
+
+  letterBox.querySelector(".custom_letter_message").textContent =
+    decodedMessage;
 } else if (type && letters[type] && letterBox) {
   letterBox.innerHTML = letters[type];
 }
