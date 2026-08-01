@@ -379,13 +379,6 @@ uploadBoxes.forEach((box, index) => {
   });
 });
 
-const message = document.getElementById("customMessage").value;
-
-if (!message.trim()) {
-  alert("Please Write Your Message!");
-  return;
-}
-
 const messageRadios = document.querySelectorAll('input[name="messageType"]');
 
 const customMessage = document.getElementById("customMessage");
