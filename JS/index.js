@@ -2361,7 +2361,7 @@ async function initBatteryStatus() {
     if (battery.charging) {
       batteryStatus.innerHTML = `<span class="battery-text">⚡ ${percent}%</span>`;
     } else {
-      batteryStatus.innerHTML = `<span class="battery-text">🔋git add -A${percent}%</span>`;
+      batteryStatus.innerHTML = `<span class="battery-text">🔋${percent}%</span>`;
     }
 
     if (percent <= 20) {
