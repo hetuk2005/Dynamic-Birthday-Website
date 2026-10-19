@@ -1,3 +1,10 @@
+const params = new URLSearchParams(window.location.search);
+
+function decodeImageUrl(url) {
+  if (!url) return "";
+  try { return decodeURIComponent(url); } catch { return url; }
+}
+
 // Bulb Animation
 
 const nav = document.querySelector("nav");
@@ -20,7 +27,7 @@ bulbs.forEach((bulb, i) => {
 
 // Petal Animation
 
-const theme = localStorage.getItem("theme");
+const theme = params.get("theme") || localStorage.getItem("theme");
 
 const hero = document.querySelector(".hero");
 
@@ -320,9 +327,18 @@ let images = ["", "", ""];
 
 let customSongs = JSON.parse(localStorage.getItem("customSongs")) || [];
 
-let allSongs = JSON.parse(localStorage.getItem("allSongs")) || [
-  ...defaultSongs,
-];
+let allSongs = (() => {
+  try {
+    const sharedSongs = params.get("songs");
+    if (sharedSongs) {
+      const parsed = JSON.parse(sharedSongs);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (error) {
+    console.warn("Could not read playlist from shared link.", error);
+  }
+  return JSON.parse(localStorage.getItem("allSongs")) || [...defaultSongs];
+})();
 
 // Temporary Playlist (Apply Changes Feature)
 
@@ -765,15 +781,25 @@ function generate() {
   localStorage.setItem("theme", selectedTheme);
 
   setTimeout(() => {
-    const url = `?name=${encodeURIComponent(name)}&type=${type}&message=${encodeURIComponent(message)}&img1=${images[0]}&img2=${images[1]}&img3=${images[2]}`;
+    const shareParams = new URLSearchParams({
+      name,
+      type,
+      message,
+      theme: selectedTheme,
+      gallery: galleryType,
+      img1: decodeImageUrl(images[0]),
+      img2: decodeImageUrl(images[1]),
+      img3: decodeImageUrl(images[2]),
+      galleryImages: JSON.stringify(galleryType === "animated" ? animatedImages : []),
+      songs: JSON.stringify(allSongs),
+    });
+    const url = `?${shareParams.toString()}`;
     themeToggleBtn.style.display = "flex";
     window.location.href = url;
   }, 3000);
 }
 
 const overlay = document.getElementById("form_overlay");
-
-const params = new URLSearchParams(window.location.search);
 
 if (theme) {
   document.body.classList.remove("royal", "galaxy", "romantic", "floral");
@@ -797,10 +823,20 @@ if (savedDarkMode === "true") {
   themeToggleBtn.textContent = "🌙";
 }
 
-const galleryType = localStorage.getItem("galleryType");
+const galleryType = params.get("gallery") || localStorage.getItem("galleryType");
 
-const animatedGallery =
-  JSON.parse(localStorage.getItem("animatedGallery")) || [];
+const animatedGallery = (() => {
+  try {
+    const sharedGallery = params.get("galleryImages");
+    if (sharedGallery) {
+      const parsed = JSON.parse(sharedGallery);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (error) {
+    console.warn("Could not read animated gallery from shared link.", error);
+  }
+  return JSON.parse(localStorage.getItem("animatedGallery")) || [];
+})();
 
 const photo = document.querySelector(".photo");
 
@@ -1441,9 +1477,9 @@ function editAgain() {
     customMessage.value = decodeURIComponent(params.get("message"));
   }
 
-  images[0] = params.get("img1") || "";
-  images[1] = params.get("img2") || "";
-  images[2] = params.get("img3") || "";
+  images[0] = encodeURIComponent(params.get("img1") || "");
+  images[1] = encodeURIComponent(params.get("img2") || "");
+  images[2] = encodeURIComponent(params.get("img3") || "");
 
   uploadBoxes.forEach((box, i) => {
     if (images[i]) {
