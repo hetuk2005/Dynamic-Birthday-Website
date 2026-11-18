@@ -1,11 +1,12 @@
 # Ignore VS Code settings
 .vscode/
 
-# Ignore KY folder
-Utili/KY/
-
 # DataBase Password
 mu3yKkM6hL27UTJK
+
 # Local Netlify folder
 .netlify
+
 .env
+
+node_modules
