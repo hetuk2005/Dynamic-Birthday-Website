@@ -1,0 +1,24 @@
+{
+  "name": "dynamic-birthday-website",
+  "version": "1.0.0",
+  "description": "A fully customizable and interactive Birthday Website built using **HTML, CSS, JavaScript, jQuery, and Cloudinary**. Create a beautiful birthday webpage with personalized messages, image galleries, custom music, multiple themes, and premium animations—all without writing any code.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hetuk2005/Dynamic-Birthday-Website.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/hetuk2005/Dynamic-Birthday-Website/issues"
+  },
+  "homepage": "https://github.com/hetuk2005/Dynamic-Birthday-Website#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.119.0"
+  }
+}

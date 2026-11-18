@@ -90,35 +90,70 @@ body {
   bottom: 85px;
   width: 50px;
   height: 50px;
-  border: 1px transparent;
   border-radius: 50%;
   cursor: pointer;
   z-index: 9999;
-  font-size: 21px;
-  box-shadow: 0 5px 15px #00000027;
-  border: 1px solid;
-  transition: all 0.3s ease-in-out;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  outline: none;
+  transition: background 0.3s, border-color 0.3s, transform 0.2s, box-shadow 0.3s;
 }
 
-#themeToggleBtn.moveUp {
-  bottom: 141px;
+body.dark #themeToggleBtn {
+  background: rgba(30, 30, 30, 0.95);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+#themeToggleBtn:hover {
+  transform: scale(1.08);
+}
+
+.theme-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 22px;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
 }
 
 /* Scroll To Top */
 
 #scrollTopBtn {
   position: fixed;
-  bottom: 81px;
+  bottom: 145px;
   right: 31px;
   width: 50px;
   height: 50px;
-  border: 1px solid;
+  border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 50%;
   display: none;
   cursor: pointer;
-  font-size: 23px;
+  font-size: 22px;
   z-index: 999;
-  transition: all 0.3s ease-in-out;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  transition: background 0.3s, border-color 0.3s, transform 0.2s;
+}
+
+body.dark #scrollTopBtn {
+  background: rgba(30, 30, 30, 0.95);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
 }
 
 #scrollTopBtn:hover,
@@ -206,7 +241,7 @@ html::-webkit-scrollbar-thumb:hover {
   inset: 0;
   background: #00000066;
   backdrop-filter: blur(11px);
-  z-index: 101;
+  z-index: 10000;
 }
 
 .popup {
@@ -2253,41 +2288,42 @@ body.dark .wish_card {
   left: 21px;
   bottom: 61px;
   /* Above Network Status */
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 25px;
+  padding: 6px 14px;
   border-radius: 50px;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 500;
+  color: #222;
+  font-size: 13px;
+  font-weight: 600;
   z-index: 9999;
-  border: 1px solid #000;
-  transition: all 0.5s ease;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
   user-select: none;
   pointer-events: none;
+  white-space: nowrap;
+  width: auto;
+  height: auto;
 }
 
 body.galaxy #batteryStatus,
 body.dark #batteryStatus {
-  border: 1px solid #fff;
-}
-
-#batteryStatus {
-  width: 50px;
-  height: 19px;
-  padding: 0 3px;
-  border-radius: 50px;
+  background: rgba(20, 20, 30, 0.9);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 #batteryStatus .battery-text {
   font-size: 13px;
-  color: #000;
-}
-
-body.galaxy #batteryStatus .battery-text,
-body.dark #batteryStatus .battery-text {
-  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  line-height: 1;
+  color: inherit;
 }
 
 #applyMusicChanges {
@@ -2314,10 +2350,41 @@ body.dark #batteryStatus .battery-text {
   line-height: 1.9;
 }
 
-/* Media Query */
+/* ==========================================================
+   MEDIA QUERIES (Responsive Design)
+   ========================================================== */
 
+/* Touch Devices: Disable custom cursor and keep action buttons reachable */
+@media (hover: none) and (pointer: coarse) {
+  #cursor_dot,
+  #cursor_ring {
+    display: none !important;
+  }
+
+  body {
+    cursor: auto !important;
+  }
+
+  .upload_photo {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Extra Large Screens (e.g. 4K, 2560px+) */
+@media (min-width: 2560px) {
+  body {
+    max-width: 2500px;
+    margin: 0 auto;
+  }
+
+  .hero_wrapper {
+    transform: scale(1.3);
+  }
+}
+
+/* Media Query - Extra Small (max-width: 320px) */
 @media (max-width: 320px) {
-
   /* Hide unnecessary navigation on tiny screens */
   nav {
     display: none;
@@ -2472,11 +2539,28 @@ body.dark #batteryStatus .battery-text {
     padding: 14px;
   }
 
-  /* Action Menu */
+  /* Action Menu & Buttons */
   .action_menu,
   #scrollTopBtn,
   #themeToggleBtn {
     right: 17px;
+  }
+
+  #themeToggleBtn {
+    bottom: 68px;
+    width: 42px;
+    height: 42px;
+  }
+
+  .theme-icon {
+    font-size: 19px;
+  }
+
+  #scrollTopBtn {
+    bottom: 118px;
+    width: 42px;
+    height: 42px;
+    font-size: 19px;
   }
 
   /* Footer */
@@ -2489,6 +2573,7 @@ body.dark #batteryStatus .battery-text {
   }
 }
 
+/* Media Query - Mobile Phones (321px - 430px) */
 @media (min-width: 321px) and (max-width: 430px) {
   .popup {
     width: 81%;
@@ -2500,7 +2585,6 @@ body.dark #batteryStatus .battery-text {
   }
 
   /* Buttons */
-
   .action_buttons {
     bottom: 21px;
     right: 0;
@@ -2509,7 +2593,6 @@ body.dark #batteryStatus .battery-text {
   }
 
   /* Navbar */
-
   .flex,
   .memory_h1>br {
     display: none;
@@ -2531,21 +2614,22 @@ body.dark #batteryStatus .battery-text {
   }
 
   /* Memory Section */
-
   .memory,
   .letter,
   .wish {
     padding: 41px 17px;
   }
 
-  /* Letter Section */
+  .photo {
+    grid-template-columns: 1fr;
+  }
 
+  /* Letter Section */
   .letter_content>span {
     font-size: 17px;
   }
 
   /* Playlist Section */
-
   .playlist {
     padding: 51px 21px;
   }
@@ -2560,7 +2644,6 @@ body.dark #batteryStatus .battery-text {
   }
 
   /* Wish Section */
-
   .wish_list {
     align-items: center;
   }
@@ -2568,8 +2651,28 @@ body.dark #batteryStatus .battery-text {
   .wish>h5 {
     font-size: 15px;
   }
+
+  #themeToggleBtn {
+    right: 17px;
+    bottom: 68px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .theme-icon {
+    font-size: 20px;
+  }
+
+  #scrollTopBtn {
+    right: 17px;
+    bottom: 120px;
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
 }
 
+/* Media Query - Tablets & Medium Devices (431px - 840px) */
 @media (min-width: 431px) and (max-width: 840px) {
   .popup {
     width: 70%;
@@ -2589,14 +2692,24 @@ body.dark #batteryStatus .battery-text {
 
   .photo {
     grid-template-columns: 1fr;
-    /* Stack photos */
   }
 
   .hero_wrapper {
     margin-top: 61px;
   }
+
+  #themeToggleBtn {
+    right: 20px;
+    bottom: 75px;
+  }
+
+  #scrollTopBtn {
+    right: 20px;
+    bottom: 135px;
+  }
 }
 
+/* Media Query - Laptops & Desktops (841px - 1340px) */
 @media (min-width: 841px) and (max-width: 1340px) {
   .popup {
     width: 50%;
@@ -2604,16 +2717,5 @@ body.dark #batteryStatus .battery-text {
 
   .hero_wrapper {
     margin-top: 81px;
-  }
-}
-
-@media (min-width: 2560px) {
-  body {
-    max-width: 2500px;
-    margin: 0 auto;
-  }
-
-  .hero_wrapper {
-    transform: scale(1.3);
   }
 }

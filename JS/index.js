@@ -1,482 +1,523 @@
-const params = new URLSearchParams(window.location.search);
+// const params = new URLSearchParams(window.location.search);
 
-function decodeImageUrl(url) {
-  if (!url) return "";
-  try { return decodeURIComponent(url); } catch { return url; }
-}
+async function startBirthdayPage() {
+  const params = new URLSearchParams(window.location.search);
+  let savedBirthday = null;
 
-// Bulb Animation
+  if (params.has("id")) {
+    const id = params.get("id");
 
-const nav = document.querySelector("nav");
-window.addEventListener("scroll", () => {
-  if (window.scrollY > 50) {
-    nav.classList.add("show");
-  } else {
-    nav.classList.remove("show");
-  }
-});
+    try {
+      const response = await fetch(
+        `/.netlify/functions/birthday?id=${encodeURIComponent(id)}`,
+      );
 
-const bulbs = document.querySelectorAll("#bulbs ellipse");
+      if (!response.ok) {
+        throw new Error(
+          response.status === 400 || response.status === 404
+            ? "This birthday link is invalid or no longer exists."
+            : "Could not load this birthday. Please try again.",
+        );
+      }
 
-bulbs.forEach((bulb, i) => {
-  const duration = 1 + Math.random() * 1.5;
-  const delay = Math.random() * 2;
+      savedBirthday = await response.json();
 
-  bulb.style.animation = `twinkle ${duration}s ${delay}s infinite alternate`;
-});
+      // Give the existing display code the fields it already reads.
+      params.set("name", savedBirthday.recipient_name);
+      params.set("type", savedBirthday.relationship);
+      params.set("message", savedBirthday.message);
+      params.set("theme", savedBirthday.theme);
+      params.set("gallery", savedBirthday.gallery_type);
 
-// Petal Animation
+      const photos = savedBirthday.images;
+      const isSimple = savedBirthday.gallery_type === "simple";
 
-const theme = params.get("theme") || localStorage.getItem("theme");
+      for (let i = 0; i < 3; i++) {
+        params.set(`img${i + 1}`, isSimple ? (photos[i] ?? "") : "");
+      }
 
-const hero = document.querySelector(".hero");
+      params.set("galleryImages", JSON.stringify(isSimple ? [] : photos));
+    } catch (error) {
+      const message = document.createElement("p");
+      message.textContent =
+        error instanceof TypeError
+          ? "Could not connect. Please try again."
+          : error.message;
 
-const colors = ["#e8b4b8", "#b8aed2", "#a8c5ac", "#f5d6d9", "#c9e8c0"];
+      const createLink = document.createElement("a");
+      createLink.href = window.location.pathname;
+      createLink.textContent = "Create a birthday";
 
-if (
-  theme !== "royal" &&
-  theme !== "galaxy" &&
-  theme !== "romantic" &&
-  theme !== "floral"
-) {
-  for (let i = 0; i < 25; i++) {
-    const petal = document.createElement("div");
-    petal.classList.add("petal");
-
-    petal.style.left = Math.random() * 100 + "%";
-    petal.style.background = colors[Math.floor(Math.random() * colors.length)];
-
-    petal.style.width = 9 + Math.random() * 11 + "px";
-    petal.style.height = 13 + Math.random() * 15 + "px";
-
-    petal.style.animationDuration = 7 + Math.random() * 8 + "s";
-    petal.style.animationDelay = -Math.random() * 11 + "s";
-
-    petal.style.transform = `rotate(${Math.random() * 360}deg)`;
-
-    if (hero) {
-      hero.append(petal);
+      document.body.replaceChildren(message, createLink);
+      return;
     }
   }
-}
 
-// Royal Gold Theme
-
-if (theme === "royal") {
-  const sparkleContainer = document.querySelector(".royal_sparkles");
-
-  if (sparkleContainer) {
-    for (let i = 0; i < 41; i++) {
-      const sparkle = document.createElement("div");
-      const sparkleIcon = ["✨", "⭐", "✦", "✧"];
-      sparkle.innerHTML =
-        sparkleIcon[Math.floor(Math.random() * sparkleIcon.length)];
-      sparkle.classList.add("sparkle");
-      sparkle.style.left = Math.random() * 100 + "%";
-      sparkle.style.top = Math.random() * 100 + "%";
-      sparkle.style.animationDuration = 3 + Math.random() * 4 + "s";
-      sparkle.style.animationDelay = Math.random() * 5 + "s";
-      sparkleContainer.appendChild(sparkle);
+  function decodeImageUrl(url) {
+    if (!url) return "";
+    try {
+      return decodeURIComponent(url);
+    } catch {
+      return url;
     }
   }
-}
 
-// MidNight Galaxy Theme
+  // Bulb Animation
 
-if (theme === "galaxy") {
-  const stars = document.querySelector(".galaxy_stars");
-
-  if (stars) {
-    for (let i = 0; i < 81; i++) {
-      const star = document.createElement("div");
-      star.classList.add("star");
-      star.innerHTML = Math.random() > 0.5 ? "✦" : "✧";
-      star.style.left = Math.random() * 100 + "%";
-      star.style.top = Math.random() * 100 + "%";
-      star.style.animationDelay = Math.random() * 3 + "s";
-      stars.appendChild(star);
+  const nav = document.querySelector("nav");
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 50) {
+      nav.classList.add("show");
+    } else {
+      nav.classList.remove("show");
     }
-  }
-}
-
-let currentTrackIndex = -1;
-
-function setUpTrack(track) {
-  const audio = track.querySelector("audio");
-  const icon = track.querySelector(".music_icon");
-
-  audio.addEventListener("ended", () => {
-    track.classList.remove("active");
-    icon.textContent = "▶";
   });
 
-  track.addEventListener("click", () => {
-    const allTrack = document.querySelectorAll(".music");
+  const bulbs = document.querySelectorAll("#bulbs ellipse");
 
-    if (track.classList.contains("active")) {
-      if (!audio.paused) {
-        audio.pause();
-        icon.textContent = "▶";
+  bulbs.forEach((bulb, i) => {
+    const duration = 1 + Math.random() * 1.5;
+    const delay = Math.random() * 2;
+
+    bulb.style.animation = `twinkle ${duration}s ${delay}s infinite alternate`;
+  });
+
+  // Petal Animation
+
+  const theme = params.get("theme") || "classic";
+
+  const hero = document.querySelector(".hero");
+
+  const colors = ["#e8b4b8", "#b8aed2", "#a8c5ac", "#f5d6d9", "#c9e8c0"];
+
+  if (
+    theme !== "royal" &&
+    theme !== "galaxy" &&
+    theme !== "romantic" &&
+    theme !== "floral"
+  ) {
+    for (let i = 0; i < 25; i++) {
+      const petal = document.createElement("div");
+      petal.classList.add("petal");
+
+      petal.style.left = Math.random() * 100 + "%";
+      petal.style.background =
+        colors[Math.floor(Math.random() * colors.length)];
+
+      petal.style.width = 9 + Math.random() * 11 + "px";
+      petal.style.height = 13 + Math.random() * 15 + "px";
+
+      petal.style.animationDuration = 7 + Math.random() * 8 + "s";
+      petal.style.animationDelay = -Math.random() * 11 + "s";
+
+      petal.style.transform = `rotate(${Math.random() * 360}deg)`;
+
+      if (hero) {
+        hero.append(petal);
+      }
+    }
+  }
+
+  // Royal Gold Theme
+
+  if (theme === "royal") {
+    const sparkleContainer = document.querySelector(".royal_sparkles");
+
+    if (sparkleContainer) {
+      for (let i = 0; i < 41; i++) {
+        const sparkle = document.createElement("div");
+        const sparkleIcon = ["✨", "⭐", "✦", "✧"];
+        sparkle.innerHTML =
+          sparkleIcon[Math.floor(Math.random() * sparkleIcon.length)];
+        sparkle.classList.add("sparkle");
+        sparkle.style.left = Math.random() * 100 + "%";
+        sparkle.style.top = Math.random() * 100 + "%";
+        sparkle.style.animationDuration = 3 + Math.random() * 4 + "s";
+        sparkle.style.animationDelay = Math.random() * 5 + "s";
+        sparkleContainer.appendChild(sparkle);
+      }
+    }
+  }
+
+  // MidNight Galaxy Theme
+
+  if (theme === "galaxy") {
+    const stars = document.querySelector(".galaxy_stars");
+
+    if (stars) {
+      for (let i = 0; i < 81; i++) {
+        const star = document.createElement("div");
+        star.classList.add("star");
+        star.innerHTML = Math.random() > 0.5 ? "✦" : "✧";
+        star.style.left = Math.random() * 100 + "%";
+        star.style.top = Math.random() * 100 + "%";
+        star.style.animationDelay = Math.random() * 3 + "s";
+        stars.appendChild(star);
+      }
+    }
+  }
+
+  let currentTrackIndex = -1;
+
+  function setUpTrack(track) {
+    const audio = track.querySelector("audio");
+    const icon = track.querySelector(".music_icon");
+
+    audio.addEventListener("ended", () => {
+      track.classList.remove("active");
+      icon.textContent = "▶";
+    });
+
+    track.addEventListener("click", () => {
+      const allTrack = document.querySelectorAll(".music");
+
+      if (track.classList.contains("active")) {
+        if (!audio.paused) {
+          audio.pause();
+          icon.textContent = "▶";
+        } else {
+          audio.play();
+          icon.textContent = "⏸";
+        }
       } else {
+        allTrack.forEach((t) => {
+          t.classList.remove("active");
+
+          const a = t.querySelector("audio");
+          const i = t.querySelector(".music_icon");
+
+          a.pause();
+          i.textContent = "▶";
+        });
+
+        track.classList.add("active");
+
+        const allTracks = [...document.querySelectorAll(".music")];
+        currentTrackIndex = allTracks.indexOf(track);
+
+        audio.currentTime = 0;
         audio.play();
+
         icon.textContent = "⏸";
       }
-    } else {
-      allTrack.forEach((t) => {
-        t.classList.remove("active");
-
-        const a = t.querySelector("audio");
-        const i = t.querySelector(".music_icon");
-
-        a.pause();
-        i.textContent = "▶";
-      });
-
-      track.classList.add("active");
-
-      const allTracks = [...document.querySelectorAll(".music")];
-      currentTrackIndex = allTracks.indexOf(track);
-
-      audio.currentTime = 0;
-      audio.play();
-
-      icon.textContent = "⏸";
-    }
-  });
-}
-
-function playTrack(index) {
-  const tracks = [...document.querySelectorAll(".music")];
-
-  if (!tracks.length) return;
-
-  if (index < 0) {
-    index = tracks.length - 1;
+    });
   }
 
-  if (index >= tracks.length) {
-    index = 0;
+  function playTrack(index) {
+    const tracks = [...document.querySelectorAll(".music")];
+
+    if (!tracks.length) return;
+
+    if (index < 0) {
+      index = tracks.length - 1;
+    }
+
+    if (index >= tracks.length) {
+      index = 0;
+    }
+
+    currentTrackIndex = index;
+
+    tracks[index].click();
   }
 
-  currentTrackIndex = index;
-
-  tracks[index].click();
-}
-
-function nextTrack() {
-  playTrack(currentTrackIndex + 1);
-}
-
-function previousTrack() {
-  playTrack(currentTrackIndex - 1);
-}
-
-function toggleCurrentTrack() {
-  const tracks = [...document.querySelectorAll(".music")];
-
-  if (currentTrackIndex === -1) {
-    playTrack(0);
-    return;
+  function nextTrack() {
+    playTrack(currentTrackIndex + 1);
   }
 
-  tracks[currentTrackIndex].click();
-}
+  function previousTrack() {
+    playTrack(currentTrackIndex - 1);
+  }
 
-// Rose Quartz Romantic Theme
+  function toggleCurrentTrack() {
+    const tracks = [...document.querySelectorAll(".music")];
 
-if (theme === "romantic") {
-  const container = document.querySelector(".romantic_petals");
+    if (currentTrackIndex === -1) {
+      playTrack(0);
+      return;
+    }
 
-  if (container) {
-    for (let i = 0; i < 41; i++) {
-      const petal = document.createElement("div");
-      const roseIcon = ["🌹", "✦", "♥"];
-      petal.innerHTML = roseIcon[Math.floor(Math.random() * roseIcon.length)];
-      petal.classList.add("petal");
-      petal.style.left = Math.random() * 100 + "%";
-      petal.style.top = Math.random() * 100 + "%";
-      petal.style.animationDuration = 3 + Math.random() * 4 + "s";
-      petal.style.animationDelay = Math.random() * 5 + "s";
-      container.appendChild(petal);
+    tracks[currentTrackIndex].click();
+  }
+
+  // Rose Quartz Romantic Theme
+
+  if (theme === "romantic") {
+    const container = document.querySelector(".romantic_petals");
+
+    if (container) {
+      for (let i = 0; i < 41; i++) {
+        const petal = document.createElement("div");
+        const roseIcon = ["🌹", "✦", "♥"];
+        petal.innerHTML = roseIcon[Math.floor(Math.random() * roseIcon.length)];
+        petal.classList.add("petal");
+        petal.style.left = Math.random() * 100 + "%";
+        petal.style.top = Math.random() * 100 + "%";
+        petal.style.animationDuration = 3 + Math.random() * 4 + "s";
+        petal.style.animationDelay = Math.random() * 5 + "s";
+        container.appendChild(petal);
+      }
     }
   }
-}
 
-// Floral Garden Theme
+  // Floral Garden Theme
 
-if (theme === "floral") {
-  const container = document.querySelector(".floral_petals");
+  if (theme === "floral") {
+    const container = document.querySelector(".floral_petals");
 
-  if (container) {
-    for (let i = 0; i < 41; i++) {
-      const leaf = document.createElement("div");
-      leaf.classList.add("floral_leaf");
-      const icons = ["🌸", "🌿", "🍃"];
-      leaf.innerHTML = icons[Math.floor(Math.random() * icons.length)];
-      leaf.style.left = Math.random() * 100 + "%";
-      leaf.style.animationDuration = 8 + Math.random() * 7 + "s";
-      leaf.style.animationDelay = Math.random() * 8 + "s";
-      container.appendChild(leaf);
+    if (container) {
+      for (let i = 0; i < 41; i++) {
+        const leaf = document.createElement("div");
+        leaf.classList.add("floral_leaf");
+        const icons = ["🌸", "🌿", "🍃"];
+        leaf.innerHTML = icons[Math.floor(Math.random() * icons.length)];
+        leaf.style.left = Math.random() * 100 + "%";
+        leaf.style.animationDuration = 8 + Math.random() * 7 + "s";
+        leaf.style.animationDelay = Math.random() * 8 + "s";
+        container.appendChild(leaf);
+      }
     }
   }
-}
 
-const defaultSongs = [
-  {
-    id: 1,
-    title: "golden hour",
-    artist: "jVKE",
-    audioURL: "../Utili/Golden Hour.mp3",
-    default: true,
-  },
-  {
-    id: 2,
-    title: "ilahi",
-    artist: "arjit sing",
-    audioURL: "../Utili/Ilahi.mp3",
-    default: true,
-  },
-  {
-    id: 3,
-    title: "iktara",
-    artist: "kavita seth",
-    audioURL: "../Utili/Iktara.mp3",
-    default: true,
-  },
-  {
-    id: 4,
-    title: "safarnama",
-    artist: "lucky ali",
-    audioURL: "../Utili/Safarnama.mp3",
-    default: true,
-  },
-  {
-    id: 5,
-    title: "aashayein",
-    artist: "kk",
-    audioURL: "../Utili/Aashayein.mp3",
-    default: true,
-  },
-  {
-    id: 6,
-    title: "love you zindagi",
-    artist: "jasleena royal",
-    audioURL: "../Utili/Love You Zindagi.mp3",
-    default: true,
-  },
-  {
-    id: 7,
-    title: "phir se ud chala",
-    artist: "mohit chauhan",
-    audioURL: "../Utili/Phir Se Ud Chala.mp3",
-    default: true,
-  },
-];
-
-// Music Active
-
-const tracks = document.querySelectorAll(".music");
-
-let currentAudio = null;
-
-tracks.forEach((track) => {
-  setUpTrack(track);
-});
-
-// Active Navbar Highlight
-
-const sections = document.querySelectorAll("div[id]");
-const navLinks = document.querySelectorAll(".flex a");
-
-window.addEventListener("scroll", () => {
-  let current = "";
-
-  sections.forEach((section) => {
-    const sectionTop = section.offsetTop - 100;
-    const sectionHeight = section.offsetHeight;
-
-    if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
-      current = section.getAttribute("id");
-    }
-  });
-
-  navLinks.forEach((link) => {
-    link.classList.remove("active");
-
-    if (link.getAttribute("href") === "#" + current) {
-      link.classList.add("active");
-    }
-  });
-});
-
-// Taking Image And Setting
-
-// Loading
-
-const loading = document.getElementById("loading");
-
-function showLoading() {
-  if (loading) loading.style.display = "flex";
-}
-
-// Image Injection
-
-const uploadBoxes = document.querySelectorAll(".upload_box");
-
-let images = ["", "", ""];
-
-let customSongs = JSON.parse(localStorage.getItem("customSongs")) || [];
-
-let allSongs = (() => {
-  try {
-    const sharedSongs = params.get("songs");
-    if (sharedSongs) {
-      const parsed = JSON.parse(sharedSongs);
-      if (Array.isArray(parsed)) return parsed;
-    }
-  } catch (error) {
-    console.warn("Could not read playlist from shared link.", error);
-  }
-  return JSON.parse(localStorage.getItem("allSongs")) || [...defaultSongs];
-})();
-
-// Temporary Playlist (Apply Changes Feature)
-
-let tempSongs = [...allSongs];
-
-let playlistChanged = false;
-
-const applyMusicChangesBtn = document.getElementById("applyMusicChanges");
-
-function markPlaylistChanged() {
-  playlistChanged = true;
-
-  applyMusicChangesBtn.style.display = "inline-flex";
-}
-
-function resetPlaylistChanged() {
-  playlistChanged = false;
-
-  applyMusicChangesBtn.style.display = "none";
-}
-
-uploadBoxes.forEach((box, index) => {
-  // Drag Over
-
-  box.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    box.style.background = "#e8f2e4";
-  });
-
-  box.addEventListener("dragleave", () => {
-    box.style.background = "transparent";
-  });
-
-  // Drop
-
-  box.addEventListener("drop", (e) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    handleFile(file, index, box);
-  });
-
-  // Click Upload
-
-  box.addEventListener("click", () => {
-    const input = document.createElement("input");
-    input.type = "file";
-
-    input.onchange = () => {
-      const file = input.files[0];
-      handleFile(file, index, box);
-    };
-
-    input.click();
-  });
-});
-
-const messageRadios = document.querySelectorAll('input[name="messageType"]');
-
-const customMessage = document.getElementById("customMessage");
-
-const galleryRadios = document.querySelectorAll('input[name="galleryType"]');
-
-const animatedContainer = document.getElementById("animatedUploadContainer");
-
-const uploadBoxesContainer = document.querySelectorAll(".upload_row");
-
-galleryRadios.forEach((radio) => {
-  radio.addEventListener("change", () => {
-    if (radio.checked && radio.value === "animated") {
-      animatedContainer.style.display = "flex";
-
-      uploadBoxesContainer.forEach((box) => {
-        box.style.display = "none";
-      });
-    } else if (radio.checked && radio.value === "simple") {
-      animatedContainer.style.display = "none";
-
-      uploadBoxesContainer.forEach((box) => {
-        box.style.display = "flex";
-      });
-    }
-  });
-});
-
-messageRadios.forEach((radio) => {
-  radio.addEventListener("change", () => {
-    if (radio.value === "custom" && radio.checked) {
-      customMessage.style.display = "block";
-    } else {
-      customMessage.style.display = "none";
-    }
-  });
-});
-
-async function uploadSong(file) {
-  const formData = new FormData();
-
-  formData.append("file", file);
-  formData.append("upload_preset", "playlist_audio");
-
-  const res = await fetch(
-    "https://api.cloudinary.com/v1_1/demvl3niy/video/upload",
+  const defaultSongs = [
     {
-      method: "POST",
-      body: formData,
+      id: 1,
+      title: "golden hour",
+      artist: "jVKE",
+      audioURL: "../Utili/Golden Hour.mp3",
+      default: true,
     },
-  );
+    {
+      id: 2,
+      title: "ilahi",
+      artist: "arjit sing",
+      audioURL: "../Utili/Ilahi.mp3",
+      default: true,
+    },
+    {
+      id: 3,
+      title: "iktara",
+      artist: "kavita seth",
+      audioURL: "../Utili/Iktara.mp3",
+      default: true,
+    },
+    {
+      id: 4,
+      title: "safarnama",
+      artist: "lucky ali",
+      audioURL: "../Utili/Safarnama.mp3",
+      default: true,
+    },
+    {
+      id: 5,
+      title: "aashayein",
+      artist: "kk",
+      audioURL: "../Utili/Aashayein.mp3",
+      default: true,
+    },
+    {
+      id: 6,
+      title: "love you zindagi",
+      artist: "jasleena royal",
+      audioURL: "../Utili/Love You Zindagi.mp3",
+      default: true,
+    },
+    {
+      id: 7,
+      title: "phir se ud chala",
+      artist: "mohit chauhan",
+      audioURL: "../Utili/Phir Se Ud Chala.mp3",
+      default: true,
+    },
+  ];
 
-  const data = await res.json();
-  // console.log("✈️  data: ", data);
+  // Music Active
 
-  return data.secure_url;
-}
+  const tracks = document.querySelectorAll(".music");
 
-async function handleFile(file, index, box, isReplace = false) {
-  if (!file) return;
+  let currentAudio = null;
 
-  if (!file.type.startsWith("image/")) {
-    alert("Please Upload An Image File!");
-    return;
+  tracks.forEach((track) => {
+    setUpTrack(track);
+  });
+
+  // Active Navbar Highlight
+
+  const sections = document.querySelectorAll("div[id]");
+  const navLinks = document.querySelectorAll(".flex a");
+
+  window.addEventListener("scroll", () => {
+    let current = "";
+
+    sections.forEach((section) => {
+      const sectionTop = section.offsetTop - 100;
+      const sectionHeight = section.offsetHeight;
+
+      if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+        current = section.getAttribute("id");
+      }
+    });
+
+    navLinks.forEach((link) => {
+      link.classList.remove("active");
+
+      if (link.getAttribute("href") === "#" + current) {
+        link.classList.add("active");
+      }
+    });
+  });
+
+  // Taking Image And Setting
+
+  // Loading
+
+  const loading = document.getElementById("loading");
+
+  function showLoading() {
+    if (loading) loading.style.display = "flex";
   }
 
-  const maxSize = 5 * 1024 * 1024;
+  // Image Injection
 
-  if (file.size > maxSize) {
-    alert("Image Size Must Be Under 5MB!");
-    return;
+  const uploadBoxes = document.querySelectorAll(".upload_box");
+
+  let images = ["", "", ""];
+
+  let customSongs = [];
+
+  let allSongs = (() => {
+    if (savedBirthday) {
+      return savedBirthday.playlist.flatMap((song, index) => {
+        if (Number.isInteger(song.defaultId)) {
+          const defaultSong = defaultSongs.find(
+            (track) => track.id === song.defaultId,
+          );
+          return defaultSong ? [{ ...defaultSong }] : [];
+        }
+
+        return [
+          {
+            id: -(index + 1),
+            title: song.title,
+            artist: song.artist,
+            audioURL: song.audioURL,
+          },
+        ];
+      });
+    }
+    try {
+      const sharedSongs = params.get("songs");
+      if (sharedSongs) {
+        const parsed = JSON.parse(sharedSongs);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (error) {
+      console.warn("Could not read playlist from shared link.", error);
+    }
+    return [...defaultSongs];
+  })();
+
+  // Temporary Playlist (Apply Changes Feature)
+
+  let tempSongs = [...allSongs];
+
+  let playlistChanged = false;
+
+  const applyMusicChangesBtn = document.getElementById("applyMusicChanges");
+
+  function markPlaylistChanged() {
+    playlistChanged = true;
+
+    applyMusicChangesBtn.style.display = "inline-flex";
   }
 
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", "birthday_upload");
+  function resetPlaylistChanged() {
+    playlistChanged = false;
 
-  box.innerHTML = "Uploading... ⏳";
+    applyMusicChangesBtn.style.display = "none";
+  }
 
-  try {
+  uploadBoxes.forEach((box, index) => {
+    // Drag Over
+
+    box.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      box.style.background = "#e8f2e4";
+    });
+
+    box.addEventListener("dragleave", () => {
+      box.style.background = "transparent";
+    });
+
+    // Drop
+
+    box.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const file = e.dataTransfer.files[0];
+      handleFile(file, index, box);
+    });
+
+    // Click Upload
+
+    box.addEventListener("click", () => {
+      const input = document.createElement("input");
+      input.type = "file";
+
+      input.onchange = () => {
+        const file = input.files[0];
+        handleFile(file, index, box);
+      };
+
+      input.click();
+    });
+  });
+
+  const messageRadios = document.querySelectorAll('input[name="messageType"]');
+
+  const customMessage = document.getElementById("customMessage");
+
+  const galleryRadios = document.querySelectorAll('input[name="galleryType"]');
+
+  const animatedContainer = document.getElementById("animatedUploadContainer");
+
+  const uploadBoxesContainer = document.querySelectorAll(".upload_row");
+
+  galleryRadios.forEach((radio) => {
+    radio.addEventListener("change", () => {
+      if (radio.checked && radio.value === "animated") {
+        animatedContainer.style.display = "flex";
+
+        uploadBoxesContainer.forEach((box) => {
+          box.style.display = "none";
+        });
+      } else if (radio.checked && radio.value === "simple") {
+        animatedContainer.style.display = "none";
+
+        uploadBoxesContainer.forEach((box) => {
+          box.style.display = "flex";
+        });
+      }
+    });
+  });
+
+  messageRadios.forEach((radio) => {
+    radio.addEventListener("change", () => {
+      if (radio.value === "custom" && radio.checked) {
+        customMessage.style.display = "block";
+      } else {
+        customMessage.style.display = "none";
+      }
+    });
+  });
+
+  async function uploadSong(file) {
+    const formData = new FormData();
+
+    formData.append("file", file);
+    formData.append("upload_preset", "playlist_audio");
+
     const res = await fetch(
-      "https://api.cloudinary.com/v1_1/demvl3niy/image/upload",
+      "https://api.cloudinary.com/v1_1/demvl3niy/video/upload",
       {
         method: "POST",
         body: formData,
@@ -484,101 +525,137 @@ async function handleFile(file, index, box, isReplace = false) {
     );
 
     const data = await res.json();
+    // console.log("✈️  data: ", data);
 
-    images[index] = encodeURIComponent(data.secure_url);
+    return data.secure_url;
+  }
 
-    box.innerHTML = isReplace ? "Image Replaced ✅" : "Image Uploaded ✅";
+  async function handleFile(file, index, box, isReplace = false) {
+    if (!file) return;
 
+    if (!file.type.startsWith("image/")) {
+      alert("Please Upload An Image File!");
+      return;
+    }
+
+    const maxSize = 5 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+      alert("Image Size Must Be Under 5MB!");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "birthday_upload");
+
+    box.innerHTML = "Uploading... ⏳";
+
+    try {
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/demvl3niy/image/upload",
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
+      const data = await res.json();
+
+      images[index] = encodeURIComponent(data.secure_url);
+
+      box.innerHTML = isReplace ? "Image Replaced ✅" : "Image Uploaded ✅";
+
+      document.querySelector(
+        `.imagePreviewBtn[data-index="${index}"]`,
+      ).disabled = false;
+
+      document.querySelector(
+        `.replaceImageBtn[data-index="${index}"]`,
+      ).disabled = false;
+
+      document.querySelector(
+        `.deleteImageBtn[data-index="${index}"]`,
+      ).disabled = false;
+    } catch (err) {
+      // console.log("✈️  err: ", err);
+      box.innerHTML = "Upload Failed ❌";
+    }
+  }
+
+  function deleteImage(index) {
+    if (!confirm("Delete This Image?")) return;
+
+    // Remove from images array
+    images[index] = "";
+
+    // Restore upload box
+    const uploadBox = document.querySelector(
+      `.upload_box[data-index="${index}"]`,
+    );
+
+    uploadBox.innerHTML = `Image ${index + 1}`;
+
+    // Enable clicking again
+    uploadBox.style.pointerEvents = "auto";
+
+    // Disable buttons
     document.querySelector(`.imagePreviewBtn[data-index="${index}"]`).disabled =
-      false;
+      true;
 
     document.querySelector(`.replaceImageBtn[data-index="${index}"]`).disabled =
-      false;
+      true;
 
     document.querySelector(`.deleteImageBtn[data-index="${index}"]`).disabled =
-      false;
-  } catch (err) {
-    // console.log("✈️  err: ", err);
-    box.innerHTML = "Upload Failed ❌";
+      true;
   }
-}
 
-function deleteImage(index) {
-  if (!confirm("Delete This Image?")) return;
+  function markGalleryChanged() {
+    galleryChanged = true;
+    confirmGalleryChangesBtn.style.display = "inline-flex";
+  }
 
-  // Remove from images array
-  images[index] = "";
+  function resetGalleryChanged() {
+    galleryChanged = false;
+    confirmGalleryChangesBtn.style.display = "none";
+  }
 
-  // Save updated array
-  localStorage.setItem("images", JSON.stringify(images));
+  // Set Images
 
-  // Restore upload box
-  const uploadBox = document.querySelector(
-    `.upload_box[data-index="${index}"]`,
+  function setImage(selector, img) {
+    if (img) {
+      const el = document.querySelector(selector);
+      if (!el) return;
+
+      el.style.backgroundImage = `url(${img})`;
+      el.style.backgroundSize = "cover";
+      el.innerHTML = "";
+    }
+  }
+  // Animated Gallery
+
+  let animatedImages = [];
+
+  let tempAnimatedImages = [];
+
+  let uploadedCount = 0;
+
+  let galleryChanged = false;
+
+  const confirmGalleryChangesBtn = document.getElementById(
+    "confirmGalleryChanges",
   );
 
-  uploadBox.innerHTML = `Image ${index + 1}`;
+  const previewGalleryBtn = document.getElementById("previewAnimatedGallery");
 
-  // Enable clicking again
-  uploadBox.style.pointerEvents = "auto";
+  const imageCount = document.getElementById("imageCount");
 
-  // Disable buttons
-  document.querySelector(`.imagePreviewBtn[data-index="${index}"]`).disabled =
-    true;
+  function updateAnimatedGalleryCounter() {
+    uploadedCount = animatedImages.length;
 
-  document.querySelector(`.replaceImageBtn[data-index="${index}"]`).disabled =
-    true;
+    const remaining = Math.max(0, 10 - uploadedCount);
 
-  document.querySelector(`.deleteImageBtn[data-index="${index}"]`).disabled =
-    true;
-}
-
-function markGalleryChanged() {
-  galleryChanged = true;
-  confirmGalleryChangesBtn.style.display = "inline-flex";
-}
-
-function resetGalleryChanged() {
-  galleryChanged = false;
-  confirmGalleryChangesBtn.style.display = "none";
-}
-
-// Set Images
-
-function setImage(selector, img) {
-  if (img) {
-    const el = document.querySelector(selector);
-    if (!el) return;
-
-    el.style.backgroundImage = `url(${img})`;
-    el.style.backgroundSize = "cover";
-    el.innerHTML = "";
-  }
-}
-// Animated Gallery
-
-let animatedImages = [];
-
-let tempAnimatedImages = [];
-
-let uploadedCount = 0;
-
-let galleryChanged = false;
-
-const confirmGalleryChangesBtn = document.getElementById(
-  "confirmGalleryChanges",
-);
-
-const previewGalleryBtn = document.getElementById("previewAnimatedGallery");
-
-const imageCount = document.getElementById("imageCount");
-
-function updateAnimatedGalleryCounter() {
-  uploadedCount = animatedImages.length;
-
-  const remaining = Math.max(0, 10 - uploadedCount);
-
-  imageCount.innerHTML = `
+    imageCount.innerHTML = `
         📸 Uploaded : ${uploadedCount}/15
         <br><br>
         ${
@@ -590,529 +667,464 @@ function updateAnimatedGalleryCounter() {
         }
     `;
 
-  previewGalleryBtn.disabled = uploadedCount === 0;
+    previewGalleryBtn.disabled = uploadedCount === 0;
 
-  previewGalleryBtn.innerHTML = `👁 Preview Gallery (${uploadedCount})`;
-}
-
-confirmGalleryChangesBtn.addEventListener("click", () => {
-  animatedImages = [...tempAnimatedImages];
-
-  localStorage.setItem("animatedGallery", JSON.stringify(animatedImages));
-
-  const remaining = Math.max(0, 10 - uploadedCount);
-
-  updateAnimatedGalleryCounter();
-
-  previewGalleryBtn.disabled = uploadedCount === 0;
-
-  previewGalleryBtn.innerHTML = `👁 Preview Gallery (${uploadedCount})`;
-
-  galleryOverlay.style.display = "none";
-
-  resetGalleryChanged();
-});
-
-const animatedInput = document.getElementById("animatedImages");
-
-const animatedUploadBox = document.getElementById("animatedUploadBox");
-
-animatedImages = [];
-uploadedCount = 0;
-
-const savedAnimatedGallery =
-  JSON.parse(localStorage.getItem("animatedGallery")) || [];
-
-if (savedAnimatedGallery.length) {
-  animatedImages = savedAnimatedGallery;
-  uploadedCount = savedAnimatedGallery.length;
-  updateAnimatedGalleryCounter();
-
-  const previewBtn = document.getElementById("previewAnimatedGallery");
-
-  previewBtn.disabled = uploadedCount === 0;
-
-  previewBtn.innerHTML = `👁 Preview Gallery (${uploadedCount})`;
-}
-
-animatedUploadBox.addEventListener("click", () => {
-  animatedInput.click();
-});
-
-animatedInput.addEventListener("change", async () => {
-  const files = [...animatedInput.files];
-
-  if (uploadedCount + files.length > 15) {
-    alert(
-      `Maximum 15 Images Allowed.
-You Can Upload ${15 - uploadedCount} More Images`,
-    );
-
-    animatedInput.value = "";
-    return;
+    previewGalleryBtn.innerHTML = `👁 Preview Gallery (${uploadedCount})`;
   }
 
-  imageCount.innerHTML = "⏳ Uploading...";
-
-  try {
-    for (const file of files) {
-      if (!file.type.startsWith("image/")) {
-        continue;
-      }
-
-      const formData = new FormData();
-
-      formData.append("file", file);
-      formData.append("upload_preset", "birthday_upload");
-
-      const res = await fetch(
-        "https://api.cloudinary.com/v1_1/demvl3niy/image/upload",
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
-
-      const data = await res.json();
-
-      animatedImages.push(data.secure_url);
-
-      uploadedCount++;
-
-      document.getElementById("previewAnimatedGallery").disabled =
-        uploadedCount === 0;
-    }
+  confirmGalleryChangesBtn.addEventListener("click", () => {
+    animatedImages = [...tempAnimatedImages];
 
     const remaining = Math.max(0, 10 - uploadedCount);
 
     updateAnimatedGalleryCounter();
 
-    const previewBtn = document.getElementById("previewAnimatedGallery");
+    previewGalleryBtn.disabled = uploadedCount === 0;
 
-    previewBtn.disabled = uploadedCount === 0;
+    previewGalleryBtn.innerHTML = `👁 Preview Gallery (${uploadedCount})`;
 
-    previewBtn.innerHTML = `👁 Preview Gallery (${uploadedCount})`;
+    galleryOverlay.style.display = "none";
 
-    animatedInput.value = "";
-  } catch (err) {
-    console.error(err);
+    resetGalleryChanged();
+  });
 
-    imageCount.innerHTML = "❌ Upload Failed";
-  }
-});
+  const animatedInput = document.getElementById("animatedImages");
 
-const typeInput = document.getElementById("typeInput");
+  const animatedUploadBox = document.getElementById("animatedUploadBox");
 
-const romanticThemeOption = document.getElementById("romanticThemeOption");
+  animatedImages = [];
+  uploadedCount = 0;
 
-typeInput.addEventListener("change", () => {
-  const value = typeInput.value.toLowerCase();
+  animatedUploadBox.addEventListener("click", () => {
+    animatedInput.click();
+  });
 
-  const romanticTypes = ["gf", "bf", "wife", "husband"];
+  animatedInput.addEventListener("change", async () => {
+    const files = [...animatedInput.files];
 
-  if (romanticTypes.includes(value)) {
-    romanticThemeOption.style.display = "block";
-  } else {
-    romanticThemeOption.style.display = "none";
+    if (uploadedCount + files.length > 15) {
+      alert(
+        `Maximum 15 Images Allowed.
+You Can Upload ${15 - uploadedCount} More Images`,
+      );
 
-    const romanticRadio = romanticThemeOption.querySelector("input");
+      animatedInput.value = "";
+      return;
+    }
 
-    romanticRadio.checked = false;
+    imageCount.innerHTML = "⏳ Uploading...";
 
-    document.querySelector('input[value="classic"]').checked = true;
-  }
-});
+    try {
+      for (const file of files) {
+        if (!file.type.startsWith("image/")) {
+          continue;
+        }
 
-function generate() {
-  const galleryType = document.querySelector(
-    'input[name="galleryType"]:checked',
-  ).value;
+        const formData = new FormData();
 
-  const selectedTheme = document.querySelector(
-    'input[name="themeType"]:checked',
-  ).value;
+        formData.append("file", file);
+        formData.append("upload_preset", "birthday_upload");
 
-  const btn = document.querySelector(".popup button");
-  const name = document.getElementById("nameInput").value;
-  const type = document.getElementById("typeInput").value;
+        const res = await fetch(
+          "https://api.cloudinary.com/v1_1/demvl3niy/image/upload",
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
 
-  if (!name.trim() || !type) {
-    alert("Please Fill All Details!");
-    return;
-  }
+        const data = await res.json();
 
-  if (galleryType === "simple") {
-    if (!images[0] || !images[1] || !images[2]) {
+        animatedImages.push(data.secure_url);
+
+        uploadedCount++;
+
+        document.getElementById("previewAnimatedGallery").disabled =
+          uploadedCount === 0;
+      }
+
+      const remaining = Math.max(0, 10 - uploadedCount);
+
+      updateAnimatedGalleryCounter();
+
+      const previewBtn = document.getElementById("previewAnimatedGallery");
+
+      previewBtn.disabled = uploadedCount === 0;
+
+      previewBtn.innerHTML = `👁 Preview Gallery (${uploadedCount})`;
+
+      animatedInput.value = "";
+    } catch (err) {
+      console.error(err);
+
+      imageCount.innerHTML = "❌ Upload Failed";
+    }
+  });
+
+  const typeInput = document.getElementById("typeInput");
+
+  const romanticThemeOption = document.getElementById("romanticThemeOption");
+
+  typeInput.addEventListener("change", () => {
+    const value = typeInput.value.toLowerCase();
+
+    const romanticTypes = ["gf", "bf", "wife", "husband"];
+
+    if (romanticTypes.includes(value)) {
+      romanticThemeOption.style.display = "block";
+    } else {
+      romanticThemeOption.style.display = "none";
+
+      const romanticRadio = romanticThemeOption.querySelector("input");
+
+      romanticRadio.checked = false;
+
+      document.querySelector('input[value="classic"]').checked = true;
+    }
+  });
+
+  async function generate() {
+    const galleryType = document.querySelector(
+      'input[name="galleryType"]:checked',
+    ).value;
+
+    const selectedTheme = document.querySelector(
+      'input[name="themeType"]:checked',
+    ).value;
+
+    const selectedType = document.querySelector(
+      'input[name="messageType"]:checked',
+    ).value;
+
+    const btn = document.querySelector('button[onclick="generate()"]');
+    const name = document.getElementById("nameInput").value.trim();
+    const type = document.getElementById("typeInput").value;
+
+    if (!name || !type) {
+      alert("Please Fill All Details!");
+      return;
+    }
+
+    if (galleryType === "simple" && (!images[0] || !images[1] || !images[2])) {
       alert("Please Upload All 3 Images!");
       return;
     }
-  }
 
-  if (galleryType === "animated" && animatedImages.length < 10) {
-    alert(`Please Upload ${10 - animatedImages.length} More Images!`);
+    if (galleryType === "animated" && animatedImages.length < 10) {
+      alert(`Please Upload ${10 - animatedImages.length} More Images!`);
+      return;
+    }
 
-    return;
-  }
+    const message =
+      selectedType === "custom"
+        ? document.getElementById("customMessage").value.trim()
+        : "";
 
-  showLoading();
-
-  btn.disabled = true;
-  btn.innerHTML = "Generating...";
-
-  let message = "";
-
-  const selectedType = document.querySelector(
-    `input[name="messageType"]:checked`,
-  ).value;
-
-  localStorage.setItem("galleryType", galleryType);
-
-  if (selectedType === "custom") {
-    message = document.getElementById("customMessage").value.trim();
-
-    if (!message) {
+    if (selectedType === "custom" && !message) {
       alert("Please Write Your Message!");
       return;
     }
-  }
 
-  localStorage.setItem("animatedGallery", JSON.stringify(animatedImages));
+    const originalButtonText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Generating...";
+    showLoading();
 
-  localStorage.setItem("theme", selectedTheme);
-
-  setTimeout(() => {
-    const shareParams = new URLSearchParams({
-      name,
-      type,
-      message,
-      theme: selectedTheme,
-      gallery: galleryType,
-      img1: decodeImageUrl(images[0]),
-      img2: decodeImageUrl(images[1]),
-      img3: decodeImageUrl(images[2]),
-      galleryImages: JSON.stringify(galleryType === "animated" ? animatedImages : []),
-      songs: JSON.stringify(allSongs),
-    });
-    const url = `?${shareParams.toString()}`;
-    themeToggleBtn.style.display = "flex";
-    window.location.href = url;
-  }, 3000);
-}
-
-const overlay = document.getElementById("form_overlay");
-
-if (theme) {
-  document.body.classList.remove("royal", "galaxy", "romantic", "floral");
-  document.body.classList.add(theme);
-}
-
-/* ---------- Restore Dark Mode ---------- */
-
-const themeToggleBtn = document.getElementById("themeToggleBtn");
-
-if (!params.has("name")) {
-  themeToggleBtn.style.display = "none";
-}
-
-const savedDarkMode = localStorage.getItem("darkMode");
-
-if (savedDarkMode === "true") {
-  document.body.classList.add("dark");
-  themeToggleBtn.textContent = "☀️";
-} else {
-  themeToggleBtn.textContent = "🌙";
-}
-
-const galleryType = params.get("gallery") || localStorage.getItem("galleryType");
-
-const animatedGallery = (() => {
-  try {
-    const sharedGallery = params.get("galleryImages");
-    if (sharedGallery) {
-      const parsed = JSON.parse(sharedGallery);
-      if (Array.isArray(parsed)) return parsed;
-    }
-  } catch (error) {
-    console.warn("Could not read animated gallery from shared link.", error);
-  }
-  return JSON.parse(localStorage.getItem("animatedGallery")) || [];
-})();
-
-const photo = document.querySelector(".photo");
-
-const divider = document.querySelector(".divider");
-
-const gallery = document.querySelector(".animated_gallery");
-
-if (galleryType === "animated" && animatedGallery.length > 0) {
-  if (photo) photo.style.display = "none";
-
-  if (divider) divider.style.display = "none";
-
-  if (gallery) gallery.style.display = "block";
-
-  const track = document.querySelector(".animated_gallery_track");
-
-  if (track) {
-    track.innerHTML = "";
-
-    animatedGallery.forEach((imgUrl, index) => {
-      const img = document.createElement("img");
-
-      img.src = imgUrl;
-
-      img.className = index % 2 === 0 ? "large_img" : "small_img";
-
-      track.appendChild(img);
-    });
-
-    animatedGallery.forEach((imgUrl, index) => {
-      const img = document.createElement("img");
-
-      img.src = imgUrl;
-
-      img.className = index % 2 === 0 ? "large_img" : "small_img";
-
-      track.appendChild(img);
-    });
-  }
-} else {
-  if (photo) photo.style.display = "grid";
-  if (divider) divider.style.display = "flex";
-  if (gallery) gallery.style.display = "none";
-}
-
-const name = params.get("name");
-const type = params.get("type");
-const languages = [
-  "hi", //Hindi
-  "mr", //Marathi
-  "gu", //Gujarati
-  "bn", // Bengali
-  "ta", // Tamil
-  "te", // Telegu
-  "kn", //Kannad
-  "ml", //Malayalam
-  "pa", //Punjabi
-  "ur", // Urdu
-  "ru", //Russian
-  "ja", //Japanese
-  "ko", //Korean
-  "ar", //Arabic
-  "zh-CN", //Chinese(Simplified)
-];
-
-async function translateText(text, target) {
-  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${target}&dt=t&q=${encodeURIComponent(text)}`;
-
-  const res = await fetch(url);
-
-  const data = await res.json();
-
-  const translated = data[0][0][0];
-  const romanized = data[0] && data[0][0] && data[0][0][2];
-  return romanized || translated;
-}
-
-async function getTranslations(name) {
-  const words = [name];
-
-  for (const lang of languages) {
     try {
-      const translated = await translateText(name, lang);
-      if (translated && !words.includes(translated)) {
-        words.push(translated);
+      const response = await fetch("/.netlify/functions/birthday", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipient_name: name,
+          relationship: type,
+          message,
+          message_type: selectedType,
+          theme: selectedTheme,
+          gallery_type: galleryType,
+          images:
+            galleryType === "animated"
+              ? [...animatedImages]
+              : images.map(decodeImageUrl),
+          playlist: allSongs.map((song) =>
+            song.default
+              ? { defaultId: song.id }
+              : {
+                  title: song.title,
+                  artist: song.artist || "",
+                  audioURL: song.audioURL,
+                },
+          ),
+        }),
+      });
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result?.id) {
+        throw new Error(result?.error || "Could not save the birthday.");
       }
-    } catch (err) {
-      console.error("Translation Error", err);
+
+      const shareUrl = new URL(
+        window.location.pathname,
+        window.location.origin,
+      );
+      shareUrl.searchParams.set("id", result.id);
+      window.location.assign(shareUrl.href);
+    } catch (error) {
+      if (loading) loading.style.display = "none";
+      btn.disabled = false;
+      btn.textContent = originalButtonText;
+      alert(error.message);
     }
   }
 
-  return words;
-}
+  const overlay = document.getElementById("form_overlay");
 
-const customMessageParam = params.get("message");
-const img1 = params.get("img1");
-const img2 = params.get("img2");
-const img3 = params.get("img3");
-
-setImage(".photo_child1", img1);
-setImage(".photo_child2", img2);
-setImage(".photo_child3", img3);
-
-if (!name) {
-  const closeBtn = document.querySelector(".popup_close");
-  if (closeBtn) {
-    closeBtn.style.display = "none";
-  }
-  if (overlay) overlay.style.display = "flex";
-  setTimeout(() => {
-    document.getElementById("nameInput").focus();
-  }, 100);
-  document.body.style.overflow = "hidden";
-  const actionMenu = document.querySelector(".action_menu");
-  if (actionMenu) {
-    actionMenu.style.display = "none";
-  }
-} else {
-  const actionMenu = document.querySelector(".action_menu");
-  if (actionMenu) {
-    actionMenu.style.display = "block";
+  if (theme) {
+    document.body.classList.remove("royal", "galaxy", "romantic", "floral");
+    document.body.classList.add(theme);
   }
 
-  if (overlay) overlay.style.display = "none";
-  document.body.style.overflow = "auto";
-}
+  /* ---------- Restore Dark Mode ---------- */
 
-const editName = localStorage.getItem("edit_name");
-const editType = localStorage.getItem("edit_type");
-const editing_mode = localStorage.getItem("editing_mode");
+  const themeToggleBtn = document.getElementById("themeToggleBtn");
 
-if (editName || editType) {
-  const savedTheme = localStorage.getItem("theme");
+  if (!params.has("name")) {
+    themeToggleBtn.style.display = "none";
 
-  if (savedTheme) {
-    const themeRadio = document.querySelector(
-      `input[name="themeType"][value="${savedTheme}"]`,
-    );
-
-    if (themeRadio) {
-      themeRadio.checked = true;
+    const actionMenu = document.querySelector(".action_menu");
+    if (actionMenu) {
+      actionMenu.style.display = "none";
     }
+    $(".action_items").hide();
+    $("#mainActionBtn").show();
+    $("#scrollTopBtn").hide();
   }
 
-  const savedGalleryType = localStorage.getItem("galleryType");
+  const savedDarkMode = "false";
 
-  if (savedGalleryType) {
-    const galleryRadio = document.querySelector(
-      `input[name="galleryType"][value="${savedGalleryType}"]`,
-    );
-
-    if (galleryRadio) {
-      galleryRadio.checked = true;
-      galleryRadio.dispatchEvent(new Event("change"));
-    }
+  if (savedDarkMode === "true") {
+    document.body.classList.add("dark");
+    themeToggleBtn.innerHTML = '<span class="theme-icon">☀️</span>';
+  } else {
+    themeToggleBtn.innerHTML = '<span class="theme-icon">🌙</span>';
   }
 
-  if (overlay) overlay.style.display = "flex";
+  const galleryType = params.get("gallery") || "simple";
 
-  document.getElementById("nameInput").value = editName || "";
-  document.getElementById("typeInput").value = editType || "";
-
-  document.body.style.overflow = "hidden";
-
-  const closeBtn = document.querySelector(".popup_close");
-
-  if (closeBtn) {
-    closeBtn.style.display = editing_mode ? "block" : "none";
-  }
-
-  // Clear After Use (Optional)
-  localStorage.removeItem("edit_name");
-  localStorage.removeItem("edit_type");
-  localStorage.removeItem("editing_mode");
-}
-
-const editImg1 = localStorage.getItem("edit_img1");
-const editImg2 = localStorage.getItem("edit_img2");
-const editImg3 = localStorage.getItem("edit_img3");
-
-// Restore Images Array
-if (editImg1) images[0] = editImg1;
-if (editImg2) images[1] = editImg2;
-if (editImg3) images[2] = editImg3;
-
-// Show Uploaded UI
-if (editImg1 && uploadBoxes[0]) {
-  uploadBoxes[0].innerHTML = "Image Uploaded ✅";
-}
-if (editImg2 && uploadBoxes[1]) {
-  uploadBoxes[1].innerHTML = "Image Uploaded ✅";
-}
-if (editImg3 && uploadBoxes[2]) {
-  uploadBoxes[2].innerHTML = "Image Uploaded ✅";
-}
-
-// Clear Storage
-localStorage.removeItem("edit_img1");
-localStorage.removeItem("edit_img2");
-localStorage.removeItem("edit_img3");
-
-if (name) {
-  document.querySelectorAll(".name").forEach((el) => {
-    el.textContent = name;
-  });
-
-  document.querySelectorAll(".nav_name").forEach((el) => {
-    el.innerHTML = `${name} &nbsp; ✦`;
-  });
-
-  document.querySelectorAll(".memory_name").forEach((el) => {
-    el.textContent = name;
-  });
-
-  document.querySelectorAll(".footer_name").forEach((el) => {
-    el.innerHTML = `${name} &nbsp; ✦`;
-  });
-
-  const head = document.querySelector(".head");
-  if (head) head.textContent = `Dear ${name},`;
-
-  const typedTarget = document.querySelector(".name");
-}
-
-async function startNameAnimation() {
-  if (!name) return;
-
-  const words = await getTranslations(name);
-
-  const target = document.querySelector(".name");
-
-  if (!target) return;
-
-  let wordIndex = 0;
-  let charIndex = words[0].length;
-  let deleting = true;
-
-  function type() {
-    const currentWord = words[wordIndex];
-
-    if (!deleting) {
-      target.textContent = currentWord.substring(0, charIndex + 1);
-
-      charIndex++;
-
-      if (charIndex === currentWord.length) {
-        deleting = true;
-
-        setTimeout(type, 1500);
-
-        return;
+  const animatedGallery = (() => {
+    try {
+      const sharedGallery = params.get("galleryImages");
+      if (sharedGallery) {
+        const parsed = JSON.parse(sharedGallery);
+        if (Array.isArray(parsed)) return parsed;
       }
-    } else {
-      charIndex--;
+    } catch (error) {
+      console.warn("Could not read animated gallery from shared link.", error);
+    }
+    return [];
+  })();
 
-      target.textContent = currentWord.substring(0, charIndex);
+  const photo = document.querySelector(".photo");
 
-      if (charIndex <= 0) {
-        deleting = false;
+  const divider = document.querySelector(".divider");
 
-        wordIndex = (wordIndex + 1) % words.length;
+  const gallery = document.querySelector(".animated_gallery");
 
-        charIndex = 0;
+  if (galleryType === "animated" && animatedGallery.length > 0) {
+    if (photo) photo.style.display = "none";
+
+    if (divider) divider.style.display = "none";
+
+    if (gallery) gallery.style.display = "block";
+
+    const track = document.querySelector(".animated_gallery_track");
+
+    if (track) {
+      track.innerHTML = "";
+
+      animatedGallery.forEach((imgUrl, index) => {
+        const img = document.createElement("img");
+
+        img.src = imgUrl;
+
+        img.className = index % 2 === 0 ? "large_img" : "small_img";
+
+        track.appendChild(img);
+      });
+
+      animatedGallery.forEach((imgUrl, index) => {
+        const img = document.createElement("img");
+
+        img.src = imgUrl;
+
+        img.className = index % 2 === 0 ? "large_img" : "small_img";
+
+        track.appendChild(img);
+      });
+    }
+  } else {
+    if (photo) photo.style.display = "grid";
+    if (divider) divider.style.display = "flex";
+    if (gallery) gallery.style.display = "none";
+  }
+
+  const name = params.get("name");
+  const type = params.get("type");
+  const languages = [
+    "hi", //Hindi
+    "mr", //Marathi
+    "gu", //Gujarati
+    "bn", // Bengali
+    "ta", // Tamil
+    "te", // Telegu
+    "kn", //Kannad
+    "ml", //Malayalam
+    "pa", //Punjabi
+    "ur", // Urdu
+    "ru", //Russian
+    "ja", //Japanese
+    "ko", //Korean
+    "ar", //Arabic
+    "zh-CN", //Chinese(Simplified)
+  ];
+
+  async function translateText(text, target) {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${target}&dt=t&q=${encodeURIComponent(text)}`;
+
+    const res = await fetch(url);
+
+    const data = await res.json();
+
+    const translated = data[0][0][0];
+    const romanized = data[0] && data[0][0] && data[0][0][2];
+    return romanized || translated;
+  }
+
+  async function getTranslations(name) {
+    const words = [name];
+
+    for (const lang of languages) {
+      try {
+        const translated = await translateText(name, lang);
+        if (translated && !words.includes(translated)) {
+          words.push(translated);
+        }
+      } catch (err) {
+        console.error("Translation Error", err);
       }
     }
 
-    setTimeout(type, deleting ? 50 : 120);
+    return words;
   }
 
-  setTimeout(type, 1500);
-}
+  const customMessageParam = params.get("message");
+  const img1 = params.get("img1");
+  const img2 = params.get("img2");
+  const img3 = params.get("img3");
 
-startNameAnimation();
+  setImage(".photo_child1", img1);
+  setImage(".photo_child2", img2);
+  setImage(".photo_child3", img3);
 
-const letters = {
-  sir: `
+  if (!name) {
+    const closeBtn = document.querySelector(".popup_close");
+    if (closeBtn) {
+      closeBtn.style.display = "none";
+    }
+    if (overlay) overlay.style.display = "flex";
+    setTimeout(() => {
+      document.getElementById("nameInput").focus();
+    }, 100);
+    document.body.style.overflow = "hidden";
+    const actionMenu = document.querySelector(".action_menu");
+    if (actionMenu) {
+      actionMenu.style.display = "none";
+    }
+  } else {
+    const actionMenu = document.querySelector(".action_menu");
+    if (actionMenu) {
+      actionMenu.style.display = "block";
+    }
+
+    if (overlay) overlay.style.display = "none";
+    document.body.style.overflow = "auto";
+  }
+
+  if (name) {
+    document.querySelectorAll(".name").forEach((el) => {
+      el.textContent = name;
+    });
+
+    document.querySelectorAll(".nav_name").forEach((el) => {
+      el.textContent = `${name}\u00a0 ✦`;
+    });
+
+    document.querySelectorAll(".memory_name").forEach((el) => {
+      el.textContent = name;
+    });
+
+    document.querySelectorAll(".footer_name").forEach((el) => {
+      el.textContent = `${name}\u00a0 ✦`;
+    });
+
+    const head = document.querySelector(".head");
+    if (head) head.textContent = `Dear ${name},`;
+
+    const typedTarget = document.querySelector(".name");
+  }
+
+  async function startNameAnimation() {
+    if (!name) return;
+
+    const words = await getTranslations(name);
+
+    const target = document.querySelector(".name");
+
+    if (!target) return;
+
+    let wordIndex = 0;
+    let charIndex = words[0].length;
+    let deleting = true;
+
+    function type() {
+      const currentWord = words[wordIndex];
+
+      if (!deleting) {
+        target.textContent = currentWord.substring(0, charIndex + 1);
+
+        charIndex++;
+
+        if (charIndex === currentWord.length) {
+          deleting = true;
+
+          setTimeout(type, 1500);
+
+          return;
+        }
+      } else {
+        charIndex--;
+
+        target.textContent = currentWord.substring(0, charIndex);
+
+        if (charIndex <= 0) {
+          deleting = false;
+
+          wordIndex = (wordIndex + 1) % words.length;
+
+          charIndex = 0;
+        }
+      }
+
+      setTimeout(type, deleting ? 50 : 120);
+    }
+
+    setTimeout(type, 1500);
+  }
+
+  startNameAnimation();
+
+  const letters = {
+    sir: `
                     <p>
                         On this special day, I just want to express my heartfelt
                         gratitude for everything you've taught us — not just
@@ -1146,7 +1158,7 @@ const letters = {
                             class="pink">✿</span>
                     </span>
                     `,
-  friend: `
+    friend: `
   <p>
   On this special day, I just want to remind you how much you mean to me. Your friendship has been one of the best parts of my life — full of laughter, support, and unforgettable memories.
   <br>
@@ -1166,7 +1178,7 @@ const letters = {
   - With love and best wishes <span class="pink">✿</span>
 </span>
   `,
-  bestfriend: `
+    bestfriend: `
                     <p>
                     On this magical day, I just want you to know how much light you bring into the world — and into my life. Your laughter is the kind that makes ordinary moments feel like little celebrations, and your kindness is one of the rarest things I've ever known.
                         <br>
@@ -1188,7 +1200,7 @@ const letters = {
                             class="pink">✿</span>
                     </span>
   `,
-  gf: `
+    gf: `
   <p>
   On this beautiful day, I just want to tell you how incredibly special you are to me. You bring so much love, warmth, and happiness into my life that words can hardly express.
   <br>
@@ -1208,7 +1220,7 @@ const letters = {
   - Forever yours <span class="pink">✿</span>
 </span>
   `,
-  bf: `
+    bf: `
   <p>
   On this special day, I just want to remind you how important you are to me. You are not just someone I love, but someone who makes my world feel complete.
   <br>
@@ -1228,7 +1240,7 @@ const letters = {
   - With all my love <span class="pink">✿</span>
 </span>
   `,
-  boss: `
+    boss: `
   <p>
   On this special day, I would like to express my sincere appreciation for your leadership and guidance. Your dedication and vision inspire everyone around you.
   <br>
@@ -1248,7 +1260,7 @@ const letters = {
   - With respect and best wishes <span class="pink">✿</span>
 </span>
   `,
-  wife: `
+    wife: `
   <p>
   On this special day, I just want to remind you how much you mean to me. You are not just my partner, but my happiness, my comfort, and my everything.
   <br>
@@ -1268,7 +1280,7 @@ const letters = {
   - Always yours <span class="pink">✿</span>
 </span>
   `,
-  husband: `
+    husband: `
   <p>
   On this special day, I want to tell you how grateful I am to have you in my life. You are my strength, my support, and my greatest happiness.
   <br>
@@ -1288,7 +1300,7 @@ const letters = {
   - With all my love <span class="pink">✿</span>
 </span>
   `,
-  mom: `
+    mom: `
   <p>
   On this special day, I just want to thank you for everything you have done for me. Your love, care, and sacrifices are the foundation of who I am today.
   <br>
@@ -1308,7 +1320,7 @@ const letters = {
   - With all my love <span class="pink">✿</span>
 </span>
   `,
-  dad: `
+    dad: `
   <p>
   On this special day, I want to thank you for being my guide and strength. Your support, wisdom, and encouragement have shaped my life in the best way.
   <br>
@@ -1328,7 +1340,7 @@ const letters = {
   - With love and respect <span class="pink">✿</span>
 </span>
   `,
-  brother: `
+    brother: `
   <p>
   On this special day, I just want to remind you how much you mean to me. Having you as my brother is one of the greatest blessings in my life.
   <br>
@@ -1348,7 +1360,7 @@ const letters = {
   - With love and care <span class="pink">✿</span>
 </span>
   `,
-  sister: `
+    sister: `
   <p>
   On this special day, I just want to tell you how special you are to me. You are not just my sister, but also my friend, my support, and my happiness.
   <br>
@@ -1368,18 +1380,20 @@ const letters = {
   - With all my love <span class="pink">✿</span>
 </span>
   `,
-};
+  };
 
-const letterBox = document.querySelector(".letter_content");
+  const letterBox = document.querySelector(".letter_content");
 
-// if (type && letters[type] && letterBox) {
-//   document.querySelector(".letter_content").innerHTML = letters[type];
-// }
+  // if (type && letters[type] && letterBox) {
+  //   document.querySelector(".letter_content").innerHTML = letters[type];
+  // }
 
-if (customMessageParam && letterBox) {
-  const decodedMessage = decodeURIComponent(customMessageParam);
+  if (customMessageParam && letterBox) {
+    const decodedMessage = savedBirthday
+      ? customMessageParam
+      : decodeImageUrl(customMessageParam);
 
-  letterBox.innerHTML = `
+    letterBox.innerHTML = `
     <p class="custom_letter_message"></p>
 
     <br>
@@ -1390,310 +1404,320 @@ if (customMessageParam && letterBox) {
     </span>
   `;
 
-  letterBox.querySelector(".custom_letter_message").textContent =
-    decodedMessage;
-} else if (type && letters[type] && letterBox) {
-  letterBox.innerHTML = letters[type];
-}
+    letterBox.querySelector(".custom_letter_message").textContent =
+      decodedMessage;
+  } else if (type && letters[type] && letterBox) {
+    letterBox.innerHTML = letters[type];
+  }
 
-// Share & Copy Link Button
+  // Share & Copy Link Button
 
-function copyLink() {
-  const link = window.location.href;
+  function copyLink() {
+    const link = window.location.href;
 
-  navigator.clipboard.writeText(link);
+    navigator.clipboard.writeText(link);
 
-  alert("Link copied! 🔗");
-}
+    alert("Link copied! 🔗");
+  }
 
-// Whatsapp Copy Link
+  // Whatsapp Copy Link
 
-function shareWhatsApp() {
-  const link = window.location.href;
+  function shareWhatsApp() {
+    const link = window.location.href;
 
-  const message = `🎉  I made something special for you!\n${link}`;
+    const message = `🎉  I made something special for you!\n${link}`;
 
-  window.open(`https://wa.me/?text=${encodeURIComponent(message)}`);
-}
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`);
+  }
 
-function editAgain() {
-  const savedTheme = localStorage.getItem("theme");
+  function editAgain() {
+    const savedTheme = theme;
 
-  if (savedTheme) {
-    const themeRadio = document.querySelector(
-      `input[name="themeType"][value="${savedTheme}"]`,
-    );
+    if (savedTheme) {
+      const themeRadio = document.querySelector(
+        `input[name="themeType"][value="${savedTheme}"]`,
+      );
 
-    if (themeRadio) {
-      themeRadio.checked = true;
+      if (themeRadio) {
+        themeRadio.checked = true;
+      }
     }
-  }
 
-  const savedGalleryType = localStorage.getItem("galleryType");
+    const savedGalleryType = galleryType;
 
-  if (savedGalleryType) {
-    const galleryRadio = document.querySelector(
-      `input[name="galleryType"][value="${savedGalleryType}"]`,
-    );
+    if (savedGalleryType) {
+      const galleryRadio = document.querySelector(
+        `input[name="galleryType"][value="${savedGalleryType}"]`,
+      );
 
-    if (galleryRadio) {
-      galleryRadio.checked = true;
-      galleryRadio.dispatchEvent(new Event("change"));
+      if (galleryRadio) {
+        galleryRadio.checked = true;
+        galleryRadio.dispatchEvent(new Event("change"));
+      }
     }
-  }
 
-  const savedAnimatedGallery =
-    JSON.parse(localStorage.getItem("animatedGallery")) || [];
+    const savedAnimatedGallery = [...animatedGallery];
 
-  if (savedAnimatedGallery.length) {
-    animatedImages = savedAnimatedGallery;
+    if (savedAnimatedGallery.length) {
+      animatedImages = [...savedAnimatedGallery];
 
-    uploadedCount = savedAnimatedGallery.length;
+      uploadedCount = savedAnimatedGallery.length;
 
-    updateAnimatedGalleryCounter();
-  }
-
-  const overlay = document.getElementById("form_overlay");
-
-  overlay.style.display = "flex";
-
-  isEditingPopup = true;
-
-  themeToggleBtn.style.display = "none";
-
-  document.body.style.overflow = "hidden";
-
-  document.getElementById("nameInput").value = params.get("name") || "";
-
-  document.getElementById("typeInput").value = params.get("type") || "";
-
-  typeInput.dispatchEvent(new Event("change"));
-
-  if (params.get("message")) {
-    document.querySelector('input[value="custom"]').checked = true;
-
-    customMessage.style.display = "block";
-
-    customMessage.value = decodeURIComponent(params.get("message"));
-  }
-
-  images[0] = encodeURIComponent(params.get("img1") || "");
-  images[1] = encodeURIComponent(params.get("img2") || "");
-  images[2] = encodeURIComponent(params.get("img3") || "");
-
-  uploadBoxes.forEach((box, i) => {
-    if (images[i]) {
-      box.innerHTML = "Image Uploaded ✅";
+      updateAnimatedGalleryCounter();
     }
+
+    const overlay = document.getElementById("form_overlay");
+
+    overlay.style.display = "flex";
+
+    isEditingPopup = true;
+
+    themeToggleBtn.style.display = "none";
+
+    const actionMenu = document.querySelector(".action_menu");
+    if (actionMenu) {
+      actionMenu.style.display = "none";
+    }
+    $(".action_items").hide();
+    $("#mainActionBtn").show();
+    $("#scrollTopBtn").hide();
+
+    document.body.style.overflow = "hidden";
+
+    document.getElementById("nameInput").value = params.get("name") || "";
+
+    document.getElementById("typeInput").value = params.get("type") || "";
+
+    typeInput.dispatchEvent(new Event("change"));
+
+    if (params.get("message")) {
+      document.querySelector('input[value="custom"]').checked = true;
+
+      customMessage.style.display = "block";
+
+      customMessage.value = savedBirthday
+        ? params.get("message")
+        : decodeImageUrl(params.get("message"));
+    }
+
+    images[0] = encodeURIComponent(params.get("img1") || "");
+    images[1] = encodeURIComponent(params.get("img2") || "");
+    images[2] = encodeURIComponent(params.get("img3") || "");
+
+    uploadBoxes.forEach((box, i) => {
+      if (images[i]) {
+        box.innerHTML = "Image Uploaded ✅";
+      }
+    });
+
+    setTimeout(() => {
+      document.getElementById("nameInput").focus();
+    }, 100);
+  }
+
+  let draggedSong = null;
+
+  let editMode = false;
+
+  function togglePlayList() {
+    editMode = !editMode;
+
+    renderSongs();
+  }
+
+  const playlistOverlay = document.getElementById("playlist_overlay");
+
+  function openPlay() {
+    playlistOverlay.style.display = "flex";
+
+    tempSongs = [...allSongs];
+
+    resetPlaylistChanged();
+
+    renderPlaylistEditor();
+  }
+
+  function closePlay() {
+    tempSongs = [...allSongs];
+
+    resetPlaylistChanged();
+
+    playlistOverlay.style.display = "none";
+
+    document.getElementById("songTitle").value = "";
+    document.getElementById("songArtist").value = "";
+    document.getElementById("songFile").value = "";
+  }
+
+  applyMusicChangesBtn.addEventListener("click", () => {
+    allSongs = [...tempSongs];
+
+    customSongs = allSongs.filter((song) => !song.default);
+
+    renderSongs();
+    renderPlaylistEditor();
+
+    resetPlaylistChanged();
+
+    closePlay();
   });
 
-  setTimeout(() => {
-    document.getElementById("nameInput").focus();
-  }, 100);
-}
+  const addSong = document.getElementById("addSong");
 
-let draggedSong = null;
+  if (addSong) {
+    addSong.addEventListener("click", async () => {
+      const title = document.getElementById("songTitle");
+      const artist = document.getElementById("songArtist");
+      const fileInput = document.getElementById("songFile");
 
-let editMode = false;
+      const titleValue = title.value.trim();
+      const artistValue = artist.value.trim();
+      const file = fileInput.files[0];
 
-function togglePlayList() {
-  editMode = !editMode;
+      if (!titleValue || !artistValue || !file) {
+        alert("Please Fill All The Details");
+        return;
+      }
 
-  renderSongs();
-}
+      addSong.disabled = true;
+      addSong.innerHTML = "Uploading...";
 
-const playlistOverlay = document.getElementById("playlist_overlay");
+      try {
+        const audioURL = await uploadSong(file);
 
-function openPlay() {
-  playlistOverlay.style.display = "flex";
+        const song = {
+          id: Date.now(),
+          title: titleValue,
+          artist: artistValue,
+          audioURL,
+        };
 
-  tempSongs = [...allSongs];
+        tempSongs.push(song);
 
-  resetPlaylistChanged();
+        markPlaylistChanged();
 
-  renderPlaylistEditor();
-}
+        renderPlaylistEditor();
 
-function closePlay() {
-  tempSongs = [...allSongs];
+        // console.log(customSongs);
 
-  resetPlaylistChanged();
+        alert("Song Captured Successfully 🎵");
 
-  playlistOverlay.style.display = "none";
+        title.value = "";
+        artist.value = "";
+        fileInput.value = "";
+      } catch (err) {
+        console.error(err);
+        alert("Upload Failed ❌");
+      }
 
-  document.getElementById("songTitle").value = "";
-  document.getElementById("songArtist").value = "";
-  document.getElementById("songFile").value = "";
-}
+      addSong.disabled = false;
+      addSong.innerHTML = "Add Song";
+    });
+  }
 
-applyMusicChangesBtn.addEventListener("click", () => {
-  allSongs = [...tempSongs];
+  function createSongElement(song, index) {
+    const div = document.createElement("div");
 
-  customSongs = allSongs.filter((song) => !song.default);
+    div.dataset.id = song.id;
 
-  localStorage.setItem("allSongs", JSON.stringify(allSongs));
-  localStorage.setItem("customSongs", JSON.stringify(customSongs));
+    div.className = song.default ? "music default_song" : "music custom_song";
 
-  renderSongs();
-  renderPlaylistEditor();
+    const tracknum = index + 1;
 
-  resetPlaylistChanged();
-
-  closePlay();
-});
-
-const addSong = document.getElementById("addSong");
-
-if (addSong) {
-  addSong.addEventListener("click", async () => {
-    const title = document.getElementById("songTitle");
-    const artist = document.getElementById("songArtist");
-    const fileInput = document.getElementById("songFile");
-
-    const titleValue = title.value.trim();
-    const artistValue = artist.value.trim();
-    const file = fileInput.files[0];
-
-    if (!titleValue || !artistValue || !file) {
-      alert("Please Fill All The Details");
-      return;
-    }
-
-    addSong.disabled = true;
-    addSong.innerHTML = "Uploading...";
-
-    try {
-      const audioURL = await uploadSong(file);
-
-      const song = {
-        id: Date.now(),
-        title: titleValue,
-        artist: artistValue,
-        audioURL,
-      };
-
-      tempSongs.push(song);
-
-      markPlaylistChanged();
-
-      renderPlaylistEditor();
-
-      // console.log(customSongs);
-
-      alert("Song Captured Successfully 🎵");
-
-      title.value = "";
-      artist.value = "";
-      fileInput.value = "";
-    } catch (err) {
-      console.error(err);
-      alert("Upload Failed ❌");
-    }
-
-    addSong.disabled = false;
-    addSong.innerHTML = "Add Song";
-  });
-}
-
-function createSongElement(song, index) {
-  const div = document.createElement("div");
-
-  div.dataset.id = song.id;
-
-  div.className = song.default ? "music default_song" : "music custom_song";
-
-  const tracknum = index + 1;
-
-  div.innerHTML = `
+    div.innerHTML = `
         <div class="music_child1">
             <p class="track_num">${String(tracknum).padStart(2, "0")}</p>
             <span class="music_icon">▶</span>
             <span>🎵</span>
             <div class="music_text">
-                <p class="track_name">${song.title}</p>
-                <p class="track_artist">${song.artist}</p>
+                <p class="track_name"></p>
+                <p class="track_artist"></p>
             </div>
         </div>
 
-        <audio src="${song.audioURL}"></audio>
+        <audio></audio>
     `;
 
-  setUpTrack(div);
-  // playlist.append(div);
-  return div;
-}
+    div.querySelector(".track_name").textContent = song.title;
+    div.querySelector(".track_artist").textContent = song.artist;
+    div.querySelector("audio").src = song.audioURL;
 
-function refreshCustom() {
-  document.querySelectorAll(".custom_song").forEach((el) => el.remove());
+    setUpTrack(div);
+    // playlist.append(div);
+    return div;
+  }
+
+  function refreshCustom() {
+    document.querySelectorAll(".custom_song").forEach((el) => el.remove());
+
+    renderSongs();
+  }
+
+  function renderSongs() {
+    const playlist = document.querySelector(".playlist_music");
+
+    if (!playlist) return;
+
+    playlist.innerHTML = "";
+
+    allSongs.forEach((song, index) => {
+      playlist.append(createSongElement(song, index));
+    });
+  }
 
   renderSongs();
-}
 
-function renderSongs() {
-  const playlist = document.querySelector(".playlist_music");
+  function renderPlaylistEditor() {
+    const editor = document.querySelector(".playlist_editor");
 
-  if (!playlist) return;
+    editor.innerHTML = "";
 
-  playlist.innerHTML = "";
+    tempSongs.forEach((song, index) => {
+      const row = document.createElement("div");
 
-  allSongs.forEach((song, index) => {
-    playlist.append(createSongElement(song, index));
-  });
-}
+      row.draggable = true;
 
-renderSongs();
+      row.dataset.id = song.id;
 
-function renderPlaylistEditor() {
-  const editor = document.querySelector(".playlist_editor");
+      row.addEventListener("dragstart", () => {
+        draggedSong = song.id;
 
-  editor.innerHTML = "";
+        row.classList.add("dragging");
+      });
 
-  tempSongs.forEach((song, index) => {
-    const row = document.createElement("div");
+      row.addEventListener("dragend", () => {
+        row.classList.remove("dragging");
+      });
 
-    row.draggable = true;
+      row.addEventListener("dragover", (e) => {
+        e.preventDefault();
+      });
 
-    row.dataset.id = song.id;
+      row.addEventListener("drop", (e) => {
+        e.preventDefault();
 
-    row.addEventListener("dragstart", () => {
-      draggedSong = song.id;
+        if (draggedSong === song.id) return;
 
-      row.classList.add("dragging");
-    });
+        const fromIndex = tempSongs.findIndex((s) => s.id === draggedSong);
 
-    row.addEventListener("dragend", () => {
-      row.classList.remove("dragging");
-    });
+        const toIndex = tempSongs.findIndex((s) => s.id === song.id);
 
-    row.addEventListener("dragover", (e) => {
-      e.preventDefault();
-    });
+        const [movedSong] = tempSongs.splice(fromIndex, 1);
 
-    row.addEventListener("drop", (e) => {
-      e.preventDefault();
+        tempSongs.splice(toIndex, 0, movedSong);
 
-      if (draggedSong === song.id) return;
+        markPlaylistChanged();
+        renderPlaylistEditor();
 
-      const fromIndex = tempSongs.findIndex((s) => s.id === draggedSong);
+        renderSongs();
+        renderPlaylistEditor();
+      });
 
-      const toIndex = tempSongs.findIndex((s) => s.id === song.id);
+      row.className = "editor_song";
 
-      const [movedSong] = tempSongs.splice(fromIndex, 1);
-
-      tempSongs.splice(toIndex, 0, movedSong);
-
-      markPlaylistChanged();
-      renderPlaylistEditor();
-
-      renderSongs();
-      renderPlaylistEditor();
-    });
-
-    row.className = "editor_song";
-
-    row.innerHTML = `
+      row.innerHTML = `
       <span class="drag_handle">☰</span>
-      <span>${song.title}</span>
+      <span class="editor_song_title"></span>
       <button
         class="editor_delete"
         data-id="${song.id}"
@@ -1702,487 +1726,496 @@ function renderPlaylistEditor() {
       </button>
     `;
 
-    editor.append(row);
-  });
-}
+      row.querySelector(".editor_song_title").textContent = song.title;
 
-document.addEventListener("click", (e) => {
-  if (e.target.classList.contains("editor_delete")) {
-    const id = Number(e.target.dataset.id);
-
-    tempSongs = tempSongs.filter((song) => song.id !== id);
-
-    markPlaylistChanged();
-
-    renderPlaylistEditor();
-  }
-});
-
-const dot = document.getElementById("cursor_dot");
-const ring = document.getElementById("cursor_ring");
-
-let ringX = 0,
-  ringY = 0;
-
-let mouseX = 0,
-  mouseY = 0;
-
-document.addEventListener("mousemove", function (e) {
-  mouseX = e.clientX;
-  mouseY = e.clientY;
-
-  dot.style.left = mouseX + "px";
-  dot.style.top = mouseY + "px";
-
-  ring.style.left = mouseX + "px";
-  ring.style.top = mouseY + "px";
-});
-
-function animateRing() {
-  ringX += (mouseX - ringX) * 1.0;
-  ringY += (mouseY - ringY) * 1.0;
-
-  ring.style.left = ringX + "px";
-  ring.style.top = ringY + "px";
-
-  requestAnimationFrame(animateRing);
-}
-
-animateRing();
-
-document.addEventListener("mouseover", (e) => {
-  if (
-    e.target.matches(
-      "a, button, input, textarea, select, label,.upload_box,.photo_child1,.photo_child2,.photo_child3",
-    )
-  ) {
-    dot.classList.add("hovered");
-    ring.classList.add("hovered");
-  }
-});
-
-document.addEventListener("mouseout", (e) => {
-  if (
-    e.target.closest(
-      "a, button, input, textarea, select, label,.upload_box,.photo_child1,.photo_child2,.photo_child3",
-    )
-  ) {
-    dot.classList.remove("hovered");
-    ring.classList.remove("hovered");
-  }
-});
-
-document.addEventListener("mouseleave", function () {
-  dot.style.opacity = "0";
-  ring.style.opacity = "0";
-});
-
-document.addEventListener("mouseenter", function () {
-  dot.style.opacity = "1";
-  ring.style.opacity = "0.4";
-});
-
-function closeEditPopup() {
-  isEditingPopup = false;
-
-  const overlay = document.getElementById("form_overlay");
-
-  overlay.style.display = "none";
-
-  if (params.has("name")) {
-    themeToggleBtn.style.display = "flex";
-  }
-
-  document.body.style.overflow = "auto";
-  playlistOverlay.style.display = "none";
-}
-
-function openEditPopup() {
-  const overlay = document.getElementById("form_overlay");
-
-  overlay.style.display = "flex";
-  document.body.style.overflow = "hidden";
-
-  setTimeout(() => {
-    document.getElementById("nameInput").focus();
-  }, 100);
-}
-
-$(window).on("scroll", function () {
-  let scrollTop = $(window).scrollTop();
-
-  let docHeight = $(document).height() - $(window).height();
-
-  let progress = (scrollTop / docHeight) * 100;
-
-  $("#progress_bar").css("width", progress + "%");
-});
-
-// JQuery
-
-$(function () {
-  $("#mainActionBtn").click(function () {
-    $(this).hide();
-    $(".action_items").slideDown(300);
-  });
-
-  $("#closeActionBtn").click(function () {
-    $(".action_items").slideUp(300, function () {
-      $("#mainActionBtn").show();
+      editor.append(row);
     });
-  });
+  }
 
-  $(window).scroll(function () {
-    if ($(this).scrollTop() > 300) {
-      $("#scrollTopBtn").fadeIn();
-      $("#themeToggleBtn").addClass("moveUp");
-    } else {
-      $("#scrollTopBtn").fadeOut();
-      $("#themeToggleBtn").removeClass("moveUp");
+  document.addEventListener("click", (e) => {
+    if (e.target.classList.contains("editor_delete")) {
+      const id = Number(e.target.dataset.id);
+
+      tempSongs = tempSongs.filter((song) => song.id !== id);
+
+      markPlaylistChanged();
+
+      renderPlaylistEditor();
     }
   });
 
-  $("#scrollTopBtn").click(function () {
-    $("html,body").animate(
-      {
-        scrollTop: 0,
-      },
-      700,
-    );
-  });
-  $(".flex a").on("click", function (e) {
-    e.preventDefault();
+  const dot = document.getElementById("cursor_dot");
+  const ring = document.getElementById("cursor_ring");
 
-    const target = $(this).attr("href");
+  let ringX = 0,
+    ringY = 0;
 
-    $("html, body").animate(
-      {
-        scrollTop: $(target).offset().top - 70,
-      },
-      900,
-    );
-  });
-});
+  let mouseX = 0,
+    mouseY = 0;
 
-// Dark/ Light Mode Button
+  document.addEventListener("mousemove", function (e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
 
-themeToggleBtn.addEventListener("click", () => {
-  document.body.classList.toggle("dark");
+    dot.style.left = mouseX + "px";
+    dot.style.top = mouseY + "px";
 
-  document.querySelectorAll(".theme_card_preview").forEach((card) => {
-    card.classList.toggle("dark");
+    ring.style.left = mouseX + "px";
+    ring.style.top = mouseY + "px";
   });
 
-  const isDark = document.body.classList.contains("dark");
-  localStorage.setItem("darkMode", isDark);
-  themeToggleBtn.textContent = isDark ? "☀️" : "🌙";
-});
+  function animateRing() {
+    ringX += (mouseX - ringX) * 1.0;
+    ringY += (mouseY - ringY) * 1.0;
 
-// Theme Preview
+    ring.style.left = ringX + "px";
+    ring.style.top = ringY + "px";
 
-// ── Theme Preview ──
-document.addEventListener("DOMContentLoaded", () => {
-  const overlay = document.getElementById("themePreviewOverlay");
-  const closeBtn = document.getElementById("themePreviewClose");
-  const previewCard = document.getElementById("previewCard");
-  const previewTitle = document.getElementById("previewTitle");
-  const previewEmoji = document.getElementById("previewEmoji");
+    requestAnimationFrame(animateRing);
+  }
 
-  const themeInfo = {
-    classic: { label: "🎂 Classic Birthday", emoji: "🎂" },
-    floral: { label: "🌸 Floral Garden", emoji: "🌸" },
-    royal: { label: "👑 Royal Gold", emoji: "👑" },
-    galaxy: { label: "🌌 Midnight Galaxy", emoji: "🌌" },
-    romantic: { label: "💖 Rose Quartz", emoji: "💖" },
-  };
+  animateRing();
 
-  document.querySelectorAll(".previewBtn").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation(); // stop radio button from toggling
-      const theme = btn.dataset.theme;
+  document.addEventListener("mouseover", (e) => {
+    if (
+      e.target.matches(
+        "a, button, input, textarea, select, label,.upload_box,.photo_child1,.photo_child2,.photo_child3",
+      )
+    ) {
+      dot.classList.add("hovered");
+      ring.classList.add("hovered");
+    }
+  });
 
-      // Update modal content
-      previewCard.className = `preview_card ${theme}`;
-      previewTitle.textContent = themeInfo[theme].label + " Preview";
-      previewEmoji.textContent = themeInfo[theme].emoji;
+  document.addEventListener("mouseout", (e) => {
+    if (
+      e.target.closest(
+        "a, button, input, textarea, select, label,.upload_box,.photo_child1,.photo_child2,.photo_child3",
+      )
+    ) {
+      dot.classList.remove("hovered");
+      ring.classList.remove("hovered");
+    }
+  });
 
-      // Show modal
-      overlay.classList.add("active");
+  document.addEventListener("mouseleave", function () {
+    dot.style.opacity = "0";
+    ring.style.opacity = "0";
+  });
+
+  document.addEventListener("mouseenter", function () {
+    dot.style.opacity = "1";
+    ring.style.opacity = "0.4";
+  });
+
+  function closeEditPopup() {
+    isEditingPopup = false;
+
+    const overlay = document.getElementById("form_overlay");
+
+    overlay.style.display = "none";
+
+    if (params.has("name")) {
+      themeToggleBtn.style.display = "flex";
+      const actionMenu = document.querySelector(".action_menu");
+      if (actionMenu) {
+        actionMenu.style.display = "block";
+      }
+    }
+
+    document.body.style.overflow = "auto";
+    playlistOverlay.style.display = "none";
+  }
+
+  function openEditPopup() {
+    const actionMenu = document.querySelector(".action_menu");
+    if (actionMenu) {
+      actionMenu.style.display = "none";
+    }
+    $(".action_items").hide();
+    $("#mainActionBtn").show();
+    themeToggleBtn.style.display = "none";
+    const overlay = document.getElementById("form_overlay");
+
+    overlay.style.display = "flex";
+    document.body.style.overflow = "hidden";
+
+    setTimeout(() => {
+      document.getElementById("nameInput").focus();
+    }, 100);
+  }
+
+  $(window).on("scroll", function () {
+    let scrollTop = $(window).scrollTop();
+
+    let docHeight = $(document).height() - $(window).height();
+
+    let progress = (scrollTop / docHeight) * 100;
+
+    $("#progress_bar").css("width", progress + "%");
+  });
+
+  // JQuery
+
+  $(function () {
+    $("#mainActionBtn").click(function () {
+      $(this).hide();
+      $(".action_items").slideDown(300);
+    });
+
+    $("#closeActionBtn").click(function () {
+      $(".action_items").slideUp(300, function () {
+        $("#mainActionBtn").show();
+      });
+    });
+
+    $(window).scroll(function () {
+      if ($(this).scrollTop() > 300) {
+        $("#scrollTopBtn").fadeIn();
+      } else {
+        $("#scrollTopBtn").fadeOut();
+      }
+    });
+
+    $("#scrollTopBtn").click(function () {
+      $("html,body").animate(
+        {
+          scrollTop: 0,
+        },
+        700,
+      );
+    });
+    $(".flex a").on("click", function (e) {
+      e.preventDefault();
+
+      const target = $(this).attr("href");
+
+      $("html, body").animate(
+        {
+          scrollTop: $(target).offset().top - 70,
+        },
+        900,
+      );
     });
   });
 
-  // Close on X button
-  closeBtn.addEventListener("click", () => {
-    overlay.classList.remove("active");
+  // Dark/ Light Mode Button
+
+  themeToggleBtn.addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+
+    document.querySelectorAll(".theme_card_preview").forEach((card) => {
+      card.classList.toggle("dark");
+    });
+
+    const isDark = document.body.classList.contains("dark");
+    themeToggleBtn.innerHTML = `<span class="theme-icon">${isDark ? "☀️" : "🌙"}</span>`;
   });
 
-  // Close on clicking outside modal
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) overlay.classList.remove("active");
+  // Theme Preview
+
+  // ── Theme Preview ──
+  (() => {
+    const overlay = document.getElementById("themePreviewOverlay");
+    const closeBtn = document.getElementById("themePreviewClose");
+    const previewCard = document.getElementById("previewCard");
+    const previewTitle = document.getElementById("previewTitle");
+    const previewEmoji = document.getElementById("previewEmoji");
+
+    const themeInfo = {
+      classic: { label: "🎂 Classic Birthday", emoji: "🎂" },
+      floral: { label: "🌸 Floral Garden", emoji: "🌸" },
+      royal: { label: "👑 Royal Gold", emoji: "👑" },
+      galaxy: { label: "🌌 Midnight Galaxy", emoji: "🌌" },
+      romantic: { label: "💖 Rose Quartz", emoji: "💖" },
+    };
+
+    document.querySelectorAll(".previewBtn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation(); // stop radio button from toggling
+        const theme = btn.dataset.theme;
+
+        // Update modal content
+        previewCard.className = `preview_card ${theme}`;
+        previewTitle.textContent = themeInfo[theme].label + " Preview";
+        previewEmoji.textContent = themeInfo[theme].emoji;
+
+        // Show modal
+        overlay.classList.add("active");
+      });
+    });
+
+    // Close on X button
+    closeBtn.addEventListener("click", () => {
+      overlay.classList.remove("active");
+    });
+
+    // Close on clicking outside modal
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) overlay.classList.remove("active");
+    });
+  })();
+
+  // Image Preview
+
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  const minSwipeDistance = 50;
+
+  const imagePreviewButtons = document.querySelectorAll(".imagePreviewBtn");
+
+  const replaceInput = document.getElementById("replaceImageInput");
+
+  let replaceIndex = -1;
+
+  let animatedReplaceIndex = -1;
+
+  let draggedImageIndex = -1;
+
+  const replaceImageButtons = document.querySelectorAll(".replaceImageBtn");
+
+  replaceImageButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      replaceIndex = Number(button.dataset.index);
+      replaceInput.click();
+    });
   });
-});
 
-// Image Preview
+  replaceInput.addEventListener("change", async () => {
+    if (!replaceInput.files.length) return;
 
-let touchStartX = 0;
-let touchEndX = 0;
+    const file = replaceInput.files[0];
 
-const minSwipeDistance = 50;
+    // Animated Gallery
+    if (animatedReplaceIndex !== -1) {
+      const formData = new FormData();
 
-const imagePreviewButtons = document.querySelectorAll(".imagePreviewBtn");
+      formData.append("file", file);
+      formData.append("upload_preset", "birthday_upload");
 
-const replaceInput = document.getElementById("replaceImageInput");
+      try {
+        const res = await fetch(
+          "https://api.cloudinary.com/v1_1/demvl3niy/image/upload",
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
 
-let replaceIndex = -1;
+        const data = await res.json();
 
-let animatedReplaceIndex = -1;
+        tempAnimatedImages[animatedReplaceIndex] = data.secure_url;
 
-let draggedImageIndex = -1;
+        markGalleryChanged();
 
-const replaceImageButtons = document.querySelectorAll(".replaceImageBtn");
+        renderGalleryPreview();
+      } catch (err) {
+        alert("Image Replace Failed!");
+      }
 
-replaceImageButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    replaceIndex = Number(button.dataset.index);
-    replaceInput.click();
-  });
-});
+      animatedReplaceIndex = -1;
+    }
 
-replaceInput.addEventListener("change", async () => {
-  if (!replaceInput.files.length) return;
-
-  const file = replaceInput.files[0];
-
-  // Animated Gallery
-  if (animatedReplaceIndex !== -1) {
-    const formData = new FormData();
-
-    formData.append("file", file);
-    formData.append("upload_preset", "birthday_upload");
-
-    try {
-      const res = await fetch(
-        "https://api.cloudinary.com/v1_1/demvl3niy/image/upload",
-        {
-          method: "POST",
-          body: formData,
-        },
+    // Simple Gallery
+    else {
+      const uploadBox = document.querySelector(
+        `.upload_box[data-index="${replaceIndex}"]`,
       );
 
-      const data = await res.json();
-
-      tempAnimatedImages[animatedReplaceIndex] = data.secure_url;
-
-      markGalleryChanged();
-
-      renderGalleryPreview();
-    } catch (err) {
-      alert("Image Replace Failed!");
+      handleFile(file, replaceIndex, uploadBox, true);
     }
 
-    animatedReplaceIndex = -1;
-  }
+    replaceInput.value = "";
+  });
 
-  // Simple Gallery
-  else {
-    const uploadBox = document.querySelector(
-      `.upload_box[data-index="${replaceIndex}"]`,
+  const deleteImageButtons = document.querySelectorAll(".deleteImageBtn");
+
+  deleteImageButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const index = Number(button.dataset.index);
+      deleteImage(index);
+    });
+  });
+
+  const imagePreviewOverlay = document.querySelector(".image_preview_overlay");
+
+  const previewImage = document.getElementById("previewImage");
+
+  previewImage.addEventListener("touchstart", (e) => {
+    touchStartX = e.changedTouches[0].clientX;
+  });
+
+  previewImage.addEventListener("touchend", (e) => {
+    touchEndX = e.changedTouches[0].clientX;
+
+    const distance = touchStartX - touchEndX;
+
+    if (Math.abs(distance) < minSwipeDistance) return;
+
+    if (distance > 0) {
+      nextImageBtn.click();
+    } else {
+      prevImageBtn.click();
+    }
+  });
+
+  const closeImagePreview = document.querySelector(".closeImagePreview");
+
+  const prevImageBtn = document.getElementById("prevImage");
+
+  const nextImageBtn = document.getElementById("nextImage");
+
+  const imageCounter = document.getElementById("imageCounter");
+
+  let currentPreviewIndex = 0;
+
+  let previewIndexes = [];
+
+  function showPreviewImage(index) {
+    previewIndexes = [];
+
+    images.forEach((img, i) => {
+      if (img) {
+        previewIndexes.push(i);
+      }
+    });
+
+    previewMode = "simple";
+
+    currentPreviewIndex = previewIndexes.indexOf(index);
+
+    previewImage.src = decodeURIComponent(
+      images[previewIndexes[currentPreviewIndex]],
     );
-
-    handleFile(file, replaceIndex, uploadBox, true);
-  }
-
-  replaceInput.value = "";
-});
-
-const deleteImageButtons = document.querySelectorAll(".deleteImageBtn");
-
-deleteImageButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    const index = Number(button.dataset.index);
-    deleteImage(index);
-  });
-});
-
-const imagePreviewOverlay = document.querySelector(".image_preview_overlay");
-
-const previewImage = document.getElementById("previewImage");
-
-previewImage.addEventListener("touchstart", (e) => {
-  touchStartX = e.changedTouches[0].clientX;
-});
-
-previewImage.addEventListener("touchend", (e) => {
-  touchEndX = e.changedTouches[0].clientX;
-
-  const distance = touchStartX - touchEndX;
-
-  if (Math.abs(distance) < minSwipeDistance) return;
-
-  if (distance > 0) {
-    nextImageBtn.click();
-  } else {
-    prevImageBtn.click();
-  }
-});
-
-const closeImagePreview = document.querySelector(".closeImagePreview");
-
-const prevImageBtn = document.getElementById("prevImage");
-
-const nextImageBtn = document.getElementById("nextImage");
-
-const imageCounter = document.getElementById("imageCounter");
-
-let currentPreviewIndex = 0;
-
-let previewIndexes = [];
-
-function showPreviewImage(index) {
-  previewIndexes = [];
-
-  images.forEach((img, i) => {
-    if (img) {
-      previewIndexes.push(i);
-    }
-  });
-
-  previewMode = "simple";
-
-  currentPreviewIndex = previewIndexes.indexOf(index);
-
-  previewImage.src = decodeURIComponent(
-    images[previewIndexes[currentPreviewIndex]],
-  );
-  const uploadedImagesCount = images.filter((img) => img !== "").length;
-
-  imageCounter.textContent = `${currentPreviewIndex + 1} / ${previewIndexes.length}`;
-  imagePreviewOverlay.style.display = "flex";
-}
-
-// Open Preview
-
-imagePreviewButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    const index = Number(button.dataset.index);
-    showPreviewImage(index);
-  });
-});
-
-// Close Button
-
-closeImagePreview.addEventListener("click", closeImagePreviewModal);
-
-// Click Outside Close
-
-imagePreviewOverlay.addEventListener("click", (e) => {
-  if (e.target === imagePreviewOverlay) {
-    closeImagePreviewModal();
-  }
-});
-
-// Previous Button
-
-prevImageBtn.addEventListener("click", () => {
-  if (previewMode === "simple") {
-    currentPreviewIndex--;
-
-    if (currentPreviewIndex < 0) {
-      currentPreviewIndex = previewIndexes.length - 1;
-    }
-
-    const actualIndex = previewIndexes[currentPreviewIndex];
-
-    previewImage.src = decodeURIComponent(images[actualIndex]);
+    const uploadedImagesCount = images.filter((img) => img !== "").length;
 
     imageCounter.textContent = `${currentPreviewIndex + 1} / ${previewIndexes.length}`;
-  } else if (previewMode === "animated") {
-    currentPreviewIndex--;
-
-    if (currentPreviewIndex < 0) {
-      currentPreviewIndex = tempAnimatedImages.length - 1;
-    }
-
-    previewImage.src = tempAnimatedImages[currentPreviewIndex];
-
-    imageCounter.textContent = `${currentPreviewIndex + 1} / ${tempAnimatedImages.length}`;
+    imagePreviewOverlay.style.display = "flex";
   }
-});
 
-// Next Button
+  // Open Preview
 
-nextImageBtn.addEventListener("click", () => {
-  if (previewMode === "simple") {
-    currentPreviewIndex++;
+  imagePreviewButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const index = Number(button.dataset.index);
+      showPreviewImage(index);
+    });
+  });
 
-    if (currentPreviewIndex >= previewIndexes.length) {
-      currentPreviewIndex = 0;
+  // Close Button
+
+  closeImagePreview.addEventListener("click", closeImagePreviewModal);
+
+  // Click Outside Close
+
+  imagePreviewOverlay.addEventListener("click", (e) => {
+    if (e.target === imagePreviewOverlay) {
+      closeImagePreviewModal();
     }
+  });
 
-    const actualIndex = previewIndexes[currentPreviewIndex];
+  // Previous Button
 
-    previewImage.src = decodeURIComponent(images[actualIndex]);
+  prevImageBtn.addEventListener("click", () => {
+    if (previewMode === "simple") {
+      currentPreviewIndex--;
 
-    imageCounter.textContent = `${currentPreviewIndex + 1} / ${previewIndexes.length}`;
-  } else if (previewMode === "animated") {
-    currentPreviewIndex++;
+      if (currentPreviewIndex < 0) {
+        currentPreviewIndex = previewIndexes.length - 1;
+      }
 
-    if (currentPreviewIndex >= tempAnimatedImages.length) {
-      currentPreviewIndex = 0;
+      const actualIndex = previewIndexes[currentPreviewIndex];
+
+      previewImage.src = decodeURIComponent(images[actualIndex]);
+
+      imageCounter.textContent = `${currentPreviewIndex + 1} / ${previewIndexes.length}`;
+    } else if (previewMode === "animated") {
+      currentPreviewIndex--;
+
+      if (currentPreviewIndex < 0) {
+        currentPreviewIndex = tempAnimatedImages.length - 1;
+      }
+
+      previewImage.src = tempAnimatedImages[currentPreviewIndex];
+
+      imageCounter.textContent = `${currentPreviewIndex + 1} / ${tempAnimatedImages.length}`;
     }
+  });
 
-    previewImage.src = tempAnimatedImages[currentPreviewIndex];
+  // Next Button
 
-    imageCounter.textContent = `${currentPreviewIndex + 1} / ${tempAnimatedImages.length}`;
-  }
-});
+  nextImageBtn.addEventListener("click", () => {
+    if (previewMode === "simple") {
+      currentPreviewIndex++;
 
-// Animated Gallery Preview
+      if (currentPreviewIndex >= previewIndexes.length) {
+        currentPreviewIndex = 0;
+      }
 
-const galleryOverlay = document.querySelector(".gallery_preview_overlay");
+      const actualIndex = previewIndexes[currentPreviewIndex];
 
-const galleryGrid = document.getElementById("galleryPreviewGrid");
+      previewImage.src = decodeURIComponent(images[actualIndex]);
 
-const closeGalleryBtn = document.querySelector(".closeGalleryPreview");
+      imageCounter.textContent = `${currentPreviewIndex + 1} / ${previewIndexes.length}`;
+    } else if (previewMode === "animated") {
+      currentPreviewIndex++;
 
-// Gallery Opening
+      if (currentPreviewIndex >= tempAnimatedImages.length) {
+        currentPreviewIndex = 0;
+      }
 
-function renderGalleryPreview() {
-  galleryGrid.innerHTML = "";
+      previewImage.src = tempAnimatedImages[currentPreviewIndex];
 
-  tempAnimatedImages.forEach((img, index) => {
-    const card = document.createElement("div");
+      imageCounter.textContent = `${currentPreviewIndex + 1} / ${tempAnimatedImages.length}`;
+    }
+  });
 
-    card.className = "galleryCard";
+  // Animated Gallery Preview
 
-    card.draggable = true;
+  const galleryOverlay = document.querySelector(".gallery_preview_overlay");
 
-    card.addEventListener("dragstart", () => {
-      draggedImageIndex = index;
-      card.classList.add("dragging");
-    });
+  const galleryGrid = document.getElementById("galleryPreviewGrid");
 
-    card.addEventListener("dragend", () => {
-      card.classList.remove("dragging");
-    });
+  const closeGalleryBtn = document.querySelector(".closeGalleryPreview");
 
-    card.addEventListener("dragover", (e) => {
-      e.preventDefault();
-    });
+  // Gallery Opening
 
-    card.addEventListener("drop", (e) => {
-      e.preventDefault();
+  function renderGalleryPreview() {
+    galleryGrid.innerHTML = "";
 
-      if (draggedImageIndex === index) return;
-      const movedImage = tempAnimatedImages.splice(draggedImageIndex, 1)[0];
-      tempAnimatedImages.splice(index, 0, movedImage);
-      markGalleryChanged();
-      renderGalleryPreview();
-    });
+    tempAnimatedImages.forEach((img, index) => {
+      const card = document.createElement("div");
 
-    card.innerHTML = `
+      card.className = "galleryCard";
+
+      card.draggable = true;
+
+      card.addEventListener("dragstart", () => {
+        draggedImageIndex = index;
+        card.classList.add("dragging");
+      });
+
+      card.addEventListener("dragend", () => {
+        card.classList.remove("dragging");
+      });
+
+      card.addEventListener("dragover", (e) => {
+        e.preventDefault();
+      });
+
+      card.addEventListener("drop", (e) => {
+        e.preventDefault();
+
+        if (draggedImageIndex === index) return;
+        const movedImage = tempAnimatedImages.splice(draggedImageIndex, 1)[0];
+        tempAnimatedImages.splice(index, 0, movedImage);
+        markGalleryChanged();
+        renderGalleryPreview();
+      });
+
+      card.innerHTML = `
             <img
-                src="${img}"
                 data-index="${index}"
                 class="galleryPreviewImage"
             >
@@ -2206,214 +2239,237 @@ function renderGalleryPreview() {
             </div>
         `;
 
-    galleryGrid.appendChild(card);
-  });
-}
+      card.querySelector(".galleryPreviewImage").src = img;
 
-previewGalleryBtn.addEventListener("click", () => {
-  if (animatedImages.length === 0) {
-    alert("Please upload at least one image.");
-    return;
+      galleryGrid.appendChild(card);
+    });
   }
 
-  tempAnimatedImages = [...animatedImages];
+  previewGalleryBtn.addEventListener("click", () => {
+    if (animatedImages.length === 0) {
+      alert("Please upload at least one image.");
+      return;
+    }
 
-  resetGalleryChanged();
+    tempAnimatedImages = [...animatedImages];
 
-  renderGalleryPreview();
-
-  galleryOverlay.style.display = "flex";
-});
-
-// Close Gallery
-
-closeGalleryBtn.addEventListener("click", closeGalleryPreviewModal);
-
-// Gallery Close Outside
-
-galleryOverlay.addEventListener("click", (e) => {
-  if (e.target === galleryOverlay) {
-    closeGalleryPreviewModal();
-  }
-});
-
-// Thumbnail Open
-
-galleryGrid.addEventListener("click", (e) => {
-  if (e.target.classList.contains("animatedReplaceBtn")) {
-    animatedReplaceIndex = Number(e.target.dataset.index);
-    replaceInput.click();
-    return;
-  }
-
-  if (e.target.classList.contains("animatedDeleteBtn")) {
-    const index = Number(e.target.dataset.index);
-
-    tempAnimatedImages.splice(index, 1);
-
-    markGalleryChanged();
+    resetGalleryChanged();
 
     renderGalleryPreview();
 
-    return;
-  }
+    galleryOverlay.style.display = "flex";
+  });
 
-  if (!e.target.classList.contains("galleryPreviewImage")) return;
+  // Close Gallery
 
-  currentPreviewIndex = Number(e.target.dataset.index);
+  closeGalleryBtn.addEventListener("click", closeGalleryPreviewModal);
 
-  previewMode = "animated";
+  // Gallery Close Outside
 
-  previewImage.src = tempAnimatedImages[currentPreviewIndex];
-
-  imageCounter.textContent = `${currentPreviewIndex + 1} / ${animatedImages.length}`;
-
-  galleryOverlay.style.display = "none";
-  imagePreviewOverlay.style.display = "flex";
-});
-
-let previewMode = "simple";
-
-let isEditingPopup = false;
-
-document.addEventListener("keydown", handleKeyboardShortcuts);
-
-function closeImagePreviewModal() {
-  imagePreviewOverlay.style.display = "none";
-}
-
-function closeGalleryPreviewModal() {
-  galleryOverlay.style.display = "none";
-}
-
-function handleKeyboardShortcuts(e) {
-  if (e.key === "Escape") {
-    if (isEditingPopup && $("#form_overlay").is(":visible")) {
-      closeEditPopup();
-    }
-
-    if ($("#playlist_overlay").is(":visible")) {
-      closePlay();
-    }
-
-    if ($(".image_preview_overlay").is(":visible")) {
-      closeImagePreviewModal();
-    }
-
-    if ($(".gallery_preview_overlay").is(":visible")) {
+  galleryOverlay.addEventListener("click", (e) => {
+    if (e.target === galleryOverlay) {
       closeGalleryPreviewModal();
     }
+  });
+
+  // Thumbnail Open
+
+  galleryGrid.addEventListener("click", (e) => {
+    if (e.target.classList.contains("animatedReplaceBtn")) {
+      animatedReplaceIndex = Number(e.target.dataset.index);
+      replaceInput.click();
+      return;
+    }
+
+    if (e.target.classList.contains("animatedDeleteBtn")) {
+      const index = Number(e.target.dataset.index);
+
+      tempAnimatedImages.splice(index, 1);
+
+      markGalleryChanged();
+
+      renderGalleryPreview();
+
+      return;
+    }
+
+    if (!e.target.classList.contains("galleryPreviewImage")) return;
+
+    currentPreviewIndex = Number(e.target.dataset.index);
+
+    previewMode = "animated";
+
+    previewImage.src = tempAnimatedImages[currentPreviewIndex];
+
+    imageCounter.textContent = `${currentPreviewIndex + 1} / ${animatedImages.length}`;
+
+    galleryOverlay.style.display = "none";
+    imagePreviewOverlay.style.display = "flex";
+  });
+
+  let previewMode = "simple";
+
+  let isEditingPopup = false;
+
+  document.addEventListener("keydown", handleKeyboardShortcuts);
+
+  function closeImagePreviewModal() {
+    imagePreviewOverlay.style.display = "none";
   }
 
-  // Image Preview Navigation
+  function closeGalleryPreviewModal() {
+    galleryOverlay.style.display = "none";
+  }
 
-  if ($(".image_preview_overlay").is(":visible")) {
-    if (e.key === "ArrowLeft") {
+  function handleKeyboardShortcuts(e) {
+    if (e.key === "Escape") {
+      if (isEditingPopup && $("#form_overlay").is(":visible")) {
+        closeEditPopup();
+      }
+
+      if ($("#playlist_overlay").is(":visible")) {
+        closePlay();
+      }
+
+      if ($(".image_preview_overlay").is(":visible")) {
+        closeImagePreviewModal();
+      }
+
+      if ($(".gallery_preview_overlay").is(":visible")) {
+        closeGalleryPreviewModal();
+      }
+    }
+
+    // Image Preview Navigation
+
+    if ($(".image_preview_overlay").is(":visible")) {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        prevImageBtn.click();
+      }
+
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        nextImageBtn.click();
+      }
+    }
+
+    // Playlist Shortcuts
+
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+      return;
+    }
+
+    if (e.code === "Space") {
       e.preventDefault();
-      prevImageBtn.click();
+      toggleCurrentTrack();
     }
 
-    if (e.key === "ArrowRight") {
-      e.preventDefault();
-      nextImageBtn.click();
+    if (e.key.toLowerCase() === "n") {
+      nextTrack();
+    }
+
+    if (e.key.toLowerCase() === "p") {
+      previousTrack();
+    }
+
+    if (e.key.toLowerCase() === "m") {
+      if ($("#playlist_overlay").is(":visible")) {
+        closePlay();
+      } else {
+        openPlay();
+      }
     }
   }
 
-  // Playlist Shortcuts
+  // Live Network Capsule
 
-  if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
-    return;
-  }
+  const networkStatus = document.getElementById("networkStatus");
 
-  if (e.code === "Space") {
-    e.preventDefault();
-    toggleCurrentTrack();
-  }
+  let compactTimer = null;
 
-  if (e.key.toLowerCase() === "n") {
-    nextTrack();
-  }
-
-  if (e.key.toLowerCase() === "p") {
-    previousTrack();
-  }
-
-  if (e.key.toLowerCase() === "m") {
-    if ($("#playlist_overlay").is(":visible")) {
-      closePlay();
-    } else {
-      openPlay();
-    }
-  }
-}
-
-// Live Network Capsule
-
-const networkStatus = document.getElementById("networkStatus");
-
-let compactTimer = null;
-
-function scheduleCompact() {
-  clearTimeout(compactTimer);
-  compactTimer = setTimeout(() => {
-    networkStatus.classList.add("compact");
-  }, 5000);
-}
-
-function updateNetworkStatus() {
-  // Always expand back to full capsule so the change is visible
-  networkStatus.classList.remove("compact", "online", "offline");
-
-  if (navigator.onLine) {
-    networkStatus.classList.add("online");
-    networkStatus.querySelector(".status-text").textContent = "Online";
-    // Shrink to dot after 5s when online
-    scheduleCompact();
-  } else {
-    networkStatus.classList.add("offline");
-    networkStatus.querySelector(".status-text").textContent = "Offline";
-    // Keep offline capsule fully visible — don't auto-compact so user notices
+  function scheduleCompact() {
     clearTimeout(compactTimer);
-  }
-}
-
-window.addEventListener("online", updateNetworkStatus);
-window.addEventListener("offline", updateNetworkStatus);
-
-updateNetworkStatus();
-
-// Live Battery Status
-
-const batteryStatus = document.getElementById("batteryStatus");
-
-async function initBatteryStatus() {
-  if (!("getBattery" in navigator)) {
-    batteryStatus.style.display = "none";
-    return;
+    compactTimer = setTimeout(() => {
+      networkStatus.classList.add("compact");
+    }, 5000);
   }
 
-  const battery = await navigator.getBattery();
+  function updateNetworkStatus() {
+    // Always expand back to full capsule so the change is visible
+    networkStatus.classList.remove("compact", "online", "offline");
 
-  function updateBattery() {
-    const percent = Math.round(battery.level * 100);
-
-    if (battery.charging) {
-      batteryStatus.innerHTML = `<span class="battery-text">⚡ ${percent}%</span>`;
+    if (navigator.onLine) {
+      networkStatus.classList.add("online");
+      networkStatus.querySelector(".status-text").textContent = "Online";
+      // Shrink to dot after 5s when online
+      scheduleCompact();
     } else {
-      batteryStatus.innerHTML = `<span class="battery-text">🔋${percent}%</span>`;
-    }
-
-    if (percent <= 20) {
-      batteryStatus.style.background = "#e74c3c";
-    } else if (battery.charging) {
-      batteryStatus.style.background = "#2ecc71";
+      networkStatus.classList.add("offline");
+      networkStatus.querySelector(".status-text").textContent = "Offline";
+      // Keep offline capsule fully visible — don't auto-compact so user notices
+      clearTimeout(compactTimer);
     }
   }
 
-  updateBattery();
+  window.addEventListener("online", updateNetworkStatus);
+  window.addEventListener("offline", updateNetworkStatus);
 
-  battery.addEventListener("chargingchange", updateBattery);
-  battery.addEventListener("levelchange", updateBattery);
+  updateNetworkStatus();
+
+  // Live Battery Status
+
+  const batteryStatus = document.getElementById("batteryStatus");
+
+  async function initBatteryStatus() {
+    if (!("getBattery" in navigator)) {
+      batteryStatus.style.display = "none";
+      return;
+    }
+
+    const battery = await navigator.getBattery();
+
+    function updateBattery() {
+      const percent = Math.round(battery.level * 100);
+
+      if (battery.charging) {
+        batteryStatus.innerHTML = `<span class="battery-text">⚡ ${percent}%</span>`;
+      } else {
+        batteryStatus.innerHTML = `<span class="battery-text">🔋 ${percent}%</span>`;
+      }
+
+      if (percent <= 20) {
+        batteryStatus.style.background = "#e74c3c";
+        batteryStatus.style.color = "#fff";
+        batteryStatus.style.borderColor = "transparent";
+      } else if (battery.charging) {
+        batteryStatus.style.background = "#2ecc71";
+        batteryStatus.style.color = "#fff";
+        batteryStatus.style.borderColor = "transparent";
+      } else {
+        batteryStatus.style.background = "";
+        batteryStatus.style.color = "";
+        batteryStatus.style.borderColor = "";
+      }
+    }
+
+    updateBattery();
+
+    battery.addEventListener("chargingchange", updateBattery);
+    battery.addEventListener("levelchange", updateBattery);
+  }
+
+  initBatteryStatus();
+
+  Object.assign(window, {
+    generate,
+    closeEditPopup,
+    openPlay,
+    closePlay,
+    copyLink,
+    shareWhatsApp,
+    editAgain,
+  });
 }
 
-initBatteryStatus();
+startBirthdayPage();
