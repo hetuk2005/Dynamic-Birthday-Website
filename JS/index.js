@@ -888,6 +888,11 @@ You Can Upload ${15 - uploadedCount} More Images`,
 
   const themeToggleBtn = document.getElementById("themeToggleBtn");
 
+  const upgradeLegacyLinkBtn = document.getElementById("upgradeLegacyLinkBtn");
+  if (params.has("name") && !params.has("id") && upgradeLegacyLinkBtn) {
+    upgradeLegacyLinkBtn.style.display = "block";
+  }
+
   if (!params.has("name")) {
     themeToggleBtn.style.display = "none";
 
@@ -1428,6 +1433,84 @@ You Can Upload ${15 - uploadedCount} More Images`,
     const message = `🎉  I made something special for you!\n${link}`;
 
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`);
+  }
+
+  async function upgradeLegacyLink() {
+    if (params.has("id")) return;
+
+    const recipientName = params.get("name") || "";
+    const relationship = params.get("type") || "";
+    const message = params.get("message") || "";
+    const legacyTheme = ["classic", "royal", "galaxy", "floral", "romantic"].includes(theme)
+      ? theme
+      : "classic";
+    const legacyGalleryType = ["simple", "animated"].includes(galleryType)
+      ? galleryType
+      : "simple";
+
+    if (!recipientName.trim() || !relationship) {
+      alert("This old link is missing the name or relationship, so it cannot be converted.");
+      return;
+    }
+
+    const confirmed = confirm(
+      "This will create a new database-backed link using the details in this old URL. Missing photos, theme, or songs cannot be recovered and will use defaults. Continue?",
+    );
+    if (!confirmed) return;
+
+    const button = upgradeLegacyLinkBtn;
+    const originalText = button?.textContent || "Make a new short link ↗";
+    if (button) {
+      button.disabled = true;
+      button.textContent = "Creating new link…";
+    }
+
+    const legacyImages =
+      legacyGalleryType === "animated"
+        ? [...animatedGallery]
+        : [1, 2, 3].map((index) => params.get(`img${index}`) || null);
+
+    const playlist = allSongs.map((song) =>
+      song.default && Number.isInteger(Number(song.id))
+        ? { defaultId: Number(song.id) }
+        : {
+            title: song.title,
+            artist: song.artist || "",
+            audioURL: song.audioURL,
+          },
+    );
+
+    try {
+      const response = await fetch("/.netlify/functions/birthday", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipient_name: recipientName,
+          relationship,
+          message,
+          message_type: message ? "custom" : "default",
+          theme: legacyTheme,
+          gallery_type: legacyGalleryType,
+          images: legacyImages,
+          playlist,
+        }),
+      });
+
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.id) {
+        throw new Error(result?.error || "Could not convert this old link.");
+      }
+
+      const newLink = new URL(window.location.pathname, window.location.origin);
+      newLink.searchParams.set("id", result.id);
+      window.location.assign(newLink.href);
+    } catch (error) {
+      alert(error.message || "Could not convert this old link. Please try again.");
+      if (button) {
+        button.disabled = false;
+        button.textContent = originalText;
+      }
+    }
   }
 
   function editAgain() {
@@ -2469,6 +2552,7 @@ You Can Upload ${15 - uploadedCount} More Images`,
     copyLink,
     shareWhatsApp,
     editAgain,
+    upgradeLegacyLink,
   });
 }
 
