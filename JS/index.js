@@ -1454,7 +1454,7 @@ You Can Upload ${15 - uploadedCount} More Images`,
     }
 
     const confirmed = confirm(
-      "This will create a new database-backed link using the details in this old URL. Missing photos, theme, or songs cannot be recovered and will use defaults. Continue?",
+      "This will create a new database-backed link using details in this old URL and, if available, the old playlist saved in this browser. Missing photos or theme cannot be recovered and will use defaults. Continue?",
     );
     if (!confirmed) return;
 
@@ -1470,15 +1470,52 @@ You Can Upload ${15 - uploadedCount} More Images`,
         ? [...animatedGallery]
         : [1, 2, 3].map((index) => params.get(`img${index}`) || null);
 
-    const playlist = allSongs.map((song) =>
-      song.default && Number.isInteger(Number(song.id))
-        ? { defaultId: Number(song.id) }
-        : {
+    // Older versions kept the playlist in localStorage instead of the URL.
+    // Read it only as a one-time migration source when the user explicitly
+    // converts a legacy link; normal page views never restore browser data.
+    let playlistSource = allSongs;
+    if (!params.has("songs")) {
+      try {
+        const oldPlaylist = JSON.parse(localStorage.getItem("allSongs") || "null");
+        if (Array.isArray(oldPlaylist) && oldPlaylist.length) {
+          playlistSource = oldPlaylist;
+        } else {
+          const oldCustomSongs = JSON.parse(
+            localStorage.getItem("customSongs") || "null",
+          );
+          if (Array.isArray(oldCustomSongs) && oldCustomSongs.length) {
+            playlistSource = [...defaultSongs, ...oldCustomSongs];
+          }
+        }
+      } catch (error) {
+        console.warn("Could not read the old saved playlist for migration.", error);
+      }
+    }
+
+    const playlist = playlistSource
+      .slice(0, 30)
+      .map((song) => {
+        const defaultId = Number(
+          song.defaultId ?? (song.default ? song.id : Number.NaN),
+        );
+        if (Number.isInteger(defaultId) && defaultId >= 1 && defaultId <= 7) {
+          return { defaultId };
+        }
+
+        if (
+          typeof song.title === "string" &&
+          typeof song.artist === "string" &&
+          typeof song.audioURL === "string"
+        ) {
+          return {
             title: song.title,
-            artist: song.artist || "",
+            artist: song.artist,
             audioURL: song.audioURL,
-          },
-    );
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
 
     try {
       const response = await fetch("/.netlify/functions/birthday", {
