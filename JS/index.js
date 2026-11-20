@@ -289,51 +289,65 @@ async function startBirthdayPage() {
   const defaultSongs = [
     {
       id: 1,
-      title: "golden hour",
-      artist: "jVKE",
-      audioURL: "../Utili/Golden Hour.mp3",
+      title: "Baar Baar Ye Din Aaye",
+      artist: "Mohammed Rafi",
+      audioURL: "../Utili/Songs/Baar Baar Ye Din Aaye.mp3",
       default: true,
     },
     {
       id: 2,
-      title: "ilahi",
-      artist: "arjit sing",
-      audioURL: "../Utili/Ilahi.mp3",
+      title: "Happy Birthday Song",
+      artist: "Nakas Aziz",
+      audioURL: "../Utili/Songs/Happy Birthday Song.mp3",
       default: true,
     },
     {
       id: 3,
-      title: "iktara",
-      artist: "kavita seth",
-      audioURL: "../Utili/Iktara.mp3",
+      title: "Cutiepie",
+      artist: "Nakas Aziz",
+      audioURL: "../Utili/Songs/Cutiepie.mp3",
       default: true,
     },
     {
       id: 4,
-      title: "safarnama",
-      artist: "lucky ali",
-      audioURL: "../Utili/Safarnama.mp3",
+      title: "Ude Dil Befikre",
+      artist: "Jaideep",
+      audioURL: "../Utili/Songs/Ude Dil Befikre.mp3",
       default: true,
     },
     {
       id: 5,
-      title: "aashayein",
-      artist: "kk",
-      audioURL: "../Utili/Aashayein.mp3",
+      title: "Kar Gayi Chull",
+      artist: "Badshaa",
+      audioURL: "../Utili/Songs/Kar Gayi Chull.mp3",
       default: true,
     },
     {
       id: 6,
       title: "love you zindagi",
       artist: "jasleena royal",
-      audioURL: "../Utili/Love You Zindagi.mp3",
+      audioURL: "../Utili/Songs/Love You Zindagi.mp3",
       default: true,
     },
     {
       id: 7,
-      title: "phir se ud chala",
-      artist: "mohit chauhan",
-      audioURL: "../Utili/Phir Se Ud Chala.mp3",
+      title: "ilahi",
+      artist: "arjit sing",
+      audioURL: "../Utili/Songs/Ilahi.mp3",
+      default: true,
+    },
+    {
+      id: 8,
+      title: "Aaj Ki Party",
+      artist: "Mika Singh",
+      audioURL: "../Utili/Songs/Aaj Ki Party.mp3",
+      default: true,
+    },
+    {
+      id: 9,
+      title: "Gallan Goodiyaan",
+      artist: "Yashita Sharma",
+      audioURL: "../Utili/Songs/Gallan Goodiyaan.mp3",
       default: true,
     },
   ];
@@ -744,7 +758,11 @@ You Can Upload ${15 - uploadedCount} More Images`,
         const batchReader = new FileReader();
         batchReader.onload = (e) => {
           if (typeof renderLocalFilePreview === "function") {
-            renderLocalFilePreview(files[0], e.target.result, `Animated Batch (${files.length} images)`);
+            renderLocalFilePreview(
+              files[0],
+              e.target.result,
+              `Animated Batch (${files.length} images)`,
+            );
           }
         };
         batchReader.readAsDataURL(files[0]);
@@ -854,10 +872,19 @@ You Can Upload ${15 - uploadedCount} More Images`,
 
         const chosenDate = new Date(y, m, d, 0, 0, 0);
         const now = new Date();
-        const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+        const todayMidnight = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          0,
+          0,
+          0,
+        );
 
         if (chosenDate < todayMidnight) {
-          alert(`⚠️ Celebration Date Already Passed!\n\nThe date you selected (${bdayDate}) has already passed, so the countdown cannot be started.\n\nPlease select today's date for an instant celebration, or an upcoming future date!`);
+          alert(
+            `⚠️ Celebration Date Already Passed!\n\nThe date you selected (${bdayDate}) has already passed, so the countdown cannot be started.\n\nPlease select today's date for an instant celebration, or an upcoming future date!`,
+          );
           bdayDateInput.style.border = "2px solid #e74c3c";
           bdayDateInput.focus();
           return;
@@ -1508,7 +1535,13 @@ You Can Upload ${15 - uploadedCount} More Images`,
     const recipientName = params.get("name") || "";
     const relationship = params.get("type") || "";
     const message = params.get("message") || "";
-    const legacyTheme = ["classic", "royal", "galaxy", "floral", "romantic"].includes(theme)
+    const legacyTheme = [
+      "classic",
+      "royal",
+      "galaxy",
+      "floral",
+      "romantic",
+    ].includes(theme)
       ? theme
       : "classic";
     const legacyGalleryType = ["simple", "animated"].includes(galleryType)
@@ -1516,7 +1549,9 @@ You Can Upload ${15 - uploadedCount} More Images`,
       : "simple";
 
     if (!recipientName.trim() || !relationship) {
-      alert("This old link is missing the name or relationship, so it cannot be converted.");
+      alert(
+        "This old link is missing the name or relationship, so it cannot be converted.",
+      );
       return;
     }
 
@@ -1543,7 +1578,9 @@ You Can Upload ${15 - uploadedCount} More Images`,
     let playlistSource = allSongs;
     if (!params.has("songs")) {
       try {
-        const oldPlaylist = JSON.parse(localStorage.getItem("allSongs") || "null");
+        const oldPlaylist = JSON.parse(
+          localStorage.getItem("allSongs") || "null",
+        );
         if (Array.isArray(oldPlaylist) && oldPlaylist.length) {
           playlistSource = oldPlaylist;
         } else {
@@ -1555,7 +1592,10 @@ You Can Upload ${15 - uploadedCount} More Images`,
           }
         }
       } catch (error) {
-        console.warn("Could not read the old saved playlist for migration.", error);
+        console.warn(
+          "Could not read the old saved playlist for migration.",
+          error,
+        );
       }
     }
 
@@ -1609,7 +1649,9 @@ You Can Upload ${15 - uploadedCount} More Images`,
       newLink.searchParams.set("id", result.id);
       window.location.assign(newLink.href);
     } catch (error) {
-      alert(error.message || "Could not convert this old link. Please try again.");
+      alert(
+        error.message || "Could not convert this old link. Please try again.",
+      );
       if (button) {
         button.disabled = false;
         button.textContent = originalText;
@@ -2669,8 +2711,15 @@ You Can Upload ${15 - uploadedCount} More Images`,
 
     const toast = document.createElement("div");
     toast.className = `toast_item toast_${type}`;
-    
-    const icon = type === "success" ? "✅" : type === "error" ? "❌" : type === "warning" ? "⚠️" : "ℹ️";
+
+    const icon =
+      type === "success"
+        ? "✅"
+        : type === "error"
+          ? "❌"
+          : type === "warning"
+            ? "⚠️"
+            : "ℹ️";
     toast.innerHTML = `<span>${icon} ${message}</span><button style="background:none;border:none;color:#fff;cursor:pointer;font-weight:bold;margin-left:8px;" onclick="this.parentElement.remove()">✕</button>`;
 
     container.appendChild(toast);
@@ -2697,7 +2746,14 @@ You Can Upload ${15 - uploadedCount} More Images`,
     const cdHeader = document.getElementById("countdownHeader");
 
     const now = new Date();
-    const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    const todayMidnight = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      0,
+      0,
+      0,
+    );
 
     // Default Case: No date given -> Celebrate Today!
     if (!targetDateStr) {
@@ -2745,15 +2801,28 @@ You Can Upload ${15 - uploadedCount} More Images`,
     if (timerWrap) timerWrap.style.display = "block";
 
     const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
     ];
     const formattedTarget = `${monthNames[chosenMonth]} ${chosenDay}, ${chosenYear}`;
     if (cdHeader) {
       cdHeader.textContent = `Counting down to celebration on ${formattedTarget}! 🎂`;
     }
 
-    showToast(`Counting down to birthday on ${monthNames[chosenMonth]} ${chosenDay}! ⏳`, "info");
+    showToast(
+      `Counting down to birthday on ${monthNames[chosenMonth]} ${chosenDay}! ⏳`,
+      "info",
+    );
 
     function tick() {
       const current = new Date();
@@ -2767,7 +2836,9 @@ You Can Upload ${15 - uploadedCount} More Images`,
       }
 
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const hours = Math.floor(
+        (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+      );
       const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const secs = Math.floor((diff % (1000 * 60)) / 1000);
 
@@ -2786,7 +2857,9 @@ You Can Upload ${15 - uploadedCount} More Images`,
   // 3. Third External API: Quotes / Birthday Inspiration API
   async function fetchQuoteFromAPI() {
     const messageArea = document.getElementById("customMessage");
-    const customRadio = document.querySelector('input[name="messageType"][value="custom"]');
+    const customRadio = document.querySelector(
+      'input[name="messageType"][value="custom"]',
+    );
 
     showToast("Connecting to External Quotes API... 🌐", "info");
 
@@ -2795,7 +2868,7 @@ You Can Upload ${15 - uploadedCount} More Images`,
       "Count your life by smiles, not tears. Count your age by friends, not years. Happy, happiest birthday!",
       "Another year older, another year wiser, and a million times more incredible! Celebrate today to the fullest!",
       "May your special day bring you as much joy, warmth, and brightness as you bring to everyone around you!",
-      "Wishing you infinite reasons to smile, relentless success, and peace in every single heartbeat this year."
+      "Wishing you infinite reasons to smile, relentless success, and peace in every single heartbeat this year.",
     ];
 
     try {
@@ -2803,10 +2876,12 @@ You Can Upload ${15 - uploadedCount} More Images`,
       const res = await fetch("https://dummyjson.com/quotes/random");
       if (res.ok) {
         const data = await res.json();
-        const base = birthdayWisdom[Math.floor(Math.random() * birthdayWisdom.length)];
+        const base =
+          birthdayWisdom[Math.floor(Math.random() * birthdayWisdom.length)];
         quoteText = `${base}\n\n"${data.quote}" — ${data.author}`;
       } else {
-        quoteText = birthdayWisdom[Math.floor(Math.random() * birthdayWisdom.length)];
+        quoteText =
+          birthdayWisdom[Math.floor(Math.random() * birthdayWisdom.length)];
       }
 
       if (customRadio) customRadio.checked = true;
@@ -2817,7 +2892,8 @@ You Can Upload ${15 - uploadedCount} More Images`,
       showToast("External Quote loaded and applied to letter! ✨", "success");
     } catch (err) {
       console.warn("External Quotes API fallback:", err);
-      const fallbackQuote = birthdayWisdom[Math.floor(Math.random() * birthdayWisdom.length)];
+      const fallbackQuote =
+        birthdayWisdom[Math.floor(Math.random() * birthdayWisdom.length)];
       if (customRadio) customRadio.checked = true;
       if (messageArea) messageArea.value = fallbackQuote;
       showToast("Birthday quote applied to letter! ✨", "success");
@@ -2830,14 +2906,25 @@ You Can Upload ${15 - uploadedCount} More Images`,
   msgRadios.forEach((r) => {
     r.addEventListener("change", () => {
       if (quoteBtn) {
-        quoteBtn.style.display = r.value === "custom" && r.checked ? "inline-block" : "none";
+        quoteBtn.style.display =
+          r.value === "custom" && r.checked ? "inline-block" : "none";
       }
     });
   });
 
   function escapeHtml(str) {
     if (!str) return "";
-    return String(str).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+    return String(str).replace(
+      /[&<>"']/g,
+      (m) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[m],
+    );
   }
 
   // 4. Local JavaScript File Handling: FileReader Preview & Metadata Inspector
@@ -2848,7 +2935,7 @@ You Can Upload ${15 - uploadedCount} More Images`,
     if (!box || !thumbs) return;
 
     box.style.display = "block";
-    
+
     const img = document.createElement("img");
     img.className = "filereader_thumb";
     img.src = dataUrl;
@@ -2861,7 +2948,7 @@ You Can Upload ${15 - uploadedCount} More Images`,
 
     const sizeKb = (file.size / 1024).toFixed(1);
     if (meta) {
-      meta.innerHTML = `<strong>Local JS FileReader:</strong> Loaded <code>${escapeHtml(file.name)}</code> (${sizeKb} KB, ${file.type || 'image'}) locally into browser memory.`;
+      meta.innerHTML = `<strong>Local JS FileReader:</strong> Loaded <code>${escapeHtml(file.name)}</code> (${sizeKb} KB, ${file.type || "image"}) locally into browser memory.`;
     }
     showToast(`Instant preview generated locally via FileReader! 📸`, "info");
   }
@@ -2882,8 +2969,11 @@ You Can Upload ${15 - uploadedCount} More Images`,
       const sizeKb = (file.size / 1024).toFixed(2);
       const base64Len = e.target.result.length;
 
-      output.innerHTML = `Name: ${escapeHtml(file.name)}\nSize: ${sizeKb} KB (${file.size} bytes)\nMIME: ${file.type || 'unknown'}\nRead Time: ${elapsed} ms\nDataURL Length: ${base64Len.toLocaleString()} chars\nLocal File API: OK (FileReader.readAsDataURL)`;
-      showToast(`Inspected ${file.name} locally using FileReader API! 🔬`, "success");
+      output.innerHTML = `Name: ${escapeHtml(file.name)}\nSize: ${sizeKb} KB (${file.size} bytes)\nMIME: ${file.type || "unknown"}\nRead Time: ${elapsed} ms\nDataURL Length: ${base64Len.toLocaleString()} chars\nLocal File API: OK (FileReader.readAsDataURL)`;
+      showToast(
+        `Inspected ${file.name} locally using FileReader API! 🔬`,
+        "success",
+      );
     };
 
     reader.onerror = () => {
@@ -2909,15 +2999,22 @@ You Can Upload ${15 - uploadedCount} More Images`,
     document.body.removeChild(a);
     URL.revokeObjectURL(blobUrl);
 
-    showToast("Birthday card exported as JSON via client-side Blob! 📥", "success");
+    showToast(
+      "Birthday card exported as JSON via client-side Blob! 📥",
+      "success",
+    );
   }
 
   async function exportSingleRecordJSON(id) {
     try {
-      const res = await fetch(`/.netlify/functions/birthday?id=${encodeURIComponent(id)}`);
+      const res = await fetch(
+        `/.netlify/functions/birthday?id=${encodeURIComponent(id)}`,
+      );
       if (!res.ok) throw new Error("Could not retrieve record to export.");
       const data = await res.json();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json",
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -2926,7 +3023,10 @@ You Can Upload ${15 - uploadedCount} More Images`,
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      showToast(`Exported ${data.recipient_name}'s record as JSON! 📥`, "success");
+      showToast(
+        `Exported ${data.recipient_name}'s record as JSON! 📥`,
+        "success",
+      );
     } catch (err) {
       showToast(err.message, "error");
     }
@@ -2947,7 +3047,7 @@ Theme Style  : ${data.theme || "Classic"}
 ${data.message || "May every single petal of this day bring you the same warmth, happiness, and peace that you bring into the lives of everyone around you!"}
 
 -------------------- CURATED SOUNDTRACK ---------------------
-${(data.playlist || []).map((s, idx) => `  ${idx + 1}. ${s.title || 'Melody'} - ${s.artist || 'Special Artist'}`).join("\n")}
+${(data.playlist || []).map((s, idx) => `  ${idx + 1}. ${s.title || "Melody"} - ${s.artist || "Special Artist"}`).join("\n")}
 
 =============================================================
 Generated with Dynamic Birthday Celebration Platform
@@ -2979,21 +3079,30 @@ Generated with Dynamic Birthday Celebration Platform
           throw new Error("JSON file must contain recipient_name.");
         }
 
-        document.getElementById("nameInput").value = imported.recipient_name || "";
-        if (imported.relationship) document.getElementById("typeInput").value = imported.relationship;
+        document.getElementById("nameInput").value =
+          imported.recipient_name || "";
+        if (imported.relationship)
+          document.getElementById("typeInput").value = imported.relationship;
         if (imported.message) {
           document.getElementById("customMessage").value = imported.message;
-          const msgRadio = document.querySelector('input[name="messageType"][value="custom"]');
+          const msgRadio = document.querySelector(
+            'input[name="messageType"][value="custom"]',
+          );
           if (msgRadio) msgRadio.checked = true;
         }
         if (imported.theme) {
-          const tr = document.querySelector(`input[name="themeType"][value="${imported.theme}"]`);
+          const tr = document.querySelector(
+            `input[name="themeType"][value="${imported.theme}"]`,
+          );
           if (tr) tr.checked = true;
         }
 
         closeFileHub();
         openEditPopup();
-        showToast(`Loaded "${imported.recipient_name}" from local JSON! 📂`, "success");
+        showToast(
+          `Loaded "${imported.recipient_name}" from local JSON! 📂`,
+          "success",
+        );
       } catch (err) {
         showToast("Invalid JSON file: " + err.message, "error");
       }
@@ -3023,10 +3132,14 @@ Generated with Dynamic Birthday Celebration Platform
     const letterContent = document.querySelector(".letter_content");
     if (letterContent) letterContent.style.fontSize = val + "px";
 
-    document.querySelectorAll(".letter_content p, .letter_content span, .letter_div .head, .custom_letter_message").forEach((el) => {
-      el.style.fontSize = val + "px";
-      el.style.lineHeight = (Number(val) * 1.6) + "px";
-    });
+    document
+      .querySelectorAll(
+        ".letter_content p, .letter_content span, .letter_div .head, .custom_letter_message",
+      )
+      .forEach((el) => {
+        el.style.fontSize = val + "px";
+        el.style.lineHeight = Number(val) * 1.6 + "px";
+      });
   }
 
   function updateMusicVolume(val) {
@@ -3043,9 +3156,11 @@ Generated with Dynamic Birthday Celebration Platform
     document.body.style.setProperty("--rose", color);
 
     // Apply color to key theme elements across the webpage
-    document.querySelectorAll(".name, .nav_name, .memory_name").forEach((el) => {
-      el.style.color = color;
-    });
+    document
+      .querySelectorAll(".name, .nav_name, .memory_name")
+      .forEach((el) => {
+        el.style.color = color;
+      });
 
     const actionBtn = document.getElementById("mainActionBtn");
     if (actionBtn) actionBtn.style.background = color;
@@ -3065,10 +3180,13 @@ Generated with Dynamic Birthday Celebration Platform
       el.style.color = color;
     });
 
-    showToast(`Accent color set to ${color}! (Changes hero name, countdown & accents)`, "info");
+    showToast(
+      `Accent color set to ${color}! (Changes hero name, countdown & accents)`,
+      "info",
+    );
   }
 
-  function playCelebrationChime(notes = [523.25, 659.25, 783.99, 1046.50]) {
+  function playCelebrationChime(notes = [523.25, 659.25, 783.99, 1046.5]) {
     if (!soundEffectsEnabled) return;
     try {
       const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
@@ -3088,8 +3206,14 @@ Generated with Dynamic Birthday Celebration Platform
         osc.frequency.setValueAtTime(freq, startTime + idx * 0.09);
 
         gain.gain.setValueAtTime(0.0001, startTime + idx * 0.09);
-        gain.gain.exponentialRampToValueAtTime(0.25, startTime + idx * 0.09 + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + idx * 0.09 + 0.3);
+        gain.gain.exponentialRampToValueAtTime(
+          0.25,
+          startTime + idx * 0.09 + 0.02,
+        );
+        gain.gain.exponentialRampToValueAtTime(
+          0.0001,
+          startTime + idx * 0.09 + 0.3,
+        );
 
         osc.connect(gain);
         gain.connect(globalAudioCtx.destination);
@@ -3117,25 +3241,47 @@ Generated with Dynamic Birthday Celebration Platform
     btn.addEventListener("click", () => {
       playCelebrationChime();
       btn.style.transform = "scale(1.08)";
-      setTimeout(() => { btn.style.transform = ""; }, 250);
-      showToast(`Celebration wish shared: ${btn.textContent.trim()} ✨`, "success");
+      setTimeout(() => {
+        btn.style.transform = "";
+      }, 250);
+      showToast(
+        `Celebration wish shared: ${btn.textContent.trim()} ✨`,
+        "success",
+      );
     });
   });
 
   function toggleConfetti(enabled) {
-    const heroPetals = document.querySelectorAll(".floral_petals, .romantic_petals, .royal_sparkles, .galaxy_stars, .shooting_stars");
+    const heroPetals = document.querySelectorAll(
+      ".floral_petals, .romantic_petals, .royal_sparkles, .galaxy_stars, .shooting_stars",
+    );
     heroPetals.forEach((el) => (el.style.display = enabled ? "block" : "none"));
     showToast(`Festive particles ${enabled ? "enabled" : "disabled"}.`, "info");
   }
 
   function getActiveBirthdayPayload() {
-    const recipientName = params.get("name") || document.getElementById("nameInput")?.value || "Friend";
-    const relationship = params.get("type") || document.getElementById("typeInput")?.value || "friend";
-    const message = params.get("message") || document.getElementById("customMessage")?.value || "";
+    const recipientName =
+      params.get("name") ||
+      document.getElementById("nameInput")?.value ||
+      "Friend";
+    const relationship =
+      params.get("type") ||
+      document.getElementById("typeInput")?.value ||
+      "friend";
+    const message =
+      params.get("message") ||
+      document.getElementById("customMessage")?.value ||
+      "";
     const currentTheme = params.get("theme") || "classic";
     const currentGallery = params.get("gallery") || "simple";
-    const currentPhotos = currentGallery === "animated" ? animatedImages : images.map(decodeImageUrl);
-    const bdayDate = params.get("date") || document.getElementById("birthdayDateInput")?.value || "";
+    const currentPhotos =
+      currentGallery === "animated"
+        ? animatedImages
+        : images.map(decodeImageUrl);
+    const bdayDate =
+      params.get("date") ||
+      document.getElementById("birthdayDateInput")?.value ||
+      "";
 
     return {
       recipient_name: recipientName,
@@ -3145,7 +3291,7 @@ Generated with Dynamic Birthday Celebration Platform
       theme: currentTheme,
       gallery_type: currentGallery,
       images: currentPhotos,
-      playlist: allSongs
+      playlist: allSongs,
     };
   }
 
@@ -3194,7 +3340,7 @@ Generated with Dynamic Birthday Celebration Platform
     toggleSoundEffects,
     playCelebrationChime,
     openSettingsModal,
-    closeSettingsModal
+    closeSettingsModal,
   });
 }
 
