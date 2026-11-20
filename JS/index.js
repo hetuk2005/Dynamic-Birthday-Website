@@ -3,6 +3,9 @@
 async function startBirthdayPage() {
   const params = new URLSearchParams(window.location.search);
   let savedBirthday = null;
+  let currentMusicVolume = 0.8;
+  let soundEffectsEnabled = true;
+  let globalAudioCtx = null;
 
   if (params.has("id")) {
     const id = params.get("id");
@@ -162,6 +165,10 @@ async function startBirthdayPage() {
   function setUpTrack(track) {
     const audio = track.querySelector("audio");
     const icon = track.querySelector(".music_icon");
+
+    if (audio) {
+      audio.volume = currentMusicVolume;
+    }
 
     audio.addEventListener("ended", () => {
       track.classList.remove("active");
@@ -541,8 +548,25 @@ async function startBirthdayPage() {
     const maxSize = 5 * 1024 * 1024;
 
     if (file.size > maxSize) {
-      alert("Image Size Must Be Under 5MB!");
+      if (typeof showToast === "function") {
+        showToast("Image Size Must Be Under 5MB!", "warning");
+      } else {
+        alert("Image Size Must Be Under 5MB!");
+      }
       return;
+    }
+
+    // Local JavaScript FileReader Instant Preview (Local File Handling)
+    try {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (typeof renderLocalFilePreview === "function") {
+          renderLocalFilePreview(file, e.target.result, `Slot #${index + 1}`);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (e) {
+      console.warn("FileReader error:", e);
     }
 
     const formData = new FormData();
@@ -714,6 +738,19 @@ You Can Upload ${15 - uploadedCount} More Images`,
 
     imageCount.innerHTML = "⏳ Uploading...";
 
+    // Local JavaScript FileReader Instant Preview for animated gallery batch
+    if (files.length > 0) {
+      try {
+        const batchReader = new FileReader();
+        batchReader.onload = (e) => {
+          if (typeof renderLocalFilePreview === "function") {
+            renderLocalFilePreview(files[0], e.target.result, `Animated Batch (${files.length} images)`);
+          }
+        };
+        batchReader.readAsDataURL(files[0]);
+      } catch (e) {}
+    }
+
     try {
       for (const file of files) {
         if (!file.type.startsWith("image/")) {
@@ -799,10 +836,35 @@ You Can Upload ${15 - uploadedCount} More Images`,
     const btn = document.querySelector('button[onclick="generate()"]');
     const name = document.getElementById("nameInput").value.trim();
     const type = document.getElementById("typeInput").value;
+    const bdayDateInput = document.getElementById("birthdayDateInput");
+    const bdayDate = bdayDateInput ? bdayDateInput.value.trim() : "";
 
     if (!name || !type) {
       alert("Please Fill All Details!");
       return;
+    }
+
+    // Past Date Validation: If date is in the past, countdown cannot be started!
+    if (bdayDate) {
+      const parts = bdayDate.split("-");
+      if (parts.length === 3) {
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        const d = parseInt(parts[2], 10);
+
+        const chosenDate = new Date(y, m, d, 0, 0, 0);
+        const now = new Date();
+        const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+
+        if (chosenDate < todayMidnight) {
+          alert(`⚠️ Celebration Date Already Passed!\n\nThe date you selected (${bdayDate}) has already passed, so the countdown cannot be started.\n\nPlease select today's date for an instant celebration, or an upcoming future date!`);
+          bdayDateInput.style.border = "2px solid #e74c3c";
+          bdayDateInput.focus();
+          return;
+        } else {
+          bdayDateInput.style.border = "";
+        }
+      }
     }
 
     if (galleryType === "simple" && (!images[0] || !images[1] || !images[2])) {
@@ -868,6 +930,9 @@ You Can Upload ${15 - uploadedCount} More Images`,
         window.location.origin,
       );
       shareUrl.searchParams.set("id", result.id);
+      if (bdayDate) {
+        shareUrl.searchParams.set("date", bdayDate);
+      }
       window.location.assign(shareUrl.href);
     } catch (error) {
       if (loading) loading.style.display = "none";
@@ -876,6 +941,8 @@ You Can Upload ${15 - uploadedCount} More Images`,
       alert(error.message);
     }
   }
+
+  window.generate = generate;
 
   const overlay = document.getElementById("form_overlay");
 
@@ -1608,6 +1675,11 @@ You Can Upload ${15 - uploadedCount} More Images`,
 
     document.getElementById("typeInput").value = params.get("type") || "";
 
+    if (params.get("date")) {
+      const bdayInput = document.getElementById("birthdayDateInput");
+      if (bdayInput) bdayInput.value = params.get("date");
+    }
+
     typeInput.dispatchEvent(new Event("change"));
 
     if (params.get("message")) {
@@ -1945,6 +2017,8 @@ You Can Upload ${15 - uploadedCount} More Images`,
 
     document.body.style.overflow = "auto";
     playlistOverlay.style.display = "none";
+    const bdayInput = document.getElementById("birthdayDateInput");
+    if (bdayInput) bdayInput.style.border = "";
   }
 
   function openEditPopup() {
@@ -2581,15 +2655,546 @@ You Can Upload ${15 - uploadedCount} More Images`,
 
   initBatteryStatus();
 
+  // =========================================================================
+  // COLLEGE PROFESSOR REQUIREMENTS: TOASTS, CRUD, FILE HANDLING, 3RD API, NAV
+  // =========================================================================
+
+  // 1. Toast Notification System (Error & Status Feedback)
+  function showToast(message, type = "info") {
+    const container = document.getElementById("toastContainer");
+    if (!container) {
+      console.log(`[${type.toUpperCase()}] ${message}`);
+      return;
+    }
+
+    const toast = document.createElement("div");
+    toast.className = `toast_item toast_${type}`;
+    
+    const icon = type === "success" ? "✅" : type === "error" ? "❌" : type === "warning" ? "⚠️" : "ℹ️";
+    toast.innerHTML = `<span>${icon} ${message}</span><button style="background:none;border:none;color:#fff;cursor:pointer;font-weight:bold;margin-left:8px;" onclick="this.parentElement.remove()">✕</button>`;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = "0";
+      toast.style.transform = "translateY(-10px)";
+      setTimeout(() => toast.remove(), 300);
+    }, 3800);
+  }
+
+  // 2. Birthday Countdown & Celebration Logic
+  let countdownInterval = null;
+
+  function startCountdown(targetDateStr) {
+    if (countdownInterval) clearInterval(countdownInterval);
+
+    const banner = document.getElementById("todayCelebrationBanner");
+    const timerWrap = document.getElementById("countdownTimerWrap");
+    const cdDays = document.getElementById("cdDays");
+    const cdHours = document.getElementById("cdHours");
+    const cdMinutes = document.getElementById("cdMinutes");
+    const cdSeconds = document.getElementById("cdSeconds");
+    const cdHeader = document.getElementById("countdownHeader");
+
+    const now = new Date();
+    const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+
+    // Default Case: No date given -> Celebrate Today!
+    if (!targetDateStr) {
+      if (banner) banner.style.display = "block";
+      if (timerWrap) timerWrap.style.display = "none";
+      return;
+    }
+
+    const parts = targetDateStr.split("-");
+    if (parts.length < 3) {
+      if (banner) banner.style.display = "block";
+      if (timerWrap) timerWrap.style.display = "none";
+      return;
+    }
+
+    const chosenYear = parseInt(parts[0], 10);
+    const chosenMonth = parseInt(parts[1], 10) - 1; // 0-indexed
+    const chosenDay = parseInt(parts[2], 10);
+    const targetDate = new Date(chosenYear, chosenMonth, chosenDay, 0, 0, 0);
+
+    // CASE 1: IS IT TODAY?
+    if (targetDate.getTime() === todayMidnight.getTime()) {
+      if (banner) banner.style.display = "block";
+      if (timerWrap) timerWrap.style.display = "none";
+      showToast("🎉 Today is the Special Day! Happy Birthday! 🎂", "success");
+      return;
+    }
+
+    // CASE 2: PAST DATE
+    if (targetDate < todayMidnight) {
+      if (banner) banner.style.display = "none";
+      if (timerWrap) timerWrap.style.display = "block";
+      if (cdHeader) {
+        cdHeader.textContent = `⚠️ This celebration date (${targetDateStr}) has already passed!`;
+      }
+      if (cdDays) cdDays.textContent = "00";
+      if (cdHours) cdHours.textContent = "00";
+      if (cdMinutes) cdMinutes.textContent = "00";
+      if (cdSeconds) cdSeconds.textContent = "00";
+      return;
+    }
+
+    // CASE 3: FUTURE DATE -> LIVE COUNTDOWN
+    if (banner) banner.style.display = "none";
+    if (timerWrap) timerWrap.style.display = "block";
+
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    const formattedTarget = `${monthNames[chosenMonth]} ${chosenDay}, ${chosenYear}`;
+    if (cdHeader) {
+      cdHeader.textContent = `Counting down to celebration on ${formattedTarget}! 🎂`;
+    }
+
+    showToast(`Counting down to birthday on ${monthNames[chosenMonth]} ${chosenDay}! ⏳`, "info");
+
+    function tick() {
+      const current = new Date();
+      let diff = targetDate - current;
+
+      if (diff <= 0) {
+        if (banner) banner.style.display = "block";
+        if (timerWrap) timerWrap.style.display = "none";
+        clearInterval(countdownInterval);
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+      if (cdDays) cdDays.textContent = String(days).padStart(2, "0");
+      if (cdHours) cdHours.textContent = String(hours).padStart(2, "0");
+      if (cdMinutes) cdMinutes.textContent = String(mins).padStart(2, "0");
+      if (cdSeconds) cdSeconds.textContent = String(secs).padStart(2, "0");
+    }
+
+    tick();
+    countdownInterval = setInterval(tick, 1000);
+  }
+
+  startCountdown(params.get("date") || "");
+
+  // 3. Third External API: Quotes / Birthday Inspiration API
+  async function fetchQuoteFromAPI() {
+    const messageArea = document.getElementById("customMessage");
+    const customRadio = document.querySelector('input[name="messageType"][value="custom"]');
+
+    showToast("Connecting to External Quotes API... 🌐", "info");
+
+    const birthdayWisdom = [
+      "May your year ahead be full of magical adventures, laughter that echoes forever, and dreams that turn into reality!",
+      "Count your life by smiles, not tears. Count your age by friends, not years. Happy, happiest birthday!",
+      "Another year older, another year wiser, and a million times more incredible! Celebrate today to the fullest!",
+      "May your special day bring you as much joy, warmth, and brightness as you bring to everyone around you!",
+      "Wishing you infinite reasons to smile, relentless success, and peace in every single heartbeat this year."
+    ];
+
+    try {
+      let quoteText = "";
+      const res = await fetch("https://dummyjson.com/quotes/random");
+      if (res.ok) {
+        const data = await res.json();
+        const base = birthdayWisdom[Math.floor(Math.random() * birthdayWisdom.length)];
+        quoteText = `${base}\n\n"${data.quote}" — ${data.author}`;
+      } else {
+        quoteText = birthdayWisdom[Math.floor(Math.random() * birthdayWisdom.length)];
+      }
+
+      if (customRadio) customRadio.checked = true;
+      if (messageArea) {
+        messageArea.value = quoteText;
+        messageArea.focus();
+      }
+      showToast("External Quote loaded and applied to letter! ✨", "success");
+    } catch (err) {
+      console.warn("External Quotes API fallback:", err);
+      const fallbackQuote = birthdayWisdom[Math.floor(Math.random() * birthdayWisdom.length)];
+      if (customRadio) customRadio.checked = true;
+      if (messageArea) messageArea.value = fallbackQuote;
+      showToast("Birthday quote applied to letter! ✨", "success");
+    }
+  }
+
+  // Toggle quote suggest button based on custom message radio
+  const msgRadios = document.querySelectorAll('input[name="messageType"]');
+  const quoteBtn = document.getElementById("fetchQuoteBtn");
+  msgRadios.forEach((r) => {
+    r.addEventListener("change", () => {
+      if (quoteBtn) {
+        quoteBtn.style.display = r.value === "custom" && r.checked ? "inline-block" : "none";
+      }
+    });
+  });
+
+  function escapeHtml(str) {
+    if (!str) return "";
+    return String(str).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+  }
+
+  // 4. Local JavaScript File Handling: FileReader Preview & Metadata Inspector
+  function renderLocalFilePreview(file, dataUrl, label) {
+    const box = document.getElementById("localFileReaderBox");
+    const thumbs = document.getElementById("fileReaderThumbnails");
+    const meta = document.getElementById("fileReaderMetadata");
+    if (!box || !thumbs) return;
+
+    box.style.display = "block";
+    
+    const img = document.createElement("img");
+    img.className = "filereader_thumb";
+    img.src = dataUrl;
+    img.title = file.name;
+    thumbs.prepend(img);
+
+    while (thumbs.children.length > 5) {
+      thumbs.removeChild(thumbs.lastChild);
+    }
+
+    const sizeKb = (file.size / 1024).toFixed(1);
+    if (meta) {
+      meta.innerHTML = `<strong>Local JS FileReader:</strong> Loaded <code>${escapeHtml(file.name)}</code> (${sizeKb} KB, ${file.type || 'image'}) locally into browser memory.`;
+    }
+    showToast(`Instant preview generated locally via FileReader! 📸`, "info");
+  }
+
+  function inspectLocalFile(event) {
+    const file = event.target.files[0];
+    const output = document.getElementById("fileInspectionResults");
+    if (!file || !output) return;
+
+    output.style.display = "block";
+    output.innerHTML = "Reading file locally with JavaScript FileReader... ⏳";
+
+    const reader = new FileReader();
+    const startTime = performance.now();
+
+    reader.onload = (e) => {
+      const elapsed = (performance.now() - startTime).toFixed(2);
+      const sizeKb = (file.size / 1024).toFixed(2);
+      const base64Len = e.target.result.length;
+
+      output.innerHTML = `Name: ${escapeHtml(file.name)}\nSize: ${sizeKb} KB (${file.size} bytes)\nMIME: ${file.type || 'unknown'}\nRead Time: ${elapsed} ms\nDataURL Length: ${base64Len.toLocaleString()} chars\nLocal File API: OK (FileReader.readAsDataURL)`;
+      showToast(`Inspected ${file.name} locally using FileReader API! 🔬`, "success");
+    };
+
+    reader.onerror = () => {
+      output.innerHTML = "Error reading local file.";
+      showToast("FileReader failed to read file.", "error");
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  // 5. Local File Export (Blob + URL.createObjectURL)
+  function exportCurrentBirthdayJSON() {
+    const data = getActiveBirthdayPayload();
+    const jsonStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const blobUrl = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = `Birthday-Wish-${(data.recipient_name || "Card").replace(/\s+/g, "_")}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(blobUrl);
+
+    showToast("Birthday card exported as JSON via client-side Blob! 📥", "success");
+  }
+
+  async function exportSingleRecordJSON(id) {
+    try {
+      const res = await fetch(`/.netlify/functions/birthday?id=${encodeURIComponent(id)}`);
+      if (!res.ok) throw new Error("Could not retrieve record to export.");
+      const data = await res.json();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Birthday-${(data.recipient_name || id).replace(/\s+/g, "_")}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Exported ${data.recipient_name}'s record as JSON! 📥`, "success");
+    } catch (err) {
+      showToast(err.message, "error");
+    }
+  }
+
+  function exportGreetingCardText() {
+    const data = getActiveBirthdayPayload();
+    const cardText = `=============================================================
+           🎂 HAPPY BIRTHDAY, ${(data.recipient_name || "FRIEND").toUpperCase()}! 🎂
+=============================================================
+
+Relationship : ${data.relationship || "Special One"}
+Celebration  : Dynamic Birthday Experience
+Date Created : ${new Date().toLocaleDateString()}
+Theme Style  : ${data.theme || "Classic"}
+
+--------------------- SPECIAL LETTER ------------------------
+${data.message || "May every single petal of this day bring you the same warmth, happiness, and peace that you bring into the lives of everyone around you!"}
+
+-------------------- CURATED SOUNDTRACK ---------------------
+${(data.playlist || []).map((s, idx) => `  ${idx + 1}. ${s.title || 'Melody'} - ${s.artist || 'Special Artist'}`).join("\n")}
+
+=============================================================
+Generated with Dynamic Birthday Celebration Platform
+=============================================================`;
+
+    const blob = new Blob([cardText], { type: "text/plain;charset=utf-8" });
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = `Greeting-Card-${(data.recipient_name || "Friend").replace(/\s+/g, "_")}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(blobUrl);
+
+    showToast("Printable greeting card downloaded (.txt)! 📄", "success");
+  }
+
+  // 6. Local File Import (FileReader.readAsText)
+  function handleImportJSON(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const imported = JSON.parse(e.target.result);
+        if (!imported.recipient_name) {
+          throw new Error("JSON file must contain recipient_name.");
+        }
+
+        document.getElementById("nameInput").value = imported.recipient_name || "";
+        if (imported.relationship) document.getElementById("typeInput").value = imported.relationship;
+        if (imported.message) {
+          document.getElementById("customMessage").value = imported.message;
+          const msgRadio = document.querySelector('input[name="messageType"][value="custom"]');
+          if (msgRadio) msgRadio.checked = true;
+        }
+        if (imported.theme) {
+          const tr = document.querySelector(`input[name="themeType"][value="${imported.theme}"]`);
+          if (tr) tr.checked = true;
+        }
+
+        closeFileHub();
+        openEditPopup();
+        showToast(`Loaded "${imported.recipient_name}" from local JSON! 📂`, "success");
+      } catch (err) {
+        showToast("Invalid JSON file: " + err.message, "error");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // 7. Local File Hub Navigation
+  function openFileHub() {
+    const overlay = document.getElementById("file_hub_overlay");
+    if (overlay) overlay.style.display = "flex";
+  }
+
+  function closeFileHub() {
+    const overlay = document.getElementById("file_hub_overlay");
+    if (overlay) overlay.style.display = "none";
+  }
+
+  // 8. Interactive UI Controls Handlers (Typography, Volume, Sound FX, Accents)
+  function updateFontSize(val) {
+    const display = document.getElementById("fontSizeDisplay");
+    if (display) display.textContent = val + "px";
+
+    const letterDiv = document.querySelector(".letter_div");
+    if (letterDiv) letterDiv.style.fontSize = val + "px";
+
+    const letterContent = document.querySelector(".letter_content");
+    if (letterContent) letterContent.style.fontSize = val + "px";
+
+    document.querySelectorAll(".letter_content p, .letter_content span, .letter_div .head, .custom_letter_message").forEach((el) => {
+      el.style.fontSize = val + "px";
+      el.style.lineHeight = (Number(val) * 1.6) + "px";
+    });
+  }
+
+  function updateMusicVolume(val) {
+    currentMusicVolume = Number(val) / 100;
+    const display = document.getElementById("volumeDisplay");
+    if (display) display.textContent = val + "%";
+    document.querySelectorAll("audio").forEach((a) => {
+      a.volume = currentMusicVolume;
+    });
+  }
+
+  function updateAccentColor(color) {
+    document.documentElement.style.setProperty("--rose", color);
+    document.body.style.setProperty("--rose", color);
+
+    // Apply color to key theme elements across the webpage
+    document.querySelectorAll(".name, .nav_name, .memory_name").forEach((el) => {
+      el.style.color = color;
+    });
+
+    const actionBtn = document.getElementById("mainActionBtn");
+    if (actionBtn) actionBtn.style.background = color;
+
+    const hexDisplay = document.getElementById("colorHexDisplay");
+    if (hexDisplay) {
+      hexDisplay.textContent = color;
+      hexDisplay.style.color = color;
+    }
+
+    document.querySelectorAll(".countdown_pill").forEach((el) => {
+      el.style.borderColor = color;
+      el.style.color = color;
+    });
+
+    document.querySelectorAll(".c_box span").forEach((el) => {
+      el.style.color = color;
+    });
+
+    showToast(`Accent color set to ${color}! (Changes hero name, countdown & accents)`, "info");
+  }
+
+  function playCelebrationChime(notes = [523.25, 659.25, 783.99, 1046.50]) {
+    if (!soundEffectsEnabled) return;
+    try {
+      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtxClass) return;
+      if (!globalAudioCtx) {
+        globalAudioCtx = new AudioCtxClass();
+      }
+      if (globalAudioCtx.state === "suspended") {
+        globalAudioCtx.resume();
+      }
+
+      const startTime = globalAudioCtx.currentTime;
+      notes.forEach((freq, idx) => {
+        const osc = globalAudioCtx.createOscillator();
+        const gain = globalAudioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, startTime + idx * 0.09);
+
+        gain.gain.setValueAtTime(0.0001, startTime + idx * 0.09);
+        gain.gain.exponentialRampToValueAtTime(0.25, startTime + idx * 0.09 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + idx * 0.09 + 0.3);
+
+        osc.connect(gain);
+        gain.connect(globalAudioCtx.destination);
+
+        osc.start(startTime + idx * 0.09);
+        osc.stop(startTime + idx * 0.09 + 0.32);
+      });
+    } catch (e) {
+      console.warn("Web Audio chime could not play:", e);
+    }
+  }
+
+  function toggleSoundEffects(enabled) {
+    soundEffectsEnabled = !!enabled;
+    if (soundEffectsEnabled) {
+      playCelebrationChime();
+      showToast("Sound effects & celebration chimes enabled! 🔔", "info");
+    } else {
+      showToast("Sound effects muted. 🔕", "info");
+    }
+  }
+
+  // Interactive Wish Buttons Chime Effect
+  document.querySelectorAll(".wish_button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      playCelebrationChime();
+      btn.style.transform = "scale(1.08)";
+      setTimeout(() => { btn.style.transform = ""; }, 250);
+      showToast(`Celebration wish shared: ${btn.textContent.trim()} ✨`, "success");
+    });
+  });
+
+  function toggleConfetti(enabled) {
+    const heroPetals = document.querySelectorAll(".floral_petals, .romantic_petals, .royal_sparkles, .galaxy_stars, .shooting_stars");
+    heroPetals.forEach((el) => (el.style.display = enabled ? "block" : "none"));
+    showToast(`Festive particles ${enabled ? "enabled" : "disabled"}.`, "info");
+  }
+
+  function getActiveBirthdayPayload() {
+    const recipientName = params.get("name") || document.getElementById("nameInput")?.value || "Friend";
+    const relationship = params.get("type") || document.getElementById("typeInput")?.value || "friend";
+    const message = params.get("message") || document.getElementById("customMessage")?.value || "";
+    const currentTheme = params.get("theme") || "classic";
+    const currentGallery = params.get("gallery") || "simple";
+    const currentPhotos = currentGallery === "animated" ? animatedImages : images.map(decodeImageUrl);
+    const bdayDate = params.get("date") || document.getElementById("birthdayDateInput")?.value || "";
+
+    return {
+      recipient_name: recipientName,
+      relationship: relationship,
+      birthday_date: bdayDate,
+      message: message,
+      theme: currentTheme,
+      gallery_type: currentGallery,
+      images: currentPhotos,
+      playlist: allSongs
+    };
+  }
+
+  function openSettingsModal() {
+    const overlay = document.getElementById("settings_overlay");
+    if (overlay) overlay.style.display = "flex";
+  }
+
+  function closeSettingsModal() {
+    const overlay = document.getElementById("settings_overlay");
+    if (overlay) overlay.style.display = "none";
+  }
+
+  // 9. Global Error & Exception Handlers
+  window.addEventListener("error", (event) => {
+    console.error("Global captured error:", event.error || event.message);
+  });
+
+  window.addEventListener("unhandledrejection", (event) => {
+    console.warn("Unhandled promise rejection:", event.reason);
+  });
+
+  // Global window functions export
   Object.assign(window, {
     generate,
     closeEditPopup,
+    openEditPopup,
     openPlay,
     closePlay,
     copyLink,
     shareWhatsApp,
     editAgain,
     upgradeLegacyLink,
+    showToast,
+    fetchQuoteFromAPI,
+    openFileHub,
+    closeFileHub,
+    exportCurrentBirthdayJSON,
+    exportGreetingCardText,
+    handleImportJSON,
+    inspectLocalFile,
+    updateFontSize,
+    updateMusicVolume,
+    updateAccentColor,
+    toggleConfetti,
+    toggleSoundEffects,
+    playCelebrationChime,
+    openSettingsModal,
+    closeSettingsModal
   });
 }
 

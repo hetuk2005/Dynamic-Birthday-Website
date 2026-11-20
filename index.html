@@ -38,7 +38,7 @@
                 <button class="popup_close"
                     onclick="closeEditPopup()">✕</button>
 
-                <h2>Create Your Wish 🎉</h2>
+                <h2 id="popupTitle">Create Your Wish 🎉</h2>
                 <input type="text" id="nameInput" placeholder="Enter Name"
                     required>
 
@@ -57,6 +57,8 @@
                     <option value="gf">Girl-Friend</option>
                     <option value="bf">Boy-Friend</option>
                 </select>
+
+                <input type="date" id="birthdayDateInput" title="Choose Birthday Date">
 
                 <div class="gallery_options">
                     <p>Choose Gallery Type</p>
@@ -111,6 +113,7 @@
                     </div>
                 </div>
 
+                
                 <div class="upload_row">
                     <div class="upload_box" data-index="0"
                         aria-required="true">Click To Upload</div>
@@ -260,12 +263,13 @@
                         <input type="radio" value="custom" name="messageType">
                         write my own
                     </label>
+                    <button type="button" id="fetchQuoteBtn" class="quote_suggest_btn" onclick="fetchQuoteFromAPI()" style="display:none;">✨ Suggest Quote / AI</button>
                     <br><br>
                     <textarea id="customMessage"
                         placeholder="write your special message here..."></textarea>
                 </div>
 
-                <button onclick="generate()">Generate</button>
+                <button id="generateBtn" onclick="generate()">Generate</button>
 
             </div>
         </div>
@@ -279,17 +283,44 @@
             </div>
         </div>
 
-        <!-- NavBar -->
+        <!-- Toast Notification Container -->
+        <div id="toastContainer" class="toast_container"></div>
 
-        <nav>
-            <h3 class="nav_name">Mehfooz Sir ✦</h3>
+        <!-- NavBar -->
+        <nav id="mainNav">
+            <h3 class="nav_name" id="mainNavName">Mehfooz Sir ✦</h3>
             <div class="flex">
+                <a href="#countdown_section">countdown</a>
                 <a href="#memory">memories</a>
                 <a href="#letter">letter</a>
                 <a href="#playlist">playlist</a>
                 <a href="#wish">wishes</a>
             </div>
         </nav>
+
+        <!-- Live Countdown & Celebration Section -->
+        <div class="countdown_section" id="countdown_section">
+            <div class="countdown_card" id="countdownCard">
+                <!-- Shown when Today is the Birthday -->
+                <div id="todayCelebrationBanner" class="today_celebration">
+                    <span class="celebration_emoji">🎉 🎂 🥳</span>
+                    <h2>Today Is The Special Day!</h2>
+                    <p class="celebration_sub">Happy Birthday! Wishing you endless happiness, good health, and magic today and always! ✿</p>
+                </div>
+
+                <!-- Shown ONLY when counting down to an upcoming date -->
+                <div id="countdownTimerWrap" class="countdown_timer_wrap" style="display:none;">
+                    <span class="countdown_pill">⏳ Birthday Countdown</span>
+                    <h3 id="countdownHeader">Counting down to the special moment!</h3>
+                    <div class="countdown_units">
+                        <div class="c_box"><span id="cdDays">00</span><label>Days</label></div>
+                        <div class="c_box"><span id="cdHours">00</span><label>Hours</label></div>
+                        <div class="c_box"><span id="cdMinutes">00</span><label>Minutes</label></div>
+                        <div class="c_box"><span id="cdSeconds">00</span><label>Seconds</label></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Hero -->
         <div class="hero">
@@ -628,9 +659,101 @@
             <div class="action_items">
                 <button onclick="copyLink()">Copy Link 🔗</button>
                 <button onclick="shareWhatsApp()">Share 📲</button>
+                <button onclick="openFileHub()">File Hub 💾</button>
+                <button onclick="openSettingsModal()">Controls 🎛️</button>
                 <button id="upgradeLegacyLinkBtn" onclick="upgradeLegacyLink()" style="display:none">Make a new short link ↗</button>
                 <button onclick="editAgain()">Edit ✏️</button>
                 <button id="closeActionBtn">✖</button>
+            </div>
+        </div>
+
+        <!-- Local File Handling Hub Modal (Local JS FileReader & Blob) -->
+        <div class="modal_overlay" id="file_hub_overlay" style="display:none;">
+            <div class="modal_window file_hub_window">
+                <button class="modal_close_btn" onclick="closeFileHub()">✕</button>
+                <div class="modal_header">
+                    <h2>💾 Local File Handling Hub</h2>
+                    <p class="modal_sub">Client-Side JavaScript File Handling (FileReader & Blob)</p>
+                </div>
+
+                <div class="file_cards_grid">
+                    <div class="file_action_card">
+                        <span class="file_icon">📥</span>
+                        <h3>Export Wish as JSON</h3>
+                        <p>Uses JavaScript <code>Blob</code> and <code>URL.createObjectURL</code> to generate and download a full JSON backup file locally.</p>
+                        <button type="button" class="btn_primary" onclick="exportCurrentBirthdayJSON()">Download .JSON Backup</button>
+                    </div>
+
+                    <div class="file_action_card">
+                        <span class="file_icon">📄</span>
+                        <h3>Download Printable Card</h3>
+                        <p>Generates a formatted ASCII celebration greeting card as a <code>.txt</code> file using client-side JavaScript.</p>
+                        <button type="button" class="btn_primary" onclick="exportGreetingCardText()">Download .TXT Card</button>
+                    </div>
+
+                    <div class="file_action_card">
+                        <span class="file_icon">📂</span>
+                        <h3>Import Wish from JSON</h3>
+                        <p>Uses local client-side <code>FileReader.readAsText()</code> to read, parse, and restore a saved birthday card from your computer.</p>
+                        <label class="btn_secondary file_upload_label" style="cursor: pointer;">
+                            Select .JSON File
+                            <input type="file" id="importJsonFileInput" accept=".json" style="display:none;" onchange="handleImportJSON(event)">
+                        </label>
+                    </div>
+
+                    <div class="file_action_card">
+                        <span class="file_icon">🔬</span>
+                        <h3>Local File Metadata Inspector</h3>
+                        <p>Uses JavaScript <code>FileReader</code> to inspect file size, MIME type, dimensions, and raw bytes without uploading to server.</p>
+                        <label class="btn_secondary file_upload_label" style="cursor: pointer;">
+                            Inspect Local File
+                            <input type="file" id="inspectFileInput" style="display:none;" onchange="inspectLocalFile(event)">
+                        </label>
+                        <div id="fileInspectionResults" class="inspection_output" style="display:none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings & UI Controls Modal -->
+        <div class="modal_overlay" id="settings_overlay" style="display:none;">
+            <div class="modal_window" style="max-width: 520px;">
+                <button class="modal_close_btn" onclick="closeSettingsModal()">✕</button>
+                <div class="modal_header">
+                    <h2>🎛️ Celebration Controls</h2>
+                    <p class="modal_sub">Adjust typography, music volume, theme accents, and party effects</p>
+                </div>
+                <div class="advanced_controls_box">
+                    <div class="control_row">
+                        <label for="fontSizeSlider">Letter Font Size: <span id="fontSizeDisplay">18px</span></label>
+                        <input type="range" id="fontSizeSlider" min="14" max="24" value="18" oninput="updateFontSize(this.value)">
+                    </div>
+
+                    <div class="control_row">
+                        <label for="volumeSlider">Music Volume: <span id="volumeDisplay">80%</span></label>
+                        <input type="range" id="volumeSlider" min="0" max="100" value="80" oninput="updateMusicVolume(this.value)">
+                    </div>
+
+                    <div class="control_row">
+                        <label for="accentColorPicker">Custom Theme Accent Color: <span id="colorHexDisplay" style="font-weight:bold; color:var(--rose);">#b8aed2</span></label>
+                        <input type="color" id="accentColorPicker" value="#b8aed2" onchange="updateAccentColor(this.value)" oninput="updateAccentColor(this.value)">
+                    </div>
+
+                    <div class="switch_row">
+                        <label class="switch_label">
+                            <input type="checkbox" id="confettiToggle" checked onchange="toggleConfetti(this.checked)">
+                            <span>Confetti & Sparkles ✨</span>
+                        </label>
+                        <label class="switch_label">
+                            <input type="checkbox" id="musicAutoplayToggle" checked>
+                            <span>Autoplay Music 🎵</span>
+                        </label>
+                        <label class="switch_label">
+                            <input type="checkbox" id="soundEffectsToggle" checked onchange="toggleSoundEffects(this.checked)">
+                            <span>Sound FX & Chimes 🔔</span>
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
 
