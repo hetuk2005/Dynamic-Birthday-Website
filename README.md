@@ -2,7 +2,6 @@
 
 > **A personalized, interactive web application with real database integration, serverless CRUD API, local client-side file handling, audio synthesis, and multi-level navigation.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
 [![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
 [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
@@ -266,4 +265,3 @@ SUPABASE_SECRET_KEY=your-supabase-service-role-secret-key
 - **Student Name**: Hetuk Patel
 - **Repository**: [https://github.com/hetuk2005/Dynamic-Birthday-Website](https://github.com/hetuk2005/Dynamic-Birthday-Website)
 - **Live Deployment**: [https://dynamicbirthdaywebsite.netlify.app/](https://dynamicbirthdaywebsite.netlify.app/)
-- **License**: [MIT License](LICENSE)
