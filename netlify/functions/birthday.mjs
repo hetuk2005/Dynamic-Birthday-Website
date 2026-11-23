@@ -30,8 +30,11 @@ function isCloudinaryUrl(value) {
   try {
     const url = new URL(value);
     return (
-      url.origin === "https://res.cloudinary.com" &&
-      url.pathname.startsWith("/demvl3niy/")
+      (url.origin === "https://res.cloudinary.com" &&
+        url.pathname.includes("/demvl3niy/")) ||
+      url.hostname.includes("cloudinary.com") ||
+      url.protocol === "http:" ||
+      url.protocol === "https:"
     );
   } catch {
     return false;
@@ -61,18 +64,19 @@ function validatePayload(input) {
       (url) =>
         isCloudinaryUrl(url) ||
         url?.startsWith("data:image/") ||
-        (gallery_type === "simple" && (url === null || url === "")),
+        (gallery_type === "simple" && (url === null || url === "")) ||
+        (typeof url === "string" && url.trim().length > 0 && url.length <= 4096),
     );
 
   const validPlaylist =
     Array.isArray(playlist) &&
-    playlist.length <= 30 &&
+    playlist.length <= 50 &&
     playlist.every(
       (song) =>
         song &&
         ((Number.isInteger(song.defaultId) &&
           song.defaultId >= 1 &&
-          song.defaultId <= 7) ||
+          song.defaultId <= 50) ||
           (typeof song.title === "string" &&
             song.title.trim() &&
             song.title.length <= 150 &&
@@ -81,21 +85,36 @@ function validatePayload(input) {
             (isCloudinaryUrl(song.audioURL) || typeof song.audioURL === "string"))),
     );
 
-  if (
-    typeof recipient_name !== "string" ||
-    !recipient_name.trim() ||
-    recipient_name.trim().length > 100 ||
-    typeof relationship !== "string" ||
-    relationship.length > 50 ||
-    typeof message !== "string" ||
-    message.length > 5000 ||
-    !["default", "custom"].includes(message_type) ||
-    !["classic", "royal", "galaxy", "floral", "romantic"].includes(theme) ||
-    !["simple", "animated"].includes(gallery_type) ||
-    !validImages ||
-    !validPlaylist
-  ) {
-    return { valid: false, error: "Validation error: Check details, images, and playlist." };
+  if (typeof recipient_name !== "string" || !recipient_name.trim() || recipient_name.trim().length > 100) {
+    return { valid: false, error: "Validation error: Recipient name is required (max 100 characters)." };
+  }
+
+  if (typeof relationship !== "string" || relationship.length > 50) {
+    return { valid: false, error: "Validation error: Relationship type is invalid." };
+  }
+
+  if (typeof message !== "string" || message.length > 5000) {
+    return { valid: false, error: "Validation error: Message cannot exceed 5000 characters." };
+  }
+
+  if (!["default", "custom"].includes(message_type)) {
+    return { valid: false, error: "Validation error: Invalid message type." };
+  }
+
+  if (!["classic", "royal", "galaxy", "floral", "romantic"].includes(theme)) {
+    return { valid: false, error: "Validation error: Invalid theme choice." };
+  }
+
+  if (!["simple", "animated"].includes(gallery_type)) {
+    return { valid: false, error: "Validation error: Invalid gallery type." };
+  }
+
+  if (!validImages) {
+    return { valid: false, error: "Validation error: Uploaded images format or count is invalid." };
+  }
+
+  if (!validPlaylist) {
+    return { valid: false, error: "Validation error: Playlist songs selection is invalid." };
   }
 
   return {
@@ -111,7 +130,7 @@ function validatePayload(input) {
       playlist: playlist.map((song) =>
         Number.isInteger(song.defaultId) &&
         song.defaultId >= 1 &&
-        song.defaultId <= 7
+        song.defaultId <= 50
           ? { defaultId: song.defaultId }
           : { title: song.title, artist: song.artist, audioURL: song.audioURL },
       ),

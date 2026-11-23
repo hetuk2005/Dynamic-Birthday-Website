@@ -1605,7 +1605,7 @@ You Can Upload ${15 - uploadedCount} More Images`,
         const defaultId = Number(
           song.defaultId ?? (song.default ? song.id : Number.NaN),
         );
-        if (Number.isInteger(defaultId) && defaultId >= 1 && defaultId <= 7) {
+        if (Number.isInteger(defaultId) && defaultId >= 1 && defaultId <= 50) {
           return { defaultId };
         }
 
