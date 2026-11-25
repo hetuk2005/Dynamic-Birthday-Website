@@ -1157,18 +1157,32 @@ nav>h3 {
   border-radius: 15px;
   transition: all 0.3s ease-in-out;
   position: relative;
+  cursor: pointer;
+  user-select: none;
 }
 
 .music:hover {
-  background: #ffffff0f;
+  background: #ffffff1f;
+  transform: translateY(-2px);
 }
 
 .music.active {
-  background: #ffffff0f;
+  background: #ffffff26;
+  border-left: 4px solid var(--rose);
 }
 
 .music.active .music_icon {
-  background: #ffffff0f;
+  background: var(--rose);
+  color: white;
+}
+
+.music_icon {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.music:hover .music_icon {
+  transform: scale(1.15);
 }
 
 .music_child1 {

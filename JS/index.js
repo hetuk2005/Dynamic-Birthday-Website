@@ -172,7 +172,14 @@ async function startBirthdayPage() {
 
     audio.addEventListener("ended", () => {
       track.classList.remove("active");
-      icon.textContent = "▶";
+      if (icon) icon.textContent = "▶";
+      nextTrack();
+    });
+
+    audio.addEventListener("error", (e) => {
+      console.warn("Audio loading error for:", audio?.src, e);
+      track.classList.remove("active");
+      if (icon) icon.textContent = "▶";
     });
 
     track.addEventListener("click", () => {
@@ -181,31 +188,55 @@ async function startBirthdayPage() {
       if (track.classList.contains("active")) {
         if (!audio.paused) {
           audio.pause();
-          icon.textContent = "▶";
+          if (icon) icon.textContent = "▶";
         } else {
-          audio.play();
-          icon.textContent = "⏸";
+          const playPromise = audio.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                if (icon) icon.textContent = "⏸";
+              })
+              .catch((err) => {
+                console.warn("Audio play error:", err);
+                if (icon) icon.textContent = "▶";
+              });
+          }
         }
       } else {
         allTrack.forEach((t) => {
-          t.classList.remove("active");
-
-          const a = t.querySelector("audio");
-          const i = t.querySelector(".music_icon");
-
-          a.pause();
-          i.textContent = "▶";
+          if (t !== track) {
+            t.classList.remove("active");
+            const a = t.querySelector("audio");
+            const i = t.querySelector(".music_icon");
+            if (a) {
+              a.pause();
+              a.currentTime = 0;
+            }
+            if (i) i.textContent = "▶";
+          }
         });
 
         track.classList.add("active");
-
         const allTracks = [...document.querySelectorAll(".music")];
         currentTrackIndex = allTracks.indexOf(track);
 
+        audio.volume = currentMusicVolume;
         audio.currentTime = 0;
-        audio.play();
-
-        icon.textContent = "⏸";
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              if (icon) icon.textContent = "⏸";
+            })
+            .catch((err) => {
+              console.warn("Audio playback was blocked or failed:", err);
+              track.classList.remove("active");
+              if (icon) icon.textContent = "▶";
+              if (err.name === "NotAllowedError" && typeof showToast === "function") {
+                showToast("Click anywhere on the page to allow audio playback 🎵", "info");
+              }
+            });
+        }
       }
     });
   }
@@ -291,63 +322,63 @@ async function startBirthdayPage() {
       id: 1,
       title: "Baar Baar Ye Din Aaye",
       artist: "Mohammed Rafi",
-      audioURL: "../Utili/Songs/Baar Baar Ye Din Aaye.mp3",
+      audioURL: "./Utili/Songs/Baar Baar Ye Din Aaye.mp3",
       default: true,
     },
     {
       id: 2,
       title: "Happy Birthday Song",
       artist: "Nakas Aziz",
-      audioURL: "../Utili/Songs/Happy Birthday Song.mp3",
+      audioURL: "./Utili/Songs/Happy Birthday Song.mp3",
       default: true,
     },
     {
       id: 3,
       title: "Cutiepie",
       artist: "Nakas Aziz",
-      audioURL: "../Utili/Songs/Cutiepie.mp3",
+      audioURL: "./Utili/Songs/Cutiepie.mp3",
       default: true,
     },
     {
       id: 4,
       title: "Ude Dil Befikre",
       artist: "Jaideep",
-      audioURL: "../Utili/Songs/Ude Dil Befikre.mp3",
+      audioURL: "./Utili/Songs/Ude Dil Befikre.mp3",
       default: true,
     },
     {
       id: 5,
       title: "Kar Gayi Chull",
       artist: "Badshaa",
-      audioURL: "../Utili/Songs/Kar Gayi Chull.mp3",
+      audioURL: "./Utili/Songs/Kar Gayi Chull.mp3",
       default: true,
     },
     {
       id: 6,
       title: "love you zindagi",
       artist: "jasleena royal",
-      audioURL: "../Utili/Songs/Love You Zindagi.mp3",
+      audioURL: "./Utili/Songs/Love You Zindagi.mp3",
       default: true,
     },
     {
       id: 7,
       title: "ilahi",
       artist: "arjit sing",
-      audioURL: "../Utili/Songs/Ilahi.mp3",
+      audioURL: "./Utili/Songs/Ilahi.mp3",
       default: true,
     },
     {
       id: 8,
       title: "Aaj Ki Party",
       artist: "Mika Singh",
-      audioURL: "../Utili/Songs/Aaj Ki Party.mp3",
+      audioURL: "./Utili/Songs/Aaj Ki Party.mp3",
       default: true,
     },
     {
       id: 9,
       title: "Gallan Goodiyaan",
       artist: "Yashita Sharma",
-      audioURL: "../Utili/Songs/Gallan Goodiyaan.mp3",
+      audioURL: "./Utili/Songs/Gallan Goodiyaan.mp3",
       default: true,
     },
   ];
@@ -1869,12 +1900,17 @@ You Can Upload ${15 - uploadedCount} More Images`,
             </div>
         </div>
 
-        <audio></audio>
+        <audio preload="metadata"></audio>
     `;
 
     div.querySelector(".track_name").textContent = song.title;
     div.querySelector(".track_artist").textContent = song.artist;
-    div.querySelector("audio").src = song.audioURL;
+    
+    // Normalize audio URL so any relative ../Utili/ paths resolve to ./Utili/ correctly
+    const resolvedAudioUrl = typeof song.audioURL === "string"
+      ? song.audioURL.replace(/^\.\.\/Utili\//, "./Utili/")
+      : song.audioURL;
+    div.querySelector("audio").src = resolvedAudioUrl;
 
     setUpTrack(div);
     // playlist.append(div);
@@ -3305,6 +3341,26 @@ Generated with Dynamic Birthday Celebration Platform
     if (overlay) overlay.style.display = "none";
   }
 
+  // Autoplay music on user's first interaction if enabled in settings
+  const autoplayCheckbox = document.getElementById("musicAutoplayToggle");
+  let hasAutoplayed = false;
+  function triggerAutoplayOnFirstInteraction() {
+    if (hasAutoplayed) return;
+    if (autoplayCheckbox && !autoplayCheckbox.checked) return;
+    hasAutoplayed = true;
+    document.removeEventListener("click", triggerAutoplayOnFirstInteraction);
+    document.removeEventListener("keydown", triggerAutoplayOnFirstInteraction);
+    // If viewing a created birthday card, start playing song 1 smoothly
+    if (params.has("name") || params.has("id")) {
+      const activeAudio = document.querySelector(".music.active audio");
+      if (!activeAudio && currentTrackIndex === -1) {
+        playTrack(0);
+      }
+    }
+  }
+  document.addEventListener("click", triggerAutoplayOnFirstInteraction, { once: true });
+  document.addEventListener("keydown", triggerAutoplayOnFirstInteraction, { once: true });
+
   // 9. Global Error & Exception Handlers
   window.addEventListener("error", (event) => {
     console.error("Global captured error:", event.error || event.message);
@@ -3321,6 +3377,10 @@ Generated with Dynamic Birthday Celebration Platform
     openEditPopup,
     openPlay,
     closePlay,
+    playTrack,
+    nextTrack,
+    previousTrack,
+    toggleCurrentTrack,
     copyLink,
     shareWhatsApp,
     editAgain,
