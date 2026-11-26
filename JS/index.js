@@ -1906,11 +1906,11 @@ You Can Upload ${15 - uploadedCount} More Images`,
     div.querySelector(".track_name").textContent = song.title;
     div.querySelector(".track_artist").textContent = song.artist;
     
-    // Normalize audio URL so any relative ../Utili/ paths resolve to ./Utili/ correctly
+    // Normalize audio URL so any relative ../Utili/ paths resolve to ./Utili/ correctly and handle spaces cleanly
     const resolvedAudioUrl = typeof song.audioURL === "string"
       ? song.audioURL.replace(/^\.\.\/Utili\//, "./Utili/")
       : song.audioURL;
-    div.querySelector("audio").src = resolvedAudioUrl;
+    div.querySelector("audio").src = encodeURI(decodeURI(resolvedAudioUrl));
 
     setUpTrack(div);
     // playlist.append(div);
